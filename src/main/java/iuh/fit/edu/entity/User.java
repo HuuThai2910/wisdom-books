@@ -53,9 +53,9 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<EntryForm> entryForms;
+
+    @ManyToMany
+    @JoinTable(name = "user_voucher", joinColumns = @JoinColumn(name = "user_id"),
+    inverseJoinColumns = @JoinColumn(name = "voucher_id"))
+    private List<Voucher> vouchers;
 }
-// tim 2 field
-// save
-//loc voucher
-//save voucher
-//save order

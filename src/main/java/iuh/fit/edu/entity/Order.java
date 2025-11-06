@@ -28,19 +28,19 @@ public class Order {
     private String receiverAddress;
     private String receiverName;
     private String receiverPhone;
+
     private String updateBy;
     private LocalDateTime updateAt;
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
+
     private double totalPrice;
+    private double discountedPrice;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderDetail> orderItems ;
+    private List<OrderDetail> orderDetails ;
 
     private LocalDateTime orderDate;
 
-    @ManyToOne
-    @JoinColumn(name = "promotion_id")
-    private Promotion promotion;
 }
