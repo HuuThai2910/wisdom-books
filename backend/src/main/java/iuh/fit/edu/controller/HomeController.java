@@ -4,11 +4,10 @@
  */
 package iuh.fit.edu.controller;
 
+import iuh.fit.edu.dto.request.TestRequest;
 import iuh.fit.edu.util.anotation.ApiMessage;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -34,5 +33,10 @@ public class HomeController {
     @GetMapping("/test-error")
     public String testError() {
         throw new RuntimeException("User not found");
+    }
+    @PostMapping("/add")
+    @ApiMessage("Tạo mới thành công")
+    public ResponseEntity<Void> addTest(@RequestBody TestRequest request) {
+        return ResponseEntity.ok().build();
     }
 }
