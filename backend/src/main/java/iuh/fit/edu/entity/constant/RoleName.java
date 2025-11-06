@@ -1,4 +1,4 @@
-package iuh.fit.edu.entities.enums;
+package iuh.fit.edu.entity.constant;
 
 public enum RoleName {
     ADMIN {
@@ -9,12 +9,17 @@ public enum RoleName {
     }, STAFF {
         @Override
         public String toString() {
-            return "Staff";
+            return "Nhân viên";
         }
     }, CUSTOMER {
         @Override
         public String toString() {
-            return "Customer";
+            return "Khách hàng";
+        }
+    }, WARE_HOUSE_STAFF {
+        @Override
+        public String toString(){
+            return "Thủ kho";
         }
     }
 }

@@ -1,15 +1,15 @@
-package iuh.fit.edu.entities.enums;
+package iuh.fit.edu.entity.constant;
 
 public enum UserStatus {
     ACTIVE {
         @Override
         public String toString() {
-            return "Active";
+            return "Hoạt động";
         }
     }, INACTIVE {
         @Override
         public String toString() {
-            return "Inactive";
+            return "Ngừng hoạt động";
         }
     };
 }

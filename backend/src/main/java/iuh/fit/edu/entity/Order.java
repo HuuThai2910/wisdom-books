@@ -1,8 +1,8 @@
-package iuh.fit.edu.entities;
+package iuh.fit.edu.entity;
 
 
-import iuh.fit.edu.entities.enums.OrderStatus;
-import iuh.fit.edu.entities.enums.PaymentMethod;
+import iuh.fit.edu.entity.constant.OrderStatus;
+import iuh.fit.edu.entity.constant.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;

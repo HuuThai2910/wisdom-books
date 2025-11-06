@@ -1,6 +1,6 @@
-package iuh.fit.edu.entities;
+package iuh.fit.edu.entity;
 
-import iuh.fit.edu.entities.enums.InventoryStatus;
+import iuh.fit.edu.entity.constant.InventoryStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 

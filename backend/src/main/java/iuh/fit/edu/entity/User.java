@@ -1,7 +1,7 @@
-package iuh.fit.edu.entities;
+package iuh.fit.edu.entity;
 
-import iuh.fit.edu.entities.enums.Gender;
-import iuh.fit.edu.entities.enums.UserStatus;
+import iuh.fit.edu.entity.constant.Gender;
+import iuh.fit.edu.entity.constant.UserStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;

@@ -1,22 +1,21 @@
-package iuh.fit.edu.entities;
+package iuh.fit.edu.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "order_details")
+@Table(name = "cart_details")
 @Data
-public class OrderDetail {
+public class CartDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private int quantity;
-    private double price;
 
     @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
+    @JoinColumn(name = "cart_id")
+    private Cart cart;
 
     @ManyToOne
     @JoinColumn(name = "book_id")

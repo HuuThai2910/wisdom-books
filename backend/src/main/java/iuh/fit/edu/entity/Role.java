@@ -1,8 +1,8 @@
-package iuh.fit.edu.entities;
+package iuh.fit.edu.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import iuh.fit.edu.entities.enums.RoleName;
+import iuh.fit.edu.entity.constant.RoleName;
 import jakarta.persistence.*;
 import lombok.Data;
 

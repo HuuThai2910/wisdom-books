@@ -1,4 +1,4 @@
-package iuh.fit.edu.entities.enums;
+package iuh.fit.edu.entity.constant;
 
 public enum OrderStatus {
     PENDING {

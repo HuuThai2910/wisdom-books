@@ -1,6 +1,6 @@
-package iuh.fit.edu.entities;
+package iuh.fit.edu.entity;
 
-import iuh.fit.edu.entities.enums.BookStatus;
+import iuh.fit.edu.entity.constant.BookStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -26,7 +26,10 @@ public class Book {
 
     private double sellingPrice;
     private double importPrice;
-    private String image;
+    @ElementCollection
+    @CollectionTable(name = "book_images", joinColumns = @JoinColumn(name = "book_id"))
+    @Column(name = "image_path")
+    private List<String> image;
 
     @Enumerated(EnumType.STRING)
     private BookStatus status;
