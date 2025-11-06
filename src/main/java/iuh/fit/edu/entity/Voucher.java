@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "promotions")
+@Table(name = "vouchers")
 @Data
 public class Voucher {
     @Id
