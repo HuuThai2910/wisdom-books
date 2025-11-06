@@ -2,7 +2,7 @@
  * @ (#) .java    1.0
  * Copyright (c)  IUH. All rights reserved.
  */
-package iuh.fit.edu.exceptions;
+package iuh.fit.edu.exception;
 
 import iuh.fit.edu.dto.reponse.ApiResponse;
 import org.springframework.context.support.DefaultMessageSourceResolvable;

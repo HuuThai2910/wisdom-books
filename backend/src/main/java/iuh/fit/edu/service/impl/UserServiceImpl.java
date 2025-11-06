@@ -2,12 +2,13 @@
  * @ (#) .java    1.0
  * Copyright (c)  IUH. All rights reserved.
  */
-package iuh.fit.edu.services;/*
+package iuh.fit.edu.service.impl;
+
+/*
  * @description
  * @author: Huu Thai
  * @date:
  * @version: 1.0
  */
-
-public interface UserService {
+public class UserServiceImpl implements iuh.fit.edu.service.UserService {
 }

@@ -4,7 +4,7 @@
  */
 package iuh.fit.edu.controller;
 
-import iuh.fit.edu.utils.anotation.ApiMessage;
+import iuh.fit.edu.util.anotation.ApiMessage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,8 +31,6 @@ public class HomeController {
     public ResponseEntity<Void> deleteSomething() {
         return ResponseEntity.ok().build();
     }
-//    Test
-
     @GetMapping("/test-error")
     public String testError() {
         throw new RuntimeException("User not found");

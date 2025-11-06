@@ -2,10 +2,10 @@
  * @ (#) .java    1.0
  * Copyright (c)  IUH. All rights reserved.
  */
-package iuh.fit.edu.utils;
+package iuh.fit.edu.util;
 
 import iuh.fit.edu.dto.reponse.ApiResponse;
-import iuh.fit.edu.utils.anotation.ApiMessage;
+import iuh.fit.edu.util.anotation.ApiMessage;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.io.Resource;
