@@ -58,7 +58,7 @@ public class Book {
     private Supplier supplier;
 
     @OneToMany(mappedBy = "book")
-    private List<CartDetail> cartDetails;
+    private List<CartItem> cartItems;
 
     @ManyToOne
     @JoinColumn(name = "inventory_id")

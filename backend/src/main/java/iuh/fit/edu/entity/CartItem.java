@@ -1,12 +1,19 @@
 package iuh.fit.edu.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import org.hibernate.proxy.HibernateProxy;
+
+import java.util.Objects;
 
 @Entity
-@Table(name = "cart_details")
-@Data
-public class CartDetail {
+@Table(name = "cart_items")
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,4 +27,5 @@ public class CartDetail {
     @ManyToOne
     @JoinColumn(name = "book_id")
     private Book book;
+
 }

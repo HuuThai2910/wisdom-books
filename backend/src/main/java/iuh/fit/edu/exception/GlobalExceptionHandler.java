@@ -4,7 +4,7 @@
  */
 package iuh.fit.edu.exception;
 
-import iuh.fit.edu.dto.reponse.ApiResponse;
+import iuh.fit.edu.dto.response.ApiResponse;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

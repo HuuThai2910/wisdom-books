@@ -4,7 +4,7 @@
  */
 package iuh.fit.edu.util;
 
-import iuh.fit.edu.dto.reponse.ApiResponse;
+import iuh.fit.edu.dto.response.ApiResponse;
 import iuh.fit.edu.util.anotation.ApiMessage;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.MethodParameter;

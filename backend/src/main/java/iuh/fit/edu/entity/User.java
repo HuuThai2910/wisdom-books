@@ -26,6 +26,8 @@ public class User {
     private String phone;
     private String address;
 
+    private String avatar;
+
     @Enumerated(EnumType.STRING)
     private UserStatus status = UserStatus.ACTIVE;
 

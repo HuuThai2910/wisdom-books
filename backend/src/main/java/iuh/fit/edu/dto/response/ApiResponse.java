@@ -2,7 +2,7 @@
  * @ (#) .java    1.0
  * Copyright (c)  IUH. All rights reserved.
  */
-package iuh.fit.edu.dto.reponse;
+package iuh.fit.edu.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;

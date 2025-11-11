@@ -35,6 +35,9 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String note;
+
     private double totalPrice;
     private double discountedPrice;
 
