@@ -1,74 +1,160 @@
+// src/features/cart/cartSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import cartAPI from "../../api/cartApi";
 
-export const fetchCart = createAsyncThunk("cart/fetch", async () => {
-    const res = await cartAPI.getCart();
-    return res;
-});
+// 1️⃣ Lấy cart
+export const fetchCart = createAsyncThunk(
+    "cart/fetchCart",
+    async (_, thunkAPI) => {
+        try {
+            const res = await cartAPI.getCart();
+            const result = res.data; // { success, message, data, status, errors }
 
-export const addToCart = createAsyncThunk("cart/add", async (item) => {
-    const res = await cartAPI.addItem(item);
-    return res;
-});
+            if (!result.success)
+                return thunkAPI.rejectWithValue(result.message);
 
-export const removeFromCart = createAsyncThunk("cart/remove", async (id) => {
-    const res = await cartAPI.removeItem(id);
-    return res;
-});
+            return result.data; // mảng CartItem
+        } catch (err) {
+            return thunkAPI.rejectWithValue(
+                err.response?.data?.message || err.message
+            );
+        }
+    }
+);
 
-export const clearCart = createAsyncThunk("cart/clear", async () => {
-    const res = await cartAPI.clearCart();
-    return res;
-});
+// 2️⃣ Thêm item
+export const addToCart = createAsyncThunk(
+    "cart/addToCart",
+    async ({ productId, quantity }, thunkAPI) => {
+        try {
+            const res = await cartAPI.addItem({ productId, quantity });
+            const result = res.data;
+
+            if (!result.success)
+                return thunkAPI.rejectWithValue(result.message);
+
+            return result.data; // CartItem mới hoặc cart updated
+        } catch (err) {
+            return thunkAPI.rejectWithValue(
+                err.response?.data?.message || err.message
+            );
+        }
+    }
+);
+
+// 3️⃣ Xóa item
+export const removeFromCart = createAsyncThunk(
+    "cart/removeFromCart",
+    async (productId, thunkAPI) => {
+        try {
+            const res = await cartAPI.removeItem(productId);
+            const result = res.data;
+
+            if (!result.success)
+                return thunkAPI.rejectWithValue(result.message);
+
+            return productId; // trả về id đã xóa
+        } catch (err) {
+            return thunkAPI.rejectWithValue(
+                err.response?.data?.message || err.message
+            );
+        }
+    }
+);
+
+// 4️⃣ Xóa toàn bộ cart
+export const clearCart = createAsyncThunk(
+    "cart/clearCart",
+    async (_, thunkAPI) => {
+        try {
+            const res = await cartAPI.clearCart();
+            const result = res.data;
+
+            if (!result.success)
+                return thunkAPI.rejectWithValue(result.message);
+
+            return []; // trả về cart trống
+        } catch (err) {
+            return thunkAPI.rejectWithValue(
+                err.response?.data?.message || err.message
+            );
+        }
+    }
+);
 
 const cartSlice = createSlice({
     name: "cart",
-    initialState: { items: [], loading: false, error: null },
+    initialState: {
+        items: [],
+        status: "idle", // idle | loading | success | error
+        error: null,
+    },
+    reducers: {},
     extraReducers: (builder) => {
         builder
+            // fetchCart
             .addCase(fetchCart.pending, (state) => {
-                state.loading = true;
+                state.status = "loading";
+                state.error = null;
             })
             .addCase(fetchCart.fulfilled, (state, action) => {
-                state.items = action.payload.items;
-                state.loading = false;
+                state.status = "success";
+                state.items = action.payload;
             })
             .addCase(fetchCart.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.error.message;
+                state.status = "error";
+                state.error = action.payload;
             })
+
+            // addToCart
             .addCase(addToCart.pending, (state) => {
-                state.loading = true;
+                state.status = "loading";
+                state.error = null;
             })
             .addCase(addToCart.fulfilled, (state, action) => {
-                state.items = action.payload.items;
-                state.loading = false;
+                state.status = "success";
+                const index = state.items.findIndex(
+                    (i) => i.product.id === action.payload.product.id
+                );
+                if (index >= 0) {
+                    state.items[index] = action.payload; // update quantity
+                } else {
+                    state.items.push(action.payload); // add new
+                }
             })
             .addCase(addToCart.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.error.message;
+                state.status = "error";
+                state.error = action.payload;
             })
+
+            // removeFromCart
             .addCase(removeFromCart.pending, (state) => {
-                state.loading = true;
+                state.status = "loading";
+                state.error = null;
             })
             .addCase(removeFromCart.fulfilled, (state, action) => {
-                state.items = action.payload.items;
-                state.loading = false;
+                state.status = "success";
+                state.items = state.items.filter(
+                    (i) => i.product.id !== action.payload
+                );
             })
             .addCase(removeFromCart.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.error.message;
+                state.status = "error";
+                state.error = action.payload;
             })
+
+            // clearCart
             .addCase(clearCart.pending, (state) => {
-                state.loading = true;
+                state.status = "loading";
+                state.error = null;
             })
             .addCase(clearCart.fulfilled, (state, action) => {
+                state.status = "success";
                 state.items = [];
-                state.loading = false;
             })
             .addCase(clearCart.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.error.message;
+                state.status = "error";
+                state.error = action.payload;
             });
     },
 });
