@@ -21,5 +21,6 @@ import lombok.Setter;
 public class CartItemResponse {
     private Long id;
     private int quantity;
+    private boolean selected;
     private BookSummaryResponse book;
 }

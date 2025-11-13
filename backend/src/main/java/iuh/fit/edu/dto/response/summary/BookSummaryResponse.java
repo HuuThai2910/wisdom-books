@@ -20,4 +20,5 @@ public class BookSummaryResponse {
     private String title;
     private double price;
     private String image;
+    private int quantity;
 }

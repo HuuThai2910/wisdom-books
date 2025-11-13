@@ -20,6 +20,10 @@ public class CartItem {
 
     private int quantity;
 
+    @ToString.Include
+    private boolean selected = false;
+
+
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;
