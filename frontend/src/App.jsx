@@ -2,26 +2,50 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
+import CartPage from "./pages/client/CartPage";
+import CheckOutPage from "./pages/client/CheckOutPage";
+import { Toaster } from "react-hot-toast";
+import { Route, Routes } from "react-router-dom";
+import HomePage from "./pages/client/HomePage";
 
 function App() {
-    const [count, setCount] = useState(0);
-
     return (
         <>
-            <div style={{ backgroundColor: "#fafafa", height: "100vh", display: "flex", alignItems: "center" }}>
-                <div style={{background: "white", width: "100%", boxShadow: "0 0.8rem 2.4rem 0 rgba(149, 157, 165, 0.2)"}}>
-                    <a href="https://vite.dev" target="_blank">
-                        <img src={viteLogo} className="logo" alt="Vite logo" />
-                    </a>
-                    <a href="https://react.dev" target="_blank">
-                        <img
-                            src={reactLogo}
-                            className="logo react"
-                            alt="React logo"
-                        />
-                    </a>
-                </div>
-                
+            <Toaster
+                position="top-right"
+                reverseOrder={false}
+                toastOptions={{
+                    duration: 3000,
+                    style: {
+                        background: "#363636",
+                        color: "#fff",
+                    },
+                    success: {
+                        duration: 3000,
+                        iconTheme: {
+                            primary: "#4ade80",
+                            secondary: "#fff",
+                        },
+                    },
+                    error: {
+                        duration: 3000,
+                        style: {
+                            background: "#fff",
+                            color: "#000",
+                        },
+                        iconTheme: {
+                            primary: "#ef4444",
+                            secondary: "#fff",
+                        },
+                    },
+                }}
+            />
+            <div style={{ backgroundColor: "#fafafa" }}>
+                <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    {/* <Route path="/checkout" element={<CheckOutPage />} /> */}
+                </Routes>
             </div>
         </>
     );
