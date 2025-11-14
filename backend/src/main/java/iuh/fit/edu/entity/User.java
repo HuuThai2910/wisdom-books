@@ -1,5 +1,6 @@
 package iuh.fit.edu.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import iuh.fit.edu.entity.constant.Gender;
 import iuh.fit.edu.entity.constant.UserStatus;
 import jakarta.persistence.*;
@@ -24,7 +25,8 @@ public class User {
 
     private String fullName;
     private String phone;
-    private String address;
+    @Embedded
+    private Address address;
 
     private String avatar;
 
@@ -36,6 +38,7 @@ public class User {
 
     @ManyToOne
     @JoinColumn(name = "role_id")
+    @JsonIgnore
     private Role role;
 
     @CreationTimestamp
@@ -43,6 +46,7 @@ public class User {
     private String createdBy;
     private String updatedBy;
     private LocalDateTime updatedAt;
+
 
     @OneToMany(mappedBy = "user")
     private List<Order> orders;
