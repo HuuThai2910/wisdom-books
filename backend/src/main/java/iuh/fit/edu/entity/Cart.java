@@ -1,5 +1,6 @@
 package iuh.fit.edu.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
@@ -27,6 +28,7 @@ public class Cart {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @JsonIgnoreProperties(value = "cart")
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> cartItems = new ArrayList<>();
 }

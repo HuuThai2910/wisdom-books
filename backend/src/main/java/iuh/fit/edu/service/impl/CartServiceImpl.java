@@ -63,7 +63,7 @@ public class CartServiceImpl implements iuh.fit.edu.service.CartService {
         if (cart == null) {
             Cart newCart = new Cart();
             newCart.setUser(user);
-            newCart.setSum(0);
+            newCart.setSum(1);
             cart = this.cartRepository.save(newCart);
         }
         Book book = this.bookRepository.findById(cartRequest.getBookId())
@@ -74,6 +74,7 @@ public class CartServiceImpl implements iuh.fit.edu.service.CartService {
             cartItem.setCart(cart);
             cartItem.setBook(book);
             cartItem.setQuantity(cartRequest.getQuantity());
+            cart.setSum(cart.getSum() + 1);
         } else {
             cartItem.setQuantity(cartItem.getQuantity() + cartRequest.getQuantity());
         }

@@ -38,7 +38,6 @@ public class CartController {
     @ApiMessage("Get cart successfully")
     public ResponseEntity<CartResponse> fetchCart() {
         CartResponse cartResponse = this.cartService.getCartByUser("admin@bookstore.com");
-        System.out.println(cartResponse);
         return ResponseEntity.ok(cartResponse);
     }
 
