@@ -1,5 +1,15 @@
-// src/components/cart/CartItemQuantityControl.jsx
+// src/components/cart/CartItemQuantityControl.tsx
 import { Minus, Plus } from "lucide-react";
+
+interface CartItemQuantityControlProps {
+    localQuantity: string | number;
+    isOutOfStock: boolean;
+    onIncrement: () => void;
+    onDecrement: () => void;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onBlur: () => void;
+    onKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+}
 
 export default function CartItemQuantityControl({
     localQuantity,
@@ -8,15 +18,23 @@ export default function CartItemQuantityControl({
     onDecrement,
     onChange,
     onBlur,
-    onKeyPress
-}) {
+    onKeyPress,
+}: CartItemQuantityControlProps) {
     return (
         <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
             <button
                 onClick={onDecrement}
-                disabled={localQuantity <= 1 || isOutOfStock}
+                disabled={
+                    (typeof localQuantity === "number"
+                        ? localQuantity
+                        : parseInt(localQuantity as string) || 0) <= 1 ||
+                    isOutOfStock
+                }
                 className={`w-8 h-8 flex items-center justify-center transition-colors ${
-                    localQuantity <= 1 || isOutOfStock
+                    (typeof localQuantity === "number"
+                        ? localQuantity
+                        : parseInt(localQuantity as string) || 0) <= 1 ||
+                    isOutOfStock
                         ? "bg-gray-100 cursor-not-allowed opacity-50"
                         : "hover:bg-gray-200 cursor-pointer"
                 }`}

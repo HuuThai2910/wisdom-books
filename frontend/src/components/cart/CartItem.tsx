@@ -1,16 +1,17 @@
-// src/components/cart/CartItem.jsx (Simplified)
+// src/components/cart/CartItem.tsx
 import { formatCurrency } from "../../util/formatting";
 import { X } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useAppDispatch } from "../../app/store";
 import { removeItem } from "../../features/cart/cartSlice";
 import { useCartItemQuantity } from "../../hooks/useCartItemQuantity";
 import { useCartItemSelection } from "../../hooks/useCartItemSelection";
 import CartItemQuantityControl from "./CartItemQuantityControl";
+import { CartItemProps } from "../../types";
 
-const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL as string;
 
-export default function CartItem({ item }) {
-    const dispatch = useDispatch();
+export default function CartItem({ item }: CartItemProps) {
+    const dispatch = useAppDispatch();
     const isOutOfStock = item.book.quantity === 0;
 
     const {
@@ -24,7 +25,7 @@ export default function CartItem({ item }) {
 
     const { handleToggleSelect } = useCartItemSelection(item);
 
-    const handleRemoveItem = (id) => {
+    const handleRemoveItem = (id: number) => {
         dispatch(removeItem(id));
     };
 

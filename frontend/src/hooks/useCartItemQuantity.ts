@@ -1,16 +1,19 @@
 // src/hooks/useCartItemQuantity.js
 import { useState, useEffect, useRef } from "react";
-import { useDispatch } from "react-redux";
+import { useAppDispatch } from "../app/store";
 import {
     updateItem,
     optimisticUpdateQuantity,
 } from "../features/cart/cartSlice";
 import toast from "react-hot-toast";
+import { CartItem } from "../types";
 
-export function useCartItemQuantity(item) {
-    const dispatch = useDispatch();
-    const [localQuantity, setLocalQuantity] = useState(item.quantity);
-    const debounceTimerRef = useRef(null);
+export function useCartItemQuantity(item: CartItem) {
+    const dispatch = useAppDispatch();
+    const [localQuantity, setLocalQuantity] = useState<number | string>(
+        item.quantity
+    );
+    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
     const lastSavedQuantityRef = useRef(item.quantity);
 
     useEffect(() => {
@@ -25,7 +28,7 @@ export function useCartItemQuantity(item) {
         };
     }, []);
 
-    const updateServerQuantity = (newQuantity) => {
+    const updateServerQuantity = (newQuantity: number) => {
         if (debounceTimerRef.current) {
             clearTimeout(debounceTimerRef.current);
         }
@@ -40,8 +43,12 @@ export function useCartItemQuantity(item) {
     };
 
     const handleIncrement = () => {
-        const newQuantity = localQuantity + 1;
-        if (newQuantity > item.book.quantity) {
+        const currentQuantity =
+            typeof localQuantity === "string"
+                ? parseInt(localQuantity) || 0
+                : localQuantity;
+        const newQuantity = currentQuantity + 1;
+        if (newQuantity > (item.book.quantity || 0)) {
             toast.error(
                 `Đã vượt quá số lượng tối đa của sách (${item.book.quantity})`
             );
@@ -54,8 +61,12 @@ export function useCartItemQuantity(item) {
     };
 
     const handleDecrement = () => {
-        if (localQuantity > 1) {
-            const newQuantity = localQuantity - 1;
+        const currentQuantity =
+            typeof localQuantity === "string"
+                ? parseInt(localQuantity) || 0
+                : localQuantity;
+        if (currentQuantity > 1) {
+            const newQuantity = currentQuantity - 1;
             dispatch(
                 optimisticUpdateQuantity({ id: item.id, quantity: newQuantity })
             );
@@ -63,9 +74,12 @@ export function useCartItemQuantity(item) {
         }
     };
 
-    const handleInputChange = (e) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        setLocalQuantity(e.target.value);
+        // Allow empty string or valid numbers
+        if (value === "" || !isNaN(Number(value))) {
+            setLocalQuantity(value);
+        }
     };
 
     const handleInputBlur = () => {
@@ -77,7 +91,7 @@ export function useCartItemQuantity(item) {
             return;
         }
 
-        if (quantity > item.book.quantity) {
+        if (quantity > (item.book.quantity || 0)) {
             toast.error(
                 `Đã vượt quá số lượng tối đa của sách (${item.book.quantity})`
             );
@@ -90,7 +104,7 @@ export function useCartItemQuantity(item) {
         updateServerQuantity(quantity);
     };
 
-    const handleKeyPress = (e) => {
+    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (
             !/[0-9]/.test(e.key) &&
             e.key !== "Backspace" &&

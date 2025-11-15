@@ -1,130 +1,149 @@
-// src/features/cart/cartSlice.js
+// src/features/cart/cartSlice.ts
 import {
     createSlice,
     createAsyncThunk,
     createSelector,
+    PayloadAction,
 } from "@reduxjs/toolkit";
 import cartAPI from "../../api/cartApi";
+import { CartItem } from "../../types";
 
 // Lấy cart
-export const fetchCart = createAsyncThunk(
-    "cart/fetchCart",
-    async (_, thunkAPI) => {
-        try {
-            const res = await cartAPI.fetchCart();
-            const result = res.data;
-            return result?.data?.cartItems || [];
-        } catch (err) {
-            return thunkAPI.rejectWithValue(
-                err.response?.data?.message || err.message
-            );
-        }
+export const fetchCart = createAsyncThunk<
+    CartItem[],
+    void,
+    { rejectValue: string }
+>("cart/fetchCart", async (_, thunkAPI) => {
+    try {
+        const res = await cartAPI.fetchCart();
+        const result = res.data;
+        return result?.data?.cartItems || [];
+    } catch (err: any) {
+        return thunkAPI.rejectWithValue(
+            err.response?.data?.message || err.message
+        );
     }
-);
+});
 
 // Thêm item
-export const addItem = createAsyncThunk(
-    "cart/addItem",
-    async ({ bookId, quantity }, thunkAPI) => {
-        try {
-            const res = await cartAPI.addItem({ bookId, quantity });
-            const result = res.data;
-            return result.data;
-        } catch (err) {
-            return thunkAPI.rejectWithValue(
-                err.response?.data?.message || err.message
-            );
-        }
+export const addItem = createAsyncThunk<
+    CartItem,
+    { bookId: number; quantity: number },
+    { rejectValue: string }
+>("cart/addItem", async ({ bookId, quantity }, thunkAPI) => {
+    try {
+        const res = await cartAPI.addItem({ bookId, quantity });
+        const result = res.data;
+        return result.data;
+    } catch (err: any) {
+        return thunkAPI.rejectWithValue(
+            err.response?.data?.message || err.message
+        );
     }
-);
-// Cập nhât item
-export const updateItem = createAsyncThunk(
-    "cart/updateItem",
-    async ({ id, quantity }, thunkAPI) => {
-        try {
-            const res = await cartAPI.updateItem({ id, quantity });
-            // API returns { status, success, message, data: {...} }
-            return res.data?.data || res.data;
-        } catch (err) {
-            return thunkAPI.rejectWithValue(
-                err.response?.data?.message || err.message
-            );
-        }
-    }
-);
-// Xóa item
-export const removeItem = createAsyncThunk(
-    "cart/removeFromCart",
-    async (itemId, thunkAPI) => {
-        try {
-            console.log("test");
-            await cartAPI.removeItem(itemId);
+});
 
-            return itemId;
-        } catch (err) {
-            return thunkAPI.rejectWithValue(
-                err.response?.data?.message || err.message
-            );
-        }
+// Cập nhật item
+export const updateItem = createAsyncThunk<
+    CartItem,
+    { id: number; quantity: number },
+    { rejectValue: string }
+>("cart/updateItem", async ({ id, quantity }, thunkAPI) => {
+    try {
+        const res = await cartAPI.updateItem({ id, quantity });
+        return res.data?.data || res.data;
+    } catch (err: any) {
+        return thunkAPI.rejectWithValue(
+            err.response?.data?.message || err.message
+        );
     }
-);
+});
+
+// Xóa item
+export const removeItem = createAsyncThunk<
+    number,
+    number,
+    { rejectValue: string }
+>("cart/removeFromCart", async (itemId, thunkAPI) => {
+    try {
+        console.log("test");
+        await cartAPI.removeItem(itemId);
+        return itemId;
+    } catch (err: any) {
+        return thunkAPI.rejectWithValue(
+            err.response?.data?.message || err.message
+        );
+    }
+});
 
 // Xóa toàn bộ cart
-export const clearCart = createAsyncThunk(
-    "cart/clearCart",
-    async (_, thunkAPI) => {
-        try {
-            await cartAPI.clearCart();
-            return [];
-        } catch (err) {
-            return thunkAPI.rejectWithValue(
-                err.response?.data?.message || err.message
-            );
-        }
+export const clearCart = createAsyncThunk<
+    CartItem[],
+    void,
+    { rejectValue: string }
+>("cart/clearCart", async (_, thunkAPI) => {
+    try {
+        await cartAPI.clearCart();
+        return [];
+    } catch (err: any) {
+        return thunkAPI.rejectWithValue(
+            err.response?.data?.message || err.message
+        );
     }
-);
+});
 
 // Cập nhật select cho item
-export const updateSelections = createAsyncThunk(
-    "cart/updateSelect",
-    async (selections, thunkAPI) => {
-        try {
-            const res = await cartAPI.updateSelections(selections);
-            // API returns { status, success, message, data: [...] }
-            return res.data?.data || res.data;
-        } catch (err) {
-            return thunkAPI.rejectWithValue(
-                err.response?.data?.message || err.message
-            );
-        }
+export const updateSelections = createAsyncThunk<
+    any,
+    { [key: number]: boolean },
+    { rejectValue: string }
+>("cart/updateSelect", async (selections, thunkAPI) => {
+    try {
+        const res = await cartAPI.updateSelections(selections);
+        return (res.data as any)?.data || res.data;
+    } catch (err: any) {
+        return thunkAPI.rejectWithValue(
+            err.response?.data?.message || err.message
+        );
     }
-);
+});
 
 // Cập nhật select all
-export const updateSelectAll = createAsyncThunk(
-    "cart/updateSelectAll",
-    async (selected, thunkAPI) => {
-        try {
-            await cartAPI.updateSelectAll(selected);
-            return selected;
-        } catch (err) {
-            return thunkAPI.rejectWithValue(
-                err.response?.data?.message || err.message
-            );
-        }
+export const updateSelectAll = createAsyncThunk<
+    boolean,
+    boolean,
+    { rejectValue: string }
+>("cart/updateSelectAll", async (selected, thunkAPI) => {
+    try {
+        await cartAPI.updateSelectAll(selected);
+        return selected;
+    } catch (err: any) {
+        return thunkAPI.rejectWithValue(
+            err.response?.data?.message || err.message
+        );
     }
-);
+});
+
+interface CartSliceState {
+    cartItems: CartItem[];
+    status: "idle" | "loading" | "succeeded" | "failed";
+    error: string | null;
+}
+
+const initialState: CartSliceState = {
+    cartItems: [],
+    status: "idle",
+    error: null,
+};
 
 const cartSlice = createSlice({
     name: "cart",
-    initialState: {
-        cartItems: [],
-        status: "idle", // idle | loading | succeeded | failed
-        error: null,
-    },
+    initialState,
     reducers: {
         // Hàm để cập nhật các select item và hiển thị ngay lập tức cho UI
-        optimisticUpdateSelection: (state, action) => {
+        optimisticUpdateSelection: (
+            state,
+            action: PayloadAction<{ id: number; selected: boolean }>
+        ) => {
             const { id, selected } = action.payload;
             const item = state.cartItems.find((i) => i.id === id);
             if (item) {
@@ -132,12 +151,15 @@ const cartSlice = createSlice({
             }
         },
         // Hàm để cập nhật tất cả select item và hiển thị ngay lập tức cho UI
-        optimisticUpdateSelectAll: (state, action) => {
+        optimisticUpdateSelectAll: (state, action: PayloadAction<boolean>) => {
             const selected = action.payload;
             state.cartItems.forEach((i) => (i.selected = selected));
         },
         // Hàm để cập nhật số lượng item và hiển thị ngay lập tức cho UI
-        optimisticUpdateQuantity: (state, action) => {
+        optimisticUpdateQuantity: (
+            state,
+            action: PayloadAction<{ id: number; quantity: number }>
+        ) => {
             const { id, quantity } = action.payload;
             const item = state.cartItems.find((i) => i.id === id);
             if (item) {
@@ -158,7 +180,7 @@ const cartSlice = createSlice({
             })
             .addCase(fetchCart.rejected, (state, action) => {
                 state.status = "failed";
-                state.error = action.payload;
+                state.error = action.payload || null;
             })
 
             // ADD TO CART
@@ -225,10 +247,11 @@ const cartSlice = createSlice({
 
             // Xử lý lỗi chung
             .addMatcher(
-                (action) => action.type.endsWith("rejected"),
+                (action): action is PayloadAction<string> =>
+                    action.type.endsWith("rejected"),
                 (state, action) => {
                     state.status = "failed";
-                    state.error = action.payload;
+                    state.error = action.payload || null;
                 }
             );
     },
@@ -242,19 +265,19 @@ export const {
 export default cartSlice.reducer;
 
 export const selectSelectedItems = createSelector(
-    (state) => state.cart.cartItems,
-    (cartItems) => cartItems.filter((i) => i.selected)
+    (state: { cart: CartSliceState }) => state.cart.cartItems,
+    (cartItems) => cartItems.filter((i: CartItem) => i.selected)
 );
 
 export const selectTotals = createSelector(
     selectSelectedItems,
     (selectedItems) => {
         const totalQuantity = selectedItems.reduce(
-            (sum, i) => sum + i.quantity,
+            (sum: number, i: CartItem) => sum + i.quantity,
             0
         );
         const totalPrice = selectedItems.reduce(
-            (sum, i) => sum + i.quantity * i.book.price,
+            (sum: number, i: CartItem) => sum + i.quantity * i.book.price,
             0
         );
         return { totalQuantity, totalPrice };

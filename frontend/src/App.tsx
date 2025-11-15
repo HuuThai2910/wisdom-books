@@ -1,9 +1,6 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
 import CartPage from "./pages/client/CartPage";
-import CheckOutPage from "./pages/client/CheckOutPage";
+import CheckOutPage from "./pages/client/CheckoutPage";
 import { Toaster } from "react-hot-toast";
 import { Route, Routes } from "react-router-dom";
 import HomePage from "./pages/client/HomePage";
@@ -44,7 +41,7 @@ function App() {
                 <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/cart" element={<CartPage />} />
-                    {/* <Route path="/checkout" element={<CheckOutPage />} /> */}
+                    <Route path="/checkout" element={<CheckOutPage />} />
                 </Routes>
             </div>
         </>

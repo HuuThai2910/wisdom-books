@@ -1,15 +1,15 @@
 // src/hooks/useCartItemSelection.js
 import { useRef, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useAppDispatch } from "../app/store";
 import {
     updateSelections,
     optimisticUpdateSelection,
 } from "../features/cart/cartSlice";
+import { CartItem } from "../types";
 
-export function useCartItemSelection(item) {
-    const dispatch = useDispatch();
-    const selectDebounceTimerRef = useRef(null);
-    const initialSelectedRef = useRef(item.selected);
+export function useCartItemSelection(item: CartItem) {
+    const dispatch = useAppDispatch();
+    const selectDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Kiểm tra xem sản phẩm có được check khi hết hàng không
     useEffect(() => {
@@ -19,11 +19,7 @@ export function useCartItemSelection(item) {
                 optimisticUpdateSelection({ id: item.id, selected: false })
             );
             // Sau đó mới cập nhật cho server
-            dispatch(
-                updateSelections({
-                    selections: [{ id: item.id, selected: false }],
-                })
-            );
+            dispatch(updateSelections({ [item.id]: false }));
         }
     }, [item.book.quantity, item.selected, item.id, dispatch]);
 
@@ -47,11 +43,7 @@ export function useCartItemSelection(item) {
         }
 
         selectDebounceTimerRef.current = setTimeout(() => {
-            dispatch(
-                updateSelections({
-                    selections: [{ id: item.id, selected: newSelected }],
-                })
-            );
+            dispatch(updateSelections({ [item.id]: newSelected }));
         }, 300);
     };
 

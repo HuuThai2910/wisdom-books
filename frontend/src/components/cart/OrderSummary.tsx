@@ -1,9 +1,12 @@
-
 import { useSelector } from "react-redux";
 import { selectTotals } from "../../features/cart/cartSlice";
 import { formatCurrency } from "../../util/formatting";
 
-export default function OrderSummary() {
+interface OrderSummaryProps {
+    onCheckout: () => void;
+}
+
+export default function OrderSummary({ onCheckout }: OrderSummaryProps) {
     const { totalQuantity, totalPrice } = useSelector(selectTotals);
 
     return (
@@ -39,6 +42,7 @@ export default function OrderSummary() {
                                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                                 : "bg-black text-white hover:bg-gray-800"
                         }`}
+                        onClick={onCheckout}
                     >
                         Tiến hành thanh toán
                     </button>

@@ -1,28 +1,31 @@
-import React, { useEffect, useState, useRef } from "react";
-import { Minus, Plus, X, Trash2 } from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
-import CartItem from "../../components/cart/CartItem";
+import { useEffect, useRef } from "react";
+import { Trash2 } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "../../app/store";
+import CartItemComponent from "../../components/cart/CartItem";
 import {
     fetchCart,
     updateSelectAll,
-    removeItem,
     clearCart,
     optimisticUpdateSelectAll,
 } from "../../features/cart/cartSlice";
 import OrderSummary from "../../components/cart/OrderSummary";
+import { useNavigate } from "react-router-dom";
+import { setCheckoutItems } from "../../features/checkout/checkoutSlice";
+import type { CartItem } from "../../types";
 
 export default function CartPage() {
-    const dispatch = useDispatch();
-    const { cartItems } = useSelector((state) => state.cart);
-    const debounceTimerRef = useRef(null);
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const { cartItems } = useAppSelector((state) => state.cart);
+    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         dispatch(fetchCart());
     }, [dispatch]);
 
-    
     const allSelected =
-        cartItems.length > 0 && cartItems.every((item) => item.selected);
+        cartItems.length > 0 &&
+        cartItems.every((item: CartItem) => item.selected);
 
     const toggleSelectAll = () => {
         const newValue = !allSelected;
@@ -37,6 +40,15 @@ export default function CartPage() {
 
     const handleClearCart = () => {
         dispatch(clearCart());
+    };
+
+    const handleCheckoutPage = () => {
+        dispatch(
+            setCheckoutItems(
+                cartItems.filter((item: CartItem) => item.selected)
+            )
+        );
+        navigate("/checkout");
     };
 
     useEffect(() => {
@@ -94,15 +106,18 @@ export default function CartPage() {
 
                             {/* Cart Items */}
                             <div className="divide-y divide-gray-200">
-                                {cartItems.map((item) => (
-                                    <CartItem key={item.id} item={item} />
+                                {cartItems.map((item: CartItem) => (
+                                    <CartItemComponent
+                                        key={item.id}
+                                        item={item}
+                                    />
                                 ))}
                             </div>
                         </div>
                     </div>
 
                     {/* Order Summary */}
-                    <OrderSummary />
+                    <OrderSummary onCheckout={handleCheckoutPage} />
                 </div>
             </div>
         </div>
