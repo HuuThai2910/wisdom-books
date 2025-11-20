@@ -25,7 +25,7 @@ import java.util.List;
  * @date:
  * @version: 1.0
  */
-@Controller
+@RestController
 @RequestMapping("/api/cart")
 public class CartController {
     private final CartService cartService;
