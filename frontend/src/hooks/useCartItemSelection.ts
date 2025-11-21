@@ -19,7 +19,11 @@ export function useCartItemSelection(item: CartItem) {
                 optimisticUpdateSelection({ id: item.id, selected: false })
             );
             // Sau đó mới cập nhật cho server
-            dispatch(updateSelections({ [item.id]: false }));
+            dispatch(
+                updateSelections({
+                    selections: [{ id: item.id, selected: false }],
+                })
+            );
         }
     }, [item.book.quantity, item.selected, item.id, dispatch]);
 
@@ -43,7 +47,11 @@ export function useCartItemSelection(item: CartItem) {
         }
 
         selectDebounceTimerRef.current = setTimeout(() => {
-            dispatch(updateSelections({ [item.id]: newSelected }));
+            dispatch(
+                updateSelections({
+                    selections: [{ id: item.id, selected: newSelected }],
+                })
+            );
         }, 300);
     };
 
