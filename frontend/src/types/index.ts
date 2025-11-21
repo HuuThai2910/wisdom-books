@@ -15,6 +15,7 @@ export interface Book {
 
 export interface CartItem {
     id: number;
+    bookId: number;
     quantity: number;
     selected: boolean;
     book: Book;
@@ -41,7 +42,7 @@ export interface Voucher {
     code: string;
     discountValue: number;
     description?: string;
-    minOrderValue?: number;
+    minOrder: number;
     maxDiscount?: number;
     startDate?: string;
     endDate?: string;
@@ -70,9 +71,7 @@ export interface ApiResponse<T> {
     status: number;
     success: boolean;
     message: string;
-    data: T | null; 
-    errors?: any; 
-    timestamp: string; 
+    data: T;
 }
 
 // Redux State Types
@@ -107,6 +106,7 @@ export interface VoucherModalProps {
     isOpen: boolean;
     onClose: () => void;
     vouchers: Voucher[];
+    subtotal: number;
     selectedVoucher: number | null;
     onSelectVoucher: (voucherId: number | null) => void;
 }

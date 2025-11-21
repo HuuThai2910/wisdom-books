@@ -89,6 +89,7 @@ const CheckOutPage = () => {
                 isOpen={isVoucherModalOpen}
                 onClose={closeVoucherModal}
                 vouchers={vouchers}
+                subtotal={subtotal}
                 selectedVoucher={selectedVoucher}
                 onSelectVoucher={handleSelectVoucher}
             />

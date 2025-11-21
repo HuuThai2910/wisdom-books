@@ -7,6 +7,7 @@ const VoucherModal: React.FC<VoucherModalProps> = ({
     vouchers,
     selectedVoucher,
     onSelectVoucher,
+    subtotal,
 }) => {
     if (!isOpen) return null;
 
@@ -84,8 +85,9 @@ const VoucherModal: React.FC<VoucherModalProps> = ({
                                 const isSelected =
                                     selectedVoucher === voucher.id;
                                 const isDisabled =
-                                    selectedVoucher &&
-                                    selectedVoucher !== voucher.id;
+                                    (selectedVoucher &&
+                                        selectedVoucher !== voucher.id) ||
+                                    voucher.minOrder > subtotal;
 
                                 return (
                                     <div
@@ -130,6 +132,12 @@ const VoucherModal: React.FC<VoucherModalProps> = ({
                                                         voucher.endDate
                                                     )}
                                                 </p>
+                                                {voucher.minOrder >
+                                                    subtotal && (
+                                                    <div className="text-sm text-red-500 font-bold">
+                                                        Chưa đạt giá trị tối thiểu của đơn hàng
+                                                    </div>
+                                                )}
                                                 {isSelected && (
                                                     <div className="mt-2 text-sm text-green-600 font-bold">
                                                         ✓ Đã áp dụng

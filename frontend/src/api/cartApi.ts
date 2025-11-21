@@ -12,7 +12,10 @@ interface UpdateItemParams {
 }
 
 interface UpdateSelectionsParams {
-    [key: number]: boolean;
+    selections: Array<{
+        id: number;
+        selected: boolean;
+    }>;
 }
 
 const cartAPI = {
@@ -33,8 +36,8 @@ const cartAPI = {
         axiosClient.put<ApiResponse<CartItem>>("/cart", item),
 
     // Cập nhật select cho sản phẩm trong giỏ hàng
-    updateSelections: (selections: UpdateSelectionsParams) =>
-        axiosClient.put<ApiResponse<void>>("/cart/select", selections),
+    updateSelections: (params: UpdateSelectionsParams) =>
+        axiosClient.put<ApiResponse<void>>("/cart/select", params),
 
     // Cập nhật select all cho toàn bộ sản phẩm trong giỏ hàng
     updateSelectAll: (selected: boolean) =>
