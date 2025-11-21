@@ -22,5 +22,6 @@ public class VoucherResponse {
     private String name;
     private String description;
     private int discountValue;
+    private double minOrder;
     private LocalDateTime endDate;
 }
