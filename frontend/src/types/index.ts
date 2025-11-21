@@ -70,7 +70,9 @@ export interface ApiResponse<T> {
     status: number;
     success: boolean;
     message: string;
-    data: T;
+    data: T | null; 
+    errors?: any; 
+    timestamp: string; 
 }
 
 // Redux State Types
