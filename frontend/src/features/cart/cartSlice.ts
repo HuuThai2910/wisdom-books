@@ -94,11 +94,11 @@ export const clearCart = createAsyncThunk<
 // Cập nhật select cho item
 export const updateSelections = createAsyncThunk<
     any,
-    { [key: number]: boolean },
+    { selections: Array<{ id: number; selected: boolean }> },
     { rejectValue: string }
->("cart/updateSelect", async (selections, thunkAPI) => {
+>("cart/updateSelect", async (params, thunkAPI) => {
     try {
-        const res = await cartAPI.updateSelections(selections);
+        const res = await cartAPI.updateSelections(params);
         return (res.data as any)?.data || res.data;
     } catch (err: any) {
         return thunkAPI.rejectWithValue(
@@ -223,26 +223,17 @@ const cartSlice = createSlice({
             })
 
             // Update select
-            .addCase(updateSelections.fulfilled, (state, action) => {
+            .addCase(updateSelections.fulfilled, (state) => {
                 state.status = "succeeded";
-                // Payload is array of updated cart items from server
-                if (Array.isArray(action.payload)) {
-                    action.payload.forEach((updatedItem) => {
-                        const item = state.cartItems.find(
-                            (i) => i.id === updatedItem.id
-                        );
-                        if (item) {
-                            item.selected = updatedItem.selected;
-                        }
-                    });
-                }
+                // Không cập nhật lại state vì đã có optimistic update
+                // Tránh bị giật UI
             })
 
             // Update all
-            .addCase(updateSelectAll.fulfilled, (state, action) => {
+            .addCase(updateSelectAll.fulfilled, (state) => {
                 state.status = "succeeded";
-                const selected = action.payload;
-                state.cartItems.forEach((i) => (i.selected = selected));
+                // Không cập nhật lại state vì đã có optimistic update
+                // Tránh bị giật UI
             })
 
             // Xử lý lỗi chung
