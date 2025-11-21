@@ -15,7 +15,6 @@ export interface Book {
 
 export interface CartItem {
     id: number;
-    bookId: number;
     quantity: number;
     selected: boolean;
     book: Book;
