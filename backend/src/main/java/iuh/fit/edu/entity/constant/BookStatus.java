@@ -11,6 +11,11 @@ public enum BookStatus {
         public String toString() {
             return "Ngừng bán";
         }
+    }, OUT_STOCK {
+        @Override
+        public String toString() {
+            return "Hết hàng";
+        }
     };
 }
 

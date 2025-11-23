@@ -46,6 +46,7 @@ public class Book {
     private LocalDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
+    private int quantity;
 
     @OneToMany(mappedBy = "book")
     private List<OrderDetail> orderItems;
