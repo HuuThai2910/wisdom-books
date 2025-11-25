@@ -49,7 +49,7 @@ public class Book {
     private int quantity;
 
     @OneToMany(mappedBy = "book")
-    private List<OrderDetail> orderItems;
+    private List<OrderItem> orderItems;
 
     @OneToMany(mappedBy = "book")
     private List<Review> reviews;

@@ -4,12 +4,12 @@ public enum PaymentMethod {
     COD{
         @Override
         public String toString() {
-            return "Tiền mặt";
+            return "Thanh toán khi nhận hàng";
         }
-    }, CREDIT_CARD{
+    }, VNPAY{
         @Override
         public String toString() {
-            return "Chuyển khoản";
+            return "Thanh toán VNPay";
         }
     }
 }
