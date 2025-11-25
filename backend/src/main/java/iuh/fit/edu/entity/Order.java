@@ -28,6 +28,7 @@ public class Order {
     private String receiverAddress;
     private String receiverName;
     private String receiverPhone;
+    private String receiverEmail;
 
     private String updateBy;
     private LocalDateTime updateAt;
@@ -39,10 +40,9 @@ public class Order {
     private String note;
 
     private double totalPrice;
-    private double discountedPrice;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderDetail> orderDetails ;
+    private List<OrderItem> orderItems ;
 
     private LocalDateTime orderDate;
 

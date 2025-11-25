@@ -11,7 +11,11 @@ public class EntryFormDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private int quantity;        // Số lượng nhập
+    private double unitPrice;    // Giá nhập đơn vị
+
     @ManyToOne
+    @JoinColumn(name = "book_id")
     private Book book;
 
     @ManyToOne

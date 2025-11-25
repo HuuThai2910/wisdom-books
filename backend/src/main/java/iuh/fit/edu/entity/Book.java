@@ -1,8 +1,10 @@
 package iuh.fit.edu.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import iuh.fit.edu.entity.constant.BookStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -34,13 +36,6 @@ public class Book {
     @Enumerated(EnumType.STRING)
     private BookStatus status;
 
-    @ManyToMany
-    @JoinTable(
-            name = "book_categories",
-            joinColumns = @JoinColumn(name = "book_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
-    private List<Category> categories;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -49,10 +44,19 @@ public class Book {
     private int quantity;
 
     @OneToMany(mappedBy = "book")
-    private List<OrderDetail> orderItems;
+    @JsonIgnore
+    private List<OrderItem> orderItems;
 
     @OneToMany(mappedBy = "book")
     private List<Review> reviews;
+
+    @ManyToMany
+    @JoinTable(
+            name = "book_categories",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private List<Category> categories;
 
     @ManyToOne
     @JoinColumn(name = "supplier_id")
@@ -67,4 +71,15 @@ public class Book {
 
     @OneToMany(mappedBy = "book")
     private List<EntryFormDetail> entryFormDetails;
+    @PrePersist
+    public void handleBeforeCreateAt() {
+        this.createdBy =  "Tan Nghi";
+        this.createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void handleBeforeUpdateAt() {
+        this.createdBy =  "Tan Nghi";
+        this.updatedAt = LocalDateTime.now();
+    }
 }

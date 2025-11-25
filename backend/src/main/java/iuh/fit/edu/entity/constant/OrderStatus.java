@@ -4,7 +4,7 @@ public enum OrderStatus {
     PENDING {
         @Override
         public String toString() {
-            return "Chờ duyệt";
+            return "Chờ xác nhận";
         }
     }, PROCESSING {
         @Override
@@ -14,12 +14,12 @@ public enum OrderStatus {
     }, SHIPPING {
         @Override
         public String toString() {
-            return "Đang giao";
+            return "Đang vận chuyển";
         }
     }, DELIVERED {
         @Override
         public String toString() {
-            return "Đã giao";
+            return "Đã vận chuyển";
         }
     }, CANCELLED {
         @Override
