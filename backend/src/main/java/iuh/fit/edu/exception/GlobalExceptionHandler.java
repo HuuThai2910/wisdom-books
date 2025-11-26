@@ -8,6 +8,8 @@ import iuh.fit.edu.dto.response.ApiResponse;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,5 +53,15 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(api);
     }
+
+    @ExceptionHandler(value = {IdInvalidException.class})
+    public ResponseEntity<ApiResponse<Object>> handleIdInvalidException(IdInvalidException ex) {
+        ApiResponse<Object> apiResponse = new ApiResponse<>();
+        apiResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        apiResponse.setMessage(ex.getMessage());
+        apiResponse.setErrors("Invalid");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+    }
+
 }
 
