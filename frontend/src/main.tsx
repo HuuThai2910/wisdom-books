@@ -5,13 +5,20 @@ import App from "./App.jsx";
 import { Provider } from "react-redux";
 import { store } from "./app/store.js";
 import { BrowserRouter } from "react-router-dom";
+import Header from "./components/Header/Header.js";
+import Footer from "./components/Footer/Footer.js";
+import { BookProvider } from "./contexts/BookContext";
 
 createRoot(document.getElementById("root")).render(
     <StrictMode>
         <Provider store={store}>
-            <BrowserRouter>
-                <App />
-            </BrowserRouter>
+            <BookProvider>
+                <BrowserRouter>
+                    <Header />
+                    <App />
+                    <Footer />
+                </BrowserRouter>
+            </BookProvider>
         </Provider>
     </StrictMode>
 );
