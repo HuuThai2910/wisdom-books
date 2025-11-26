@@ -2,7 +2,10 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 
 const axiosClient: AxiosInstance = axios.create({
     baseURL: "http://localhost:8080/api",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+    }
 });
 
 axiosClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {

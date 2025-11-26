@@ -1,16 +1,58 @@
 // Core Types
+export interface Category {
+    id: number;
+    name: string;
+    description: string;
+}
+
+export interface Supplier {
+    id: number;
+    companyName: string;
+    address: string;
+    phone: string;
+    email: string;
+}
+
+export interface Review {
+    id: number;
+    comment: string;
+    rating: number;
+    reviewDate: string;
+}
+
+export interface BookImage {
+    bookId: number;
+    imagePath: string;
+}
+
 export interface Book {
     id: number;
+    isbn: string;
     title: string;
     author: string;
-    price: number;
-    image: string;
+    yearOfPublication: number;
+    shortDes?: string;
     description?: string;
-    categoryId?: number;
+    sellingPrice: number;
+    importPrice: number;
+    image?: string[];
+    status: "AVAILABLE" | "SALE" | "OUT_OF_STOCK";
+    createdAt?: string;
+    updatedAt?: string;
+    createdBy?: string;
+    updatedBy?: string;
+    quantity: number;
+    review?: Review[];
+    bookImage?: BookImage[];
+    category?: Category[];
+    supplier?: Supplier;
+    // Compatibility fields
+    price?: number;
     stock?: number;
-    quantity?: number;
     publishedYear?: number;
     publisher?: string;
+    originalPrice?: number;
+    categories?: string[];
 }
 
 export interface CartItem {
@@ -72,6 +114,18 @@ export interface ApiResponse<T> {
     success: boolean;
     message: string;
     data: T;
+}
+
+export interface PaginationMeta {
+    page: number;
+    pageSize: number;
+    pages: number;
+    total: number;
+}
+
+export interface PaginatedResponse<T> {
+    meta: PaginationMeta;
+    result: T[];
 }
 
 // Redux State Types
