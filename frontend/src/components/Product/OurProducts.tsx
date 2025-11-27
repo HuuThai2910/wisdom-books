@@ -2,6 +2,9 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Book } from "../../types";
 import BookCard from "../common/BookCard";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+
 const tabs = [
     { id: "all", label: "Tất Cả Sách" },
     { id: "new", label: "Sách Mới" },
@@ -112,6 +115,15 @@ export default function OurProducts({ books }: OurProductsProps) {
                         ))}
                     </motion.div>
                 </AnimatePresence>
+                <div className="flex justify-center mt-10">
+                    <Link
+                        to="/books"
+                        className="group mt-10 mx-auto inline-flex items-center gap-2 px-10 py-3 text-lg font-semibold rounded-full border-2 border-blue-500 text-blue-600 bg-white shadow-lg hover:shadow-xl hover:bg-blue-500 hover:text-white transition-all duration-300"
+                    >
+                        Xem Tất Cả Sản Phẩm
+                        <ArrowRight className="size-5 text-blue-600 transition-all duration-300 group-hover:text-white group-hover:translate-x-1" />
+                    </Link>
+                </div>
             </div>
         </section>
     );
