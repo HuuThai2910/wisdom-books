@@ -26,9 +26,11 @@ public class FileServiceImpl implements FileService {
 
         if (!tmpDir.isDirectory()) {
             try {
-                Files.createDirectory(tmpDir.toPath());
+                // Sử dụng mkdirs() thay vì mkdir() để tạo cả thư mục cha nếu chưa tồn tại
+                Files.createDirectories(tmpDir.toPath());
                 System.out.println(">>> CREATE NEW DIRECTORY SUCCESSFUL, PATH = " + tmpDir.toPath());
             } catch (IOException e) {
+                System.err.println(">>> ERROR CREATING DIRECTORY: " + tmpDir.toPath());
                 e.printStackTrace();
             }
         } else {
