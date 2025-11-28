@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     FaPlus,
@@ -13,10 +14,12 @@ import {
     FaSave,
 } from "react-icons/fa";
 import bookApi from "../../api/bookApi";
+import fileApi from "../../api/fileApi";
 import { Book } from "../../types";
 import toast from "react-hot-toast";
 
 export default function BookManagement() {
+    const navigate = useNavigate();
     const [books, setBooks] = useState<Book[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(0);
@@ -37,16 +40,21 @@ export default function BookManagement() {
     );
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+    const [previewImages, setPreviewImages] = useState<string[]>([]);
+    const [isUploading, setIsUploading] = useState(false);
     const [formData, setFormData] = useState<Partial<Book>>({
         title: "",
         author: "",
+        isbn: "",
         publisher: "",
         yearOfPublication: new Date().getFullYear(),
-        originalPrice: 0,
+        importPrice: 0,
         sellingPrice: 0,
         quantity: 0,
+        shortDes: "",
         description: "",
-        status: "AVAILABLE",
+        status: "SALE",
     });
 
     // Column visibility state
@@ -154,27 +162,11 @@ export default function BookManagement() {
     };
 
     const openCreateModal = () => {
-        setModalMode("create");
-        setFormData({
-            title: "",
-            author: "",
-            publisher: "",
-            yearOfPublication: new Date().getFullYear(),
-            originalPrice: 0,
-            sellingPrice: 0,
-            quantity: 0,
-            description: "",
-            status: "AVAILABLE",
-        });
-        setSelectedBook(null);
-        setShowModal(true);
+        navigate("/admin/books/create");
     };
 
     const openEditModal = (book: Book) => {
-        setModalMode("edit");
-        setFormData(book);
-        setSelectedBook(book);
-        setShowModal(true);
+        navigate(`/admin/books/edit?id=${book.id}`);
     };
 
     const openViewModal = async (book: Book) => {
@@ -205,16 +197,20 @@ export default function BookManagement() {
     const closeModal = () => {
         setShowModal(false);
         setSelectedBook(null);
+        setUploadedFiles([]);
+        setPreviewImages([]);
         setFormData({
             title: "",
             author: "",
+            isbn: "",
             publisher: "",
             yearOfPublication: new Date().getFullYear(),
-            originalPrice: 0,
+            importPrice: 0,
             sellingPrice: 0,
             quantity: 0,
+            shortDes: "",
             description: "",
-            status: "AVAILABLE",
+            status: "SALE",
         });
     };
 
@@ -227,7 +223,7 @@ export default function BookManagement() {
         setFormData((prev) => ({
             ...prev,
             [name]: [
-                "originalPrice",
+                "importPrice",
                 "sellingPrice",
                 "quantity",
                 "yearOfPublication",
@@ -237,22 +233,106 @@ export default function BookManagement() {
         }));
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        const fileArray = Array.from(files);
+        const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+
+        // Validate file types
+        const invalidFiles = fileArray.filter(
+            (file) => !allowedTypes.includes(file.type)
+        );
+
+        if (invalidFiles.length > 0) {
+            toast.error("Chỉ chấp nhận file ảnh (jpg, jpeg, png)!");
+            return;
+        }
+
+        setUploadedFiles(fileArray);
+
+        // Create preview URLs
+        const previews = fileArray.map((file) => URL.createObjectURL(file));
+        setPreviewImages(previews);
+    };
+
+    const removeFile = (index: number) => {
+        const newFiles = uploadedFiles.filter((_, i) => i !== index);
+        const newPreviews = previewImages.filter((_, i) => i !== index);
+
+        // Revoke the removed preview URL to free memory
+        URL.revokeObjectURL(previewImages[index]);
+
+        setUploadedFiles(newFiles);
+        setPreviewImages(newPreviews);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
-            console.log("Submitting form data:", formData);
+            setIsUploading(true);
+            let imageFileNames: string[] = [];
+
+            // Upload files if there are any
+            if (uploadedFiles.length > 0) {
+                toast.loading("Đang tải ảnh lên...", { id: "upload" });
+                const uploadResponse = await fileApi.uploadFiles(
+                    uploadedFiles,
+                    "books"
+                );
+
+                if (uploadResponse.success && uploadResponse.data) {
+                    imageFileNames = uploadResponse.data.map(
+                        (file) => file.fileName
+                    );
+                    toast.success(
+                        `Đã tải lên ${imageFileNames.length} ảnh thành công!`,
+                        { id: "upload" }
+                    );
+                } else {
+                    throw new Error("Upload failed");
+                }
+            }
+
+            // Prepare book data with proper structure for backend
+            const bookData: any = {
+                isbn: formData.isbn,
+                title: formData.title,
+                author: formData.author,
+                yearOfPublication: formData.yearOfPublication,
+                shortDes: formData.shortDes || "",
+                description: formData.description || "",
+                sellingPrice: formData.sellingPrice,
+                importPrice: formData.importPrice,
+                status: formData.status,
+                quantity: formData.quantity,
+                // Add image array from uploaded files
+                ...(imageFileNames.length > 0 && {
+                    image: imageFileNames,
+                }),
+                // Add categories (you can add UI for this later)
+                categories:
+                    formData.category?.map((cat) => ({ id: cat.id })) || [],
+                // Add supplier and inventory (default to id: 1 for now)
+                supplier: { id: 1 },
+                inventory: { id: 1 },
+                // Entry form details (optional, can be empty array)
+                entryFormDetails: [],
+            };
+
+            console.log("Submitting form data:", bookData);
             console.log("Modal mode:", modalMode);
-            console.log("Selected book:", selectedBook);
 
             if (modalMode === "create") {
-                const response = await bookApi.createBook(formData);
+                const response = await bookApi.createBook(bookData);
                 console.log("Create response:", response);
                 toast.success("Thêm sách thành công!");
             } else if (modalMode === "edit" && selectedBook) {
                 const response = await bookApi.updateBook(
                     selectedBook.id,
-                    formData
+                    bookData
                 );
                 console.log("Update response:", response);
                 toast.success("Cập nhật sách thành công!");
@@ -271,6 +351,8 @@ export default function BookManagement() {
                 error.message ||
                 "Có lỗi xảy ra!";
             toast.error(errorMessage);
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -410,8 +492,8 @@ export default function BookManagement() {
                                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                             >
                                 <option value="">Chọn trạng thái</option>
-                                <option value="AVAILABLE">Còn hàng</option>
-                                <option value="SALE">Đang giảm giá</option>
+                                <option value="STOP">Ngừng bán</option>
+                                <option value="SALE">Đang bán</option>
                                 <option value="OUT_OF_STOCK">Hết hàng</option>
                             </select>
                         </div>
@@ -843,6 +925,103 @@ export default function BookManagement() {
 
                                 {/* Modal Body */}
                                 <form onSubmit={handleSubmit} className="p-6">
+                                    {/* File Upload Section - Only in create/edit mode */}
+                                    {modalMode !== "view" && (
+                                        <div className="mb-6">
+                                            <label className="block text-sm font-medium text-gray-700 mb-3">
+                                                Hình ảnh sách
+                                            </label>
+
+                                            <div className="flex items-center justify-center w-full">
+                                                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                        <FaPlus className="w-8 h-8 mb-3 text-gray-400" />
+                                                        <p className="mb-2 text-sm text-gray-500">
+                                                            <span className="font-semibold">
+                                                                Click để chọn
+                                                                ảnh
+                                                            </span>{" "}
+                                                            hoặc kéo thả
+                                                        </p>
+                                                        <p className="text-xs text-gray-500">
+                                                            PNG, JPG, JPEG (Chấp
+                                                            nhận nhiều file)
+                                                        </p>
+                                                    </div>
+                                                    <input
+                                                        type="file"
+                                                        className="hidden"
+                                                        accept="image/png,image/jpeg,image/jpg"
+                                                        multiple
+                                                        onChange={
+                                                            handleFileChange
+                                                        }
+                                                    />
+                                                </label>
+                                            </div>
+
+                                            {/* Preview uploaded images */}
+                                            {previewImages.length > 0 && (
+                                                <div className="mt-4">
+                                                    <p className="text-sm font-medium text-gray-700 mb-2">
+                                                        Ảnh đã chọn (
+                                                        {previewImages.length}):
+                                                    </p>
+                                                    <div className="grid grid-cols-4 gap-4">
+                                                        {previewImages.map(
+                                                            (
+                                                                preview,
+                                                                index
+                                                            ) => (
+                                                                <div
+                                                                    key={index}
+                                                                    className="relative group"
+                                                                >
+                                                                    <img
+                                                                        src={
+                                                                            preview
+                                                                        }
+                                                                        alt={`Preview ${
+                                                                            index +
+                                                                            1
+                                                                        }`}
+                                                                        className="w-full h-24 object-cover rounded-lg border-2 border-gray-200"
+                                                                    />
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            removeFile(
+                                                                                index
+                                                                            )
+                                                                        }
+                                                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                    >
+                                                                        <FaTimes className="w-3 h-3" />
+                                                                    </button>
+                                                                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 text-center rounded-b-lg">
+                                                                        {uploadedFiles[
+                                                                            index
+                                                                        ]?.name.substring(
+                                                                            0,
+                                                                            15
+                                                                        )}
+                                                                        {uploadedFiles[
+                                                                            index
+                                                                        ]?.name
+                                                                            .length >
+                                                                        15
+                                                                            ? "..."
+                                                                            : ""}
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
                                     {/* Book Images - Only in view mode */}
                                     {modalMode === "view" &&
                                         formData.image &&
@@ -948,7 +1127,7 @@ export default function BookManagement() {
                                                                             idx
                                                                         );
                                                                     }}
-                                                                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                                                                    className={`shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
                                                                         idx ===
                                                                         selectedImageIndex
                                                                             ? "border-blue-500 ring-2 ring-blue-300"
@@ -1012,6 +1191,26 @@ export default function BookManagement() {
                                             />
                                         </div>
 
+                                        {/* ISBN */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                ISBN{" "}
+                                                <span className="text-red-500">
+                                                    *
+                                                </span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="isbn"
+                                                value={formData.isbn || ""}
+                                                onChange={handleInputChange}
+                                                disabled={modalMode === "view"}
+                                                required
+                                                placeholder="Ví dụ: 978-3-16-148410-0"
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-900"
+                                            />
+                                        </div>
+
                                         {/* Publisher */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1047,19 +1246,19 @@ export default function BookManagement() {
                                             />
                                         </div>
 
-                                        {/* Original Price */}
+                                        {/* Import Price */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Giá gốc{" "}
+                                                Giá nhập{" "}
                                                 <span className="text-red-500">
                                                     *
                                                 </span>
                                             </label>
                                             <input
                                                 type="number"
-                                                name="originalPrice"
+                                                name="importPrice"
                                                 value={
-                                                    formData.originalPrice || ""
+                                                    formData.importPrice || ""
                                                 }
                                                 onChange={handleInputChange}
                                                 disabled={modalMode === "view"}
@@ -1119,18 +1318,17 @@ export default function BookManagement() {
                                             <select
                                                 name="status"
                                                 value={
-                                                    formData.status ||
-                                                    "AVAILABLE"
+                                                    formData.status || "SALE"
                                                 }
                                                 onChange={handleInputChange}
                                                 disabled={modalMode === "view"}
                                                 className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-900"
                                             >
-                                                <option value="AVAILABLE">
-                                                    Còn hàng
+                                                <option value="STOP">
+                                                    Ngừng bán
                                                 </option>
                                                 <option value="SALE">
-                                                    Đang giảm giá
+                                                    Đang bán
                                                 </option>
                                                 <option value="OUT_OF_STOCK">
                                                     Hết hàng
@@ -1138,10 +1336,26 @@ export default function BookManagement() {
                                             </select>
                                         </div>
 
+                                        {/* Short Description */}
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Mô tả ngắn
+                                            </label>
+                                            <textarea
+                                                name="shortDes"
+                                                value={formData.shortDes || ""}
+                                                onChange={handleInputChange}
+                                                disabled={modalMode === "view"}
+                                                rows={2}
+                                                placeholder="Mô tả ngắn về sách (1-2 câu)"
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-900"
+                                            />
+                                        </div>
+
                                         {/* Description */}
                                         <div className="md:col-span-2">
                                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Mô tả
+                                                Mô tả chi tiết
                                             </label>
                                             <textarea
                                                 name="description"
@@ -1151,6 +1365,7 @@ export default function BookManagement() {
                                                 onChange={handleInputChange}
                                                 disabled={modalMode === "view"}
                                                 rows={4}
+                                                placeholder="Mô tả chi tiết về nội dung sách"
                                                 className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-900"
                                             />
                                         </div>
@@ -1168,10 +1383,13 @@ export default function BookManagement() {
                                             </button>
                                             <button
                                                 type="submit"
-                                                className="flex items-center gap-2 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-semibold transition-colors"
+                                                disabled={isUploading}
+                                                className="flex items-center gap-2 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 <FaSave />
-                                                {modalMode === "create"
+                                                {isUploading
+                                                    ? "Đang xử lý..."
+                                                    : modalMode === "create"
                                                     ? "Tạo mới"
                                                     : "Lưu thay đổi"}
                                             </button>

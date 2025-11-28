@@ -11,18 +11,11 @@ import java.util.List;
  * @version 1.0
  */
 @Service
-public class CategoryService {
-    private final CategoryRepository categoryRepository;
+public interface CategoryService {
 
-    public CategoryService(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
-    }
+     List<Category> getAllCategories();
 
-    public List<Category> getAllCategories() {
-        return this.categoryRepository.findAll();
-    }
 
-    public Category getCategoryById(Long id) {
-        return this.categoryRepository.findById(id).orElse(null);
-    }
+     Category getCategoryById(Long id);
+
 }

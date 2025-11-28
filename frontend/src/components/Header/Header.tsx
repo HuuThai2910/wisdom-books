@@ -12,7 +12,6 @@ import {
     FaTimes,
 } from "react-icons/fa";
 import Carousel from "./Carousel";
-import Spinner from "./Spinner";
 import logoImg from "../../assets/img/logo.png";
 import wisbook from "../../assets/img/wisbook.png";
 
@@ -115,8 +114,6 @@ export default function Header() {
         return () => document.removeEventListener("click", handleClickOutside);
     }, []);
 
-    if (loading) return <Spinner />;
-
     return (
         <div className="relative">
             {/* Navbar cố định */}
@@ -124,30 +121,8 @@ export default function Header() {
                 className="fixed top-0 left-0 w-full z-50 transition-all duration-500"
                 style={{
                     background: isHomePage
-                        ? `
-        linear-gradient(
-          5deg,
-          rgba(98,53,233,${opacity}) 0%,
-          rgba(238,232,252,${opacity}) 0%,
-          rgba(229,221,251,${opacity}) 7%,
-          rgba(248,245,254,${opacity}) 16%,
-          rgba(238,238,238,${opacity}) 39%,
-          rgba(206,202,250,${opacity}) 76%,
-          rgba(33,18,232,${opacity}) 100%
-        )
-      `
-                        : `
-        linear-gradient(
-          5deg,
-          rgba(98,53,233,1) 0%,
-          rgba(238,232,252,1) 0%,
-          rgba(229,221,251,1) 7%,
-          rgba(248,245,254,1) 16%,
-          rgba(238,238,238,1) 39%,
-          rgba(206,202,250,1) 76%,
-          rgba(33,18,232,1) 100%
-        )
-      `,
+                        ? `rgba(37, 99, 235, ${opacity})` // Blue-600 + opacity
+                        : `#2563eb`, // Blue-600 thuần
                     boxShadow:
                         opacity > 0.2 || !isHomePage
                             ? "0 4px 15px rgba(0,0,0,0.15)"
@@ -183,47 +158,19 @@ export default function Header() {
                             to="/"
                             className="relative group transition-colors"
                         >
-                            <span
-                                className="text-blue-500 font-bold text-xl tracking-wide hover:text-blue-700 transition-colors duration-200"
-                            >
+                            <span className="text-white font-bold text-2xl">
                                 Trang chủ
                             </span>
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00D2FF] via-[#3A7BFF] to-[#9B3DFF] group-hover:w-full transition-all duration-300"></span>
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
                         </Link>
-
-                        <Link
-                            to="/about"
-                            className="relative group transition-colors"
-                        >
-                            <span
-                               className="text-blue-500 font-bold text-xl tracking-wide hover:text-blue-700 transition-colors duration-200"
-                            >
-                                Tin tức
-                            </span>
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00D2FF] via-[#3A7BFF] to-[#9B3DFF] group-hover:w-full transition-all duration-300"></span>
-                        </Link>
-
                         <Link
                             to="/books"
                             className="relative group transition-colors"
                         >
-                            <span
-                                className="text-blue-500 font-bold text-xl tracking-wide hover:text-blue-700 transition-colors duration-200"
-                            >
+                            <span className="text-white font-bold text-2xl">
                                 Sản phẩm
                             </span>
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00D2FF] via-[#3A7BFF] to-[#9B3DFF] group-hover:w-full transition-all duration-300"></span>
-                        </Link>
-                        <Link
-                            to="/admin/books"
-                            className="relative group transition-colors"
-                        >
-                            <span
-                                className="text-blue-500 font-bold text-xl tracking-wide hover:text-blue-700 transition-colors duration-200"
-                            >
-                                Quản lý sách
-                            </span>
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00D2FF] via-[#3A7BFF] to-[#9B3DFF] group-hover:w-full transition-all duration-300"></span>
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
                         </Link>
 
                         <div
@@ -241,9 +188,7 @@ export default function Header() {
                             }}
                         >
                             <button className="relative group transition-colors flex items-center gap-1">
-                                <span
-                                    className="text-blue-500 font-bold text-xl tracking-wide hover:text-blue-700 transition-colors duration-200"
-                                >
+                                <span className="text-white font-bold text-2xl">
                                     Thể loại
                                 </span>
                                 <svg
@@ -265,15 +210,15 @@ export default function Header() {
                                         >
                                             <stop
                                                 offset="0%"
-                                                stopColor="#00D2FF"
+                                                stopColor="#ffffff"
                                             />
                                             <stop
                                                 offset="50%"
-                                                stopColor="#3A7BFF"
+                                                stopColor="#ffffff"
                                             />
                                             <stop
                                                 offset="100%"
-                                                stopColor="#9B3DFF"
+                                                stopColor="#ffffff"
                                             />
                                         </linearGradient>
                                     </defs>
@@ -283,7 +228,7 @@ export default function Header() {
                                         d="M19 9l-7 7-7-7"
                                     />
                                 </svg>
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00D2FF] via-[#3A7BFF] to-[#9B3DFF] group-hover:w-full transition-all duration-300"></span>
+                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
                             </button>
 
                             {/* Category Dropdown */}
@@ -341,8 +286,8 @@ export default function Header() {
                                             </div>
                                         </div>
                                         <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-t border-gray-200">
-                                            <a
-                                                href="#all-categories"
+                                            <Link
+                                                to="/books"
                                                 className="text-blue-600 hover:text-blue-700 font-semibold text-sm flex items-center justify-center gap-2 group"
                                             >
                                                 Xem tất cả thể loại
@@ -359,22 +304,29 @@ export default function Header() {
                                                         d="M17 8l4 4m0 0l-4 4m4-4H3"
                                                     />
                                                 </svg>
-                                            </a>
+                                            </Link>
                                         </div>
                                     </div>
                                 </div>
                             )}
                         </div>
                         <Link
+                            to="/about"
+                            className="relative group transition-colors"
+                        >
+                            <span className="text-white font-bold text-2xl">
+                                Tin tức
+                            </span>
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                        </Link>
+                        <Link
                             to="/contact"
                             className="relative group transition-colors"
                         >
-                            <span
-                                className="text-blue-500 font-bold text-xl tracking-wide hover:text-blue-700 transition-colors duration-200"
-                            >
+                            <span className="text-white font-bold text-2xl">
                                 Liên hệ
                             </span>
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00D2FF] via-[#3A7BFF] to-[#9B3DFF] group-hover:w-full transition-all duration-300"></span>
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
                         </Link>
                     </div>
 
@@ -394,22 +346,10 @@ export default function Header() {
                                 style={{
                                     boxShadow: "none",
                                 }}
-                                onFocus={(e) => {
-                                    e.target.style.background =
-                                        "linear-gradient(5deg, rgba(98,53,233,0.1) 0%, rgba(238,232,252,0.1) 0%, rgba(229,221,251,0.1) 7%, rgba(248,245,254,0.1) 16%, rgba(238,238,238,0.1) 39%, rgba(206,202,250,0.1) 76%, rgba(33,18,232,0.1) 100%)";
-                                    e.target.style.borderColor = "transparent";
-                                    e.target.style.boxShadow =
-                                        "0 0 0 2px rgba(98,53,233,0.5), 0 0 0 4px rgba(33,18,232,0.3)";
-                                }}
-                                onBlur={(e) => {
-                                    e.target.style.background = "";
-                                    e.target.style.borderColor = "";
-                                    e.target.style.boxShadow = "none";
-                                }}
                             />
                             <button
                                 type="submit"
-                                className="absolute right-3 top-1/2 -translate-y-1/2 bg-gradient-to-r from-[#00D2FF] via-[#3A7BFF] to-[#9B3DFF] hover:from-[#00B8E6] hover:via-[#2D66E6] hover:to-[#8829E6] text-white w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-white w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg bg-gray-400"
                             >
                                 <FaSearch className="text-sm" />
                             </button>
@@ -417,17 +357,13 @@ export default function Header() {
                         {/* Cart Icon với Badge */}
                         <div className="cart-menu relative">
                             <button
-                                className={`relative p-2 rounded-full transition-all duration-500 ${
-                                    isHomePage && opacity < 0.2
-                                        ? "bg-white shadow-md"
-                                        : "hover:bg-gray-200"
-                                }`}
+                                className="text-white relative flex items-center p-2 rounded-full transition-all duration-500 "
                                 onMouseEnter={() => {
                                     setIsCartClosing(false);
                                     setShowCartMenu(true);
                                 }}
                             >
-                                <FaShoppingCart className="text-2xl text-gray-700" />
+                                <FaShoppingCart className="text-3xl text-white" />
                                 {cartItemCount > 0 && (
                                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
                                         {cartItemCount}
@@ -523,13 +459,9 @@ export default function Header() {
                                 onClick={() =>
                                     setShowAccountMenu(!showAccountMenu)
                                 }
-                                className={`flex items-center gap-2 p-2 rounded-full transition-all duration-500 ${
-                                    isHomePage && opacity < 0.2
-                                        ? "bg-white shadow-md"
-                                        : "hover:bg-gray-200"
-                                }`}
+                                 className="text-white relative flex items-center p-2 rounded-full transition-all duration-500 "
                             >
-                                <FaUser className="text-2xl text-gray-700" />
+                                <FaUser className="text-3xl text-white" />
                             </button>
 
                             {/* Account Dropdown */}

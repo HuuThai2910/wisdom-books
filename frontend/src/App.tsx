@@ -14,7 +14,9 @@ import BookCollectionPage from "./pages/client/BookCollectionPage";
 import ContactPage from "./pages/client/ContactPage";
 import BooksPage from "./pages/client/BooksPage";
 import BookDetailPage from "./pages/client/BookDetailPage";
+import CategoryPage from "./pages/client/CategoryPage";
 import BookManagement from "./pages/admin/BookManagement";
+import ViewUpsertBook from "./pages/admin/ViewUpsertBook";
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
@@ -56,6 +58,10 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/books" element={<BooksPage />} />
                     <Route path="/books/:id" element={<BookDetailPage />} />
+                    <Route
+                        path="/category/:categoryName"
+                        element={<CategoryPage />}
+                    />
                     <Route path="/cart" element={<CartPage />} />
                     <Route path="/checkout" element={<CheckOutPage />} />
                     <Route path="/about" element={<About />} />
@@ -79,6 +85,14 @@ function App() {
                     />
                     <Route path="/contact" element={<ContactPage />} />
                     <Route path="/admin/books" element={<BookManagement />} />
+                    <Route
+                        path="/admin/books/create"
+                        element={<ViewUpsertBook />}
+                    />
+                    <Route
+                        path="/admin/books/edit"
+                        element={<ViewUpsertBook />}
+                    />
                 </Routes>
             </div>
         </>

@@ -10,7 +10,7 @@ import Footer from "./components/Footer/Footer.js";
 import { BookProvider } from "./contexts/BookContext";
 
 createRoot(document.getElementById("root")).render(
-    <StrictMode>
+    // <StrictMode>
         <Provider store={store}>
             <BookProvider>
                 <BrowserRouter>
@@ -20,5 +20,5 @@ createRoot(document.getElementById("root")).render(
                 </BrowserRouter>
             </BookProvider>
         </Provider>
-    </StrictMode>
+    // </StrictMode>
 );

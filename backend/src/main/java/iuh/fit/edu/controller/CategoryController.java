@@ -1,7 +1,7 @@
 package iuh.fit.edu.controller;
 
 import iuh.fit.edu.entity.Category;
-import iuh.fit.edu.service.CategoryService;
+import iuh.fit.edu.service.impl.CategoryServiceImpl;
 import iuh.fit.edu.util.anotation.ApiMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +16,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/categories")
 public class CategoryController {
-    private final CategoryService categoryService;
+    private final CategoryServiceImpl categoryService;
 
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(CategoryServiceImpl categoryService) {
         this.categoryService = categoryService;
     }
 
