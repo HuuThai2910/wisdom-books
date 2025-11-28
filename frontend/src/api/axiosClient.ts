@@ -8,17 +8,17 @@ const axiosClient: AxiosInstance = axios.create({
     }
 });
 
-axiosClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem("token");
-    if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
+// axiosClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+//     const token = localStorage.getItem("token");
+//     if (token && config.headers) {
+//         config.headers.Authorization = `Bearer ${token}`;
+//     }
+//     return config;
+// });
 
-axiosClient.interceptors.response.use(
-    (res) => res,
-    (err) => Promise.reject(err.response?.data || err.message)
-);
+// axiosClient.interceptors.response.use(
+//     (res) => res,
+//     (err) => Promise.reject(err.response?.data || err.message)
+// );
 
 export default axiosClient;
