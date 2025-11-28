@@ -109,16 +109,42 @@ export default function CategoryBook({
     }, []);
 
     const handleCategoryClick = (categoryName: string) => {
-        // Chuyển đến trang category để có banner đẹp
+        // Chuyển đến trang category để có banner đẹp - sử dụng name thay vì slug
         navigate(`/category/${encodeURIComponent(categoryName)}`);
     };
 
     return (
         <div className="bg-white rounded-xl shadow-sm p-6 relative container mx-auto mb-12">
             {/* Header */}
-            <div className="flex items-center gap-3 bg-blue-500 px-4 py-3 rounded-lg mb-6">
-                <div className="text-white text-xl">📕</div>
-                <h2 className="text-4xl font-bold">{title}</h2>
+            <div
+                className="flex items-center gap-3 bg-blue-500 px-4 py-3 rounded-lg mb-6 animate-headerPulse"
+            >
+                {/* ICON */}
+                <div className="w-8 h-8 text-white animate-bookFloat">
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="w-full h-full"
+                    >
+                        <path d="M4 3h13a1 1 0 011 1v13H5a3 3 0 01-3-3V4a1 1 0 011-1z" />
+                        <path d="M7 18h13v2H7a1 1 0 110-2z" />
+                    </svg>
+                </div>
+
+                {/* TITLE */}
+                <h2
+                    className="text-4xl font-bold relative overflow-hidden animate-titleFade"
+                    style={{
+                        fontFamily: "Playfair Display, serif",
+                        fontStyle: "italic",
+                        textShadow: "2px 4px 8px rgba(0,0,0,0.25)",
+                    }}
+                >
+                    {title}
+
+                    {/* SHIMMER EFFECT */}
+                    <span className="title-shimmer"></span>
+                </h2>
             </div>
 
             {/* Scroll List */}
@@ -136,16 +162,14 @@ export default function CategoryBook({
                             duration: 0.5,
                         }}
                         className="min-w-[150px] shrink-0 cursor-pointer"
+                        onClick={() => handleCategoryClick(cat.name)}
                     >
                         <Atropos
                             className="atropos-category"
                             activeOffset={40}
                             shadowScale={1.05}
                         >
-                            <div
-                                className="w-80 h-52 rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 bg-white"
-                                onClick={() => handleCategoryClick(cat.name)}
-                            >
+                            <div className="w-80 h-52 rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 bg-white">
                                 <img
                                     src={cat.image}
                                     alt={cat.name}
@@ -155,10 +179,17 @@ export default function CategoryBook({
                         </Atropos>
 
                         <p
-                            className="text-center mt-2 font-semibold text-gray-800 hover:text-blue-600 transition-colors text-3xl"
+                            className="relative text-center mt-2 font-semibold text-gray-800 text-3xl transition-all duration-500 ease-out opacity-80 hover:text-blue-600 hover:opacity-100 hover:scale-[1.05] hover:tracking-wide hover:-translate-y-1 cursor-pointer"
                             style={{ fontFamily: "Playfair Display, serif" }}
                         >
+                            {/* Text */}
                             {cat.name}
+
+                            {/* Underline animation */}
+                            <span className="absolute left-1/2 -bottom-1 w-0 h-[3px] bg-blue-600 transition-all duration-500 ease-out group-hover:w-full group-hover:left-0"></span>
+
+                            {/* Shine effect */}
+                            <span className="shine-effect"></span>
                         </p>
                     </motion.div>
                 ))}
@@ -191,6 +222,83 @@ export default function CategoryBook({
                 }
                 .scroll-smooth {
                     scroll-behavior: smooth;
+                }
+                .shine-effect {
+                    position: absolute;
+                    inset: 0;
+                    background: linear-gradient(
+                        120deg,
+                        transparent 0%,
+                        rgba(255,255,255,0.6) 50%,
+                        transparent 100%
+                    );
+                    opacity: 0;
+                    transform: translateX(-10%);
+                    transition: opacity 0.3s;
+                }
+
+                p:hover .shine-effect {
+                    opacity: 1;
+                    animation: shineMove 1s ease-out;
+                }
+
+                @keyframes shineMove {
+                    0% {
+                        transform: translateX(-120%);
+                    }
+                    100% {
+                        transform: translateX(150%);
+                    }
+                }
+                    /* Smooth pulse cho background */
+                @keyframes headerPulse {
+                    0% { filter: brightness(1); }
+                    50% { filter: brightness(1.08); }
+                    100% { filter: brightness(1); }
+                }
+                .animate-headerPulse {
+                    animation: headerPulse 4s ease-in-out infinite;
+                }
+
+                /* Icon book nhẹ nhàng nhún lên xuống */
+                @keyframes bookFloat {
+                    0% { transform: translateY(0); }
+                    50% { transform: translateY(-4px); }
+                    100% { transform: translateY(0); }
+                }
+                .animate-bookFloat {
+                    animation: bookFloat 3s ease-in-out infinite;
+                }
+
+                /* Title fade + slide subtle */
+                @keyframes titleFade {
+                    0% { opacity: 0.85; transform: translateY(0); }
+                    50% { opacity: 1; transform: translateY(-2px); }
+                    100% { opacity: 0.85; transform: translateY(0); }
+                }
+                .animate-titleFade {
+                    animation: titleFade 5s ease-in-out infinite;
+                }
+
+                /* Shimmer chạy qua chữ */
+                .title-shimmer {
+                    position: absolute;
+                    top: 0;
+                    left: -150%;
+                    width: 150%;
+                    height: 100%;
+                    background: linear-gradient(
+                        120deg,
+                        transparent,
+                        rgba(255,255,255,0.5),
+                        transparent
+                    );
+                    animation: shimmerMove 3s linear infinite;
+                }
+
+                @keyframes shimmerMove {
+                    0% { transform: translateX(-150%); }
+                    100% { transform: translateX(150%); }
                 }
 
             `}</style>

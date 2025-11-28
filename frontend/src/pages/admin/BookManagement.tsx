@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     FaPlus,
@@ -18,6 +19,7 @@ import { Book } from "../../types";
 import toast from "react-hot-toast";
 
 export default function BookManagement() {
+    const navigate = useNavigate();
     const [books, setBooks] = useState<Book[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(0);
@@ -160,29 +162,11 @@ export default function BookManagement() {
     };
 
     const openCreateModal = () => {
-        setModalMode("create");
-        setFormData({
-            title: "",
-            author: "",
-            isbn: "",
-            publisher: "",
-            yearOfPublication: new Date().getFullYear(),
-            importPrice: 0,
-            sellingPrice: 0,
-            quantity: 0,
-            shortDes: "",
-            description: "",
-            status: "SALE",
-        });
-        setSelectedBook(null);
-        setShowModal(true);
+        navigate("/admin/books/create");
     };
 
     const openEditModal = (book: Book) => {
-        setModalMode("edit");
-        setFormData(book);
-        setSelectedBook(book);
-        setShowModal(true);
+        navigate(`/admin/books/edit?id=${book.id}`);
     };
 
     const openViewModal = async (book: Book) => {

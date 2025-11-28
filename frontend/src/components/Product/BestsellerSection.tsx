@@ -11,7 +11,7 @@ export default function BestsellerSection({ books }: BestsellerSectionProps) {
     const bestsellerData = books.slice(0, 6);
 
     return (
-        <section className="products bg-white py-16">
+        <section className="products bg-white py-25">
             <div className="container mx-auto px-6">
                 {/* Header */}
                 <div className="mx-auto text-center mb-12 max-w-2xl">
@@ -19,11 +19,10 @@ export default function BestsellerSection({ books }: BestsellerSectionProps) {
                         initial={{ opacity: 0, y: -20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
-                        className="text-blue-500 text-5xl font-bold mb-2 pb-2 border-b-2 border-blue-500 inline-block rounded-b-lg"
+                        className="text-blue-600 text-5xl font-bold mb-2 pb-2 border-b-2 border-blue-500 inline-block rounded-b-lg"
                         style={{
                             fontFamily: "Playfair Display, serif",
                             fontStyle: "italic",
-                            color: "#3b82f6",
                             textShadow: "2px 4px 8px rgba(0,0,0,0.25)",
                         }}
                     >
@@ -33,10 +32,9 @@ export default function BestsellerSection({ books }: BestsellerSectionProps) {
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.8 }}
-                        className="text-gray-600 mt-4"
+                        className="text-black mt-4 text-xl"
                     >
-                        Khám phá những cuốn sách được yêu thích nhất tại Wisdom
-                        Books
+                        Khám phá những cuốn sách được yêu thích nhất tại Wisdom Books
                     </motion.p>
                 </div>
 

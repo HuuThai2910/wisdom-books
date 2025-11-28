@@ -58,15 +58,63 @@ export default function OurProducts({ books }: OurProductsProps) {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-10">
                     <motion.h1
-                        initial={{ x: -50, opacity: 0 }}
-                        whileInView={{ x: 0, opacity: 1 }}
-                        transition={{ duration: 0.6 }}
-                        className="text-5xl font-bold mb-6 md:mb-0"
+                        initial={{
+                            x: -150,
+                            y: -50,
+                            opacity: 0,
+                            scale: 0.5,
+                            rotateX: -25,
+                            rotateY: 45,
+                            rotateZ: -10,
+                            filter: "blur(10px)",
+                        }}
+                        whileInView={{
+                            x: 0,
+                            y: 0,
+                            opacity: 1,
+                            scale: 1,
+                            rotateX: 0,
+                            rotateY: 0,
+                            rotateZ: 0,
+                            filter: "blur(0px)",
+                        }}
+                        transition={{
+                            duration: 1.2,
+                            ease: [0.6, -0.05, 0.01, 0.99],
+                            times: [0, 0.3, 0.6, 1],
+                            scale: {
+                                type: "spring",
+                                stiffness: 120,
+                                damping: 12,
+                                delay: 0.2,
+                            },
+                            rotateX: {
+                                duration: 0.8,
+                                ease: "easeOut",
+                            },
+                            rotateY: {
+                                duration: 1,
+                                ease: "easeInOut",
+                            },
+                            filter: {
+                                duration: 0.6,
+                                ease: "easeOut",
+                            },
+                        }}
+                        whileHover={{
+                            scale: 1.05,
+                            rotateZ: 2,
+                            textShadow: "4px 6px 12px rgba(0,0,0,0.35)",
+                            transition: { duration: 0.3 },
+                        }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        className="text-5xl font-bold mb-6 md:mb-0 text-blue-600"
                         style={{
                             fontFamily: "Playfair Display, serif",
                             fontStyle: "italic",
-                            color: "#1a1a1a",
                             textShadow: "2px 4px 8px rgba(0,0,0,0.25)",
+                            transformStyle: "preserve-3d",
+                            perspective: "1000px",
                         }}
                     >
                         Sách Của Chúng Tôi
@@ -115,10 +163,10 @@ export default function OurProducts({ books }: OurProductsProps) {
                         ))}
                     </motion.div>
                 </AnimatePresence>
-                <div className="flex justify-center mt-10">
+                <div className="flex justify-center mt-15">
                     <Link
                         to="/books"
-                        className="group mt-10 mx-auto inline-flex items-center gap-2 px-10 py-3 text-lg font-semibold rounded-full border-2 border-blue-500 text-blue-600 bg-white shadow-lg hover:shadow-xl hover:bg-blue-500 hover:text-white transition-all duration-300"
+                        className="group mt-10 mx-auto inline-flex items-center gap-2 px-10 py-3 text-xl font-semibold rounded-full border-2 border-blue-500 text-blue-600 bg-white shadow-lg hover:shadow-xl hover:bg-blue-500 hover:text-white transition-all duration-300"
                     >
                         Xem Tất Cả Sản Phẩm
                         <ArrowRight className="size-5 text-blue-600 transition-all duration-300 group-hover:text-white group-hover:translate-x-1" />
