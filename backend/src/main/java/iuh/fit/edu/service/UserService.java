@@ -1,13 +1,15 @@
-/*
- * @ (#) .java    1.0
- * Copyright (c)  IUH. All rights reserved.
- */
-package iuh.fit.edu.service;/*
- * @description
- * @author: Huu Thai
- * @date:
- * @version: 1.0
- */
+package iuh.fit.edu.service;
+
+import iuh.fit.edu.dto.request.user.CreateUserRequest;
+import iuh.fit.edu.dto.request.user.UpdateUserRequest;
+import iuh.fit.edu.dto.response.account.RegisterResponse;
+import iuh.fit.edu.dto.response.user.UsersResponse;
+import iuh.fit.edu.entity.User;
 
 public interface UserService {
+    boolean createUser(CreateUserRequest request);
+    void updateUser(Long id, UpdateUserRequest request);
+    void deleteUser(Long id);
+    User findUserById(Long id);
+    UsersResponse findAll();
 }
