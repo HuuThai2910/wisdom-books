@@ -173,7 +173,7 @@ export default function BooksPage() {
 
     return (
         <div className="min-h-screen wisbook-gradient-overlay pt-20">
-            <div className="container mx-auto px-6 py-8">
+            <div className="w-full px-4 md:px-6 py-8">
                 {/* Header */}
                 {/* <motion.div
                     initial={{ opacity: 0, y: -20 }}
