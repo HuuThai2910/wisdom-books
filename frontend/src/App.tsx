@@ -2,7 +2,7 @@ import "./App.css";
 import CartPage from "./pages/client/CartPage";
 import CheckOutPage from "./pages/client/CheckoutPage";
 import { Toaster } from "react-hot-toast";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import Home from "./pages/client/Home";
 import About from "./pages/client/About";
 import ShippingPage from "./pages/client/ShippingPage";
@@ -16,6 +16,7 @@ import BooksPage from "./pages/client/BooksPage";
 import BookDetailPage from "./pages/client/BookDetailPage";
 import BookManagement from "./pages/admin/BookManagement";
 import ScrollToTop from "./components/ScrollToTop";
+import ClientLayout from "./components/common/ClientLayout";
 
 import Dashboard from "./pages/admin/Dashboard";
 import EmployeesPage from "./pages/admin/EmployeesPage";
@@ -26,6 +27,9 @@ import StatisticsPage from "./pages/admin/StatisticsPage";
 import PermissionsPage from "./pages/admin/PermissionsPage";
 
 function App() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
   return (
     <>
       <ScrollToTop />
@@ -59,23 +63,114 @@ function App() {
         }}
       />
 
-      <div style={{ backgroundColor: "#fafafa" }}>
+      <div style={{ backgroundColor: isAdminRoute ? "#f9fafb" : "#fafafa" }}>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/books" element={<BooksPage />} />
-          <Route path="/books/:id" element={<BookDetailPage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckOutPage />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/shipping" element={<ShippingPage />} />
-          <Route path="/return-policy" element={<ReturnPolicyPage />} />
-          <Route path="/customer-support" element={<CustomerSupportPage />} />
-          <Route path="/payment-methods" element={<PaymentMethodsPage />} />
-          <Route path="/security" element={<SecurityPage />} />
-          <Route path="/book-collection" element={<BookCollectionPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/admin/books" element={<BookManagement />} />
+          <Route
+            path="/"
+            element={
+              <ClientLayout>
+                <Home />
+              </ClientLayout>
+            }
+          />
+          <Route
+            path="/books"
+            element={
+              <ClientLayout>
+                <BooksPage />
+              </ClientLayout>
+            }
+          />
+          <Route
+            path="/books/:id"
+            element={
+              <ClientLayout>
+                <BookDetailPage />
+              </ClientLayout>
+            }
+          />
+          <Route
+            path="/cart"
+            element={
+              <ClientLayout>
+                <CartPage />
+              </ClientLayout>
+            }
+          />
+          <Route
+            path="/checkout"
+            element={
+              <ClientLayout>
+                <CheckOutPage />
+              </ClientLayout>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <ClientLayout>
+                <About />
+              </ClientLayout>
+            }
+          />
+          <Route
+            path="/shipping"
+            element={
+              <ClientLayout>
+                <ShippingPage />
+              </ClientLayout>
+            }
+          />
+          <Route
+            path="/return-policy"
+            element={
+              <ClientLayout>
+                <ReturnPolicyPage />
+              </ClientLayout>
+            }
+          />
+          <Route
+            path="/customer-support"
+            element={
+              <ClientLayout>
+                <CustomerSupportPage />
+              </ClientLayout>
+            }
+          />
+          <Route
+            path="/payment-methods"
+            element={
+              <ClientLayout>
+                <PaymentMethodsPage />
+              </ClientLayout>
+            }
+          />
+          <Route
+            path="/security"
+            element={
+              <ClientLayout>
+                <SecurityPage />
+              </ClientLayout>
+            }
+          />
+          <Route
+            path="/book-collection"
+            element={
+              <ClientLayout>
+                <BookCollectionPage />
+              </ClientLayout>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <ClientLayout>
+                <ContactPage />
+              </ClientLayout>
+            }
+          />
 
+          <Route path="/admin/books" element={<BookManagement />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/employees" element={<EmployeesPage />} />
           <Route path="/admin/customers" element={<CustomersPage />} />
