@@ -246,3 +246,15 @@ export interface OrderData {
     total: number;
     timestamp: string;
 }
+
+export interface RegisterFormData {
+    fullName: string;
+    email:string;
+    phone:string;
+    password: string;
+    confirmPassword: string;
+}
+export interface LoginFormData {
+    fullName: string;
+    password: string;
+}

@@ -1,7 +1,239 @@
 @import "tailwindcss";
+
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 300 700;
+    font-display: swap;
+    src: url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+}
+
 button {
     cursor: pointer;
 }
+
+/* Custom Animations for Login Page */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes wingFlap {
+    0% {
+        transform: rotate(0deg) scaleY(1);
+    }
+    100% {
+        transform: rotate(20deg) scaleY(0.8);
+    }
+}
+
+@keyframes smokeTrail {
+    0% {
+        opacity: 0.8;
+        transform: scale(1) translate(0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(3) translate(-20px, 20px);
+    }
+}
+
+@keyframes flyAround {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+    10% {
+        transform: translate(-50px, -30px) scale(1.05) rotate(-10deg);
+    }
+    20% {
+        transform: translate(-100px, 0) scale(1.1) rotate(-20deg);
+    }
+    30% {
+        transform: translate(-150px, 30px) scale(1.15) rotate(-30deg);
+    }
+    40% {
+        transform: translate(-100px, 60px) scale(1.2) rotate(-20deg);
+    }
+    50% {
+        transform: translate(0, 90px) scale(1.25) rotate(0deg);
+    }
+    60% {
+        transform: translate(100px, 60px) scale(1.2) rotate(20deg);
+    }
+    70% {
+        transform: translate(150px, 30px) scale(1.15) rotate(30deg);
+    }
+    80% {
+        transform: translate(100px, 0) scale(1.1) rotate(20deg);
+    }
+    90% {
+        transform: translate(50px, -30px) scale(1.05) rotate(10deg);
+    }
+    100% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+}
+
+@keyframes flyAway {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    25% {
+        transform: translate(-150px, -100px) scale(1.2) rotate(-15deg);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(150px, -200px) scale(1.4) rotate(15deg);
+        opacity: 1;
+    }
+    75% {
+        transform: translate(-100px, -300px) scale(1.2) rotate(-10deg);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(300px, -500px) scale(0.5) rotate(30deg);
+        opacity: 0;
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+/* Owl specific animations */
+.owl-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.owl-fly-around {
+    animation: flyAround 3s ease-in-out forwards, flyAway 2s ease-in-out 3s forwards;
+}
+
+.owl-wings-active .wing-left,
+.owl-wings-active .wing-right {
+    opacity: 1;
+    animation: wingFlap 0.3s infinite alternate;
+}
+
+.owl-wings-active .smoke-trail {
+    animation: smokeTrail 2s ease-out forwards;
+}
+
+.animate-fade-out {
+    animation: fadeOut 0.8s ease-in-out forwards;
+    pointer-events: none;
+}
+
+.animate-pulse-slow {
+    animation: pulse 15s ease-in-out infinite;
+}
+
+.animate-rotate-slow {
+    animation: rotate 20s linear infinite;
+}
+
+/* Modal and Table Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlide {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes floatReverse {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(10px);
+    }
+}
+
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-modalSlide {
+    animation: modalSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fadeInUp {
+    animation: fadeInUp 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+.animate-floatReverse {
+    animation: floatReverse 4s ease-in-out infinite;
+}
+
+.animate-gradientMove {
+    animation: gradientMove 3s ease infinite;
+}
+
+/* Custom Tailwind utilities */
+@layer utilities {
+    .bg-gradient-radial {
+        background: radial-gradient(circle at 35% 35%, currentColor 0%, transparent 100%);
+    }
+}
+
 body {
     background-color: #242121; /* bg-gray-900 */
     color: white;
@@ -17,14 +249,14 @@ body {
 /* Gradient overlay mờ cho background */
 .wisbook-gradient-overlay {
     background: linear-gradient(
-        5deg,
-        rgba(98, 53, 233, 0.05) 0%,
-        rgba(238, 232, 252, 0.05) 0%,
-        rgba(229, 221, 251, 0.08) 7%,
-        rgba(248, 245, 254, 0.1) 16%,
-        rgba(238, 238, 238, 0.05) 39%,
-        rgba(206, 202, 250, 0.08) 76%,
-        rgba(33, 18, 232, 0.05) 100%
+            5deg,
+            rgba(98, 53, 233, 0.05) 0%,
+            rgba(238, 232, 252, 0.05) 0%,
+            rgba(229, 221, 251, 0.08) 7%,
+            rgba(248, 245, 254, 0.1) 16%,
+            rgba(238, 238, 238, 0.05) 39%,
+            rgba(206, 202, 250, 0.08) 76%,
+            rgba(33, 18, 232, 0.05) 100%
     );
 }
 
@@ -50,13 +282,13 @@ body {
 
 /* Gradient card background - subtle */
 .wisbook-card-gradient {
-    background: blue;       
+    background: blue;
 }
 
 /* Gradient icon background */
 .wisbook-icon-gradient {
     background: blue;
-}   
+}
 
 /* Icon with smooth orange hover transition */
 .wisbook-icon-hover-orange {
@@ -66,10 +298,10 @@ body {
 
 .wisbook-icon-hover-orange:hover {
     background: linear-gradient(
-        135deg,
-        rgba(249, 115, 22, 1) 0%,
-        rgba(234, 88, 12, 1) 50%,
-        rgba(194, 65, 12, 1) 100%
+            135deg,
+            rgba(249, 115, 22, 1) 0%,
+            rgba(234, 88, 12, 1) 50%,
+            rgba(194, 65, 12, 1) 100%
     );
     transform: scale(1.1);
 }
@@ -78,11 +310,11 @@ body {
 .wisbook-border-gradient {
     border: 2px solid transparent;
     background-image: linear-gradient(white, white),
-        linear-gradient(
+    linear-gradient(
             135deg,
             rgba(98, 53, 233, 1) 0%,
             rgba(33, 18, 232, 1) 100%
-        );
+    );
     background-origin: border-box;
     background-clip: padding-box, border-box;
 }
@@ -90,12 +322,12 @@ body {
 /* Gradient ring/glow effect */
 .wisbook-ring-gradient {
     box-shadow: 0 0 0 3px rgba(98, 53, 233, 0.1),
-        0 0 20px rgba(98, 53, 233, 0.2);
+    0 0 20px rgba(98, 53, 233, 0.2);
 }
 
 .wisbook-ring-gradient:focus {
     box-shadow: 0 0 0 3px rgba(98, 53, 233, 0.3),
-        0 0 30px rgba(98, 53, 233, 0.4);
+    0 0 30px rgba(98, 53, 233, 0.4);
 }
 
 @keyframes fade-in {
