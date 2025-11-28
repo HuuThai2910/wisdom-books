@@ -1,0 +1,54 @@
+import { ApiResponse } from "@/types";
+import axiosClient from "./axiosClient";
+
+interface RegisterParams {
+    fullName: string;
+    email: string;
+    phone: string;
+    password: string;
+    confirmPassword: string;
+}
+
+interface LoginParams {
+    fullName: string;
+    password: string;
+    token?: string;
+}
+
+interface UserInfo{
+    email: string;
+    fullName: string;
+    phone: string;
+    avatar?: string;
+}
+
+interface ResetPasswordParams {
+    email: string;
+    otp: string;
+    newPassword: string;
+    confirmPassword: string;
+}
+
+export const register = (registerForm: RegisterParams) => {
+    return axiosClient.post<ApiResponse<RegisterParams>>("/auth/register", registerForm);
+};
+
+export const login = (loginForm: LoginParams) => {
+    return axiosClient.post<ApiResponse<LoginParams>>("/auth/login", loginForm);
+}
+
+export const fetchtUser = (accessToken: string) => {
+    return axiosClient.get<ApiResponse<UserInfo>>("/auth/me",{
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+}
+
+export const sendOTP = (email: string) => {
+    return axiosClient.post<ApiResponse<null>>("/auth/forgot-password", { email });
+}
+
+export const resetPassword = (resetPasswordForm: ResetPasswordParams) => {
+    return axiosClient.post<ApiResponse<null>>("/auth/reset-password", resetPasswordForm);
+}
