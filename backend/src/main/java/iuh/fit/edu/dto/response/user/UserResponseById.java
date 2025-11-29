@@ -1,4 +1,4 @@
-package iuh.fit.edu.dto.request.user;
+package iuh.fit.edu.dto.response.user;
 
 import iuh.fit.edu.entity.Address;
 import iuh.fit.edu.entity.Role;
@@ -13,15 +13,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CreateUserRequest {
+public class UserResponseById {
+    private Long id;
     private String fullName;
     private String email;
     private String phone;
     private Gender gender;
     private Address address;
-    private Role role;
+    private String role;
     private UserStatus userStatus;
-    private String password;
-    private String confirmPassword;
     private String avatarURL;
 }

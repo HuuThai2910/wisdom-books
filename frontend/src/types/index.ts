@@ -258,3 +258,20 @@ export interface LoginFormData {
     fullName: string;
     password: string;
 }
+export interface Address {
+    address: string;
+    ward: string;
+    province: string;
+}
+
+export interface UserData{
+    id: string;
+    fullName: string;
+    email: string;
+    phone: string;
+    role: string;
+    gender?: string;
+    address?: Address;
+    userStatus: string;
+    avatarURL?: string;
+}
