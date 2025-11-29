@@ -53,7 +53,7 @@ export default function OurProducts({ books }: OurProductsProps) {
     const filteredBooks = getFilteredBooks();
 
     return (
-        <section className="product bg-white py-16">
+        <section className="product bg-white py-16 px-35">
             <div className="container mx-auto px-6">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-10">
@@ -108,7 +108,7 @@ export default function OurProducts({ books }: OurProductsProps) {
                             transition: { duration: 0.3 },
                         }}
                         viewport={{ once: true, amount: 0.3 }}
-                        className="text-5xl font-bold mb-6 md:mb-0 text-blue-600"
+                        className="text-4xl font-bold mb-6 md:mb-0 text-blue-600"
                         style={{
                             fontFamily: "Playfair Display, serif",
                             fontStyle: "italic",
@@ -130,7 +130,7 @@ export default function OurProducts({ books }: OurProductsProps) {
                             <button
                                 key={t.id}
                                 onClick={() => setActiveTab(t.id)}
-                                className={`px-5 py-2 rounded-full text-xl font-semibold transition-all ${
+                                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                                     activeTab === t.id
                                         ? "text-blue-500 shadow-md bg-blue-100"
                                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -166,7 +166,7 @@ export default function OurProducts({ books }: OurProductsProps) {
                 <div className="flex justify-center mt-15">
                     <Link
                         to="/books"
-                        className="group mt-10 mx-auto inline-flex items-center gap-2 px-10 py-3 text-xl font-semibold rounded-full border-2 border-blue-500 text-blue-600 bg-white shadow-lg hover:shadow-xl hover:bg-blue-500 hover:text-white transition-all duration-300"
+                        className="group mt-10 mx-auto inline-flex items-center gap-2 px-10 py-3 text-sm font-semibold rounded-full border-2 border-blue-500 text-blue-600 bg-white shadow-lg hover:shadow-xl hover:bg-blue-500 hover:text-white transition-all duration-300"
                     >
                         Xem Tất Cả Sản Phẩm
                         <ArrowRight className="size-5 text-blue-600 transition-all duration-300 group-hover:text-white group-hover:translate-x-1" />

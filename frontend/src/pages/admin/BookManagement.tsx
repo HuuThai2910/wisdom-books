@@ -12,6 +12,9 @@ import {
     FaChevronRight,
     FaTimes,
     FaSave,
+    FaSortUp,
+    FaSortDown,
+    FaSort,
 } from "react-icons/fa";
 import bookApi from "../../api/bookApi";
 import fileApi from "../../api/fileApi";
@@ -29,8 +32,11 @@ export default function BookManagement() {
     const [searchTerm, setSearchTerm] = useState("");
     const [searchAuthor, setSearchAuthor] = useState("");
     const [searchPublisher, setSearchPublisher] = useState("");
+    const [searchSupplier, setSearchSupplier] = useState("");
     const [selectedStatus, setSelectedStatus] = useState("");
     const [selectedLevel, setSelectedLevel] = useState("");
+    const [sortBy, setSortBy] = useState<string>("createdAt");
+    const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
     const [showColumnConfig, setShowColumnConfig] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
@@ -62,6 +68,7 @@ export default function BookManagement() {
         stt: true,
         title: true,
         author: true,
+        supplier: true,
         publisher: true,
         price: true,
         quantity: true,
@@ -78,11 +85,18 @@ export default function BookManagement() {
         }, 500); // Wait 500ms after user stops typing
 
         return () => clearTimeout(timer);
-    }, [searchTerm, searchAuthor, searchPublisher]);
+    }, [searchTerm, searchAuthor, searchPublisher, searchSupplier]);
 
     useEffect(() => {
         fetchBooks();
-    }, [currentPage, selectedStatus, selectedLevel, pageSize]);
+    }, [
+        currentPage,
+        selectedStatus,
+        selectedLevel,
+        pageSize,
+        sortBy,
+        sortDirection,
+    ]);
 
     const fetchBooks = async () => {
         try {
@@ -101,16 +115,21 @@ export default function BookManagement() {
                 filterParts.push(`publisher~'*${searchPublisher}*'`);
             }
 
+            if (searchSupplier.trim()) {
+                filterParts.push(`supplier.companyName~'*${searchSupplier}*'`);
+            }
+
             if (selectedStatus) {
-                filterParts.push(`status:'${selectedStatus}'`);
+                filterParts.push(`status=='${selectedStatus}'`);
             }
 
             const filterQuery = filterParts.join(" and ");
+            const sortQuery = `${sortBy},${sortDirection}`;
 
             const response = await bookApi.getAllBooks({
                 page: currentPage,
                 size: pageSize,
-                sort: "createdAt,desc",
+                sort: sortQuery,
                 filter: filterQuery || undefined,
             });
 
@@ -136,9 +155,36 @@ export default function BookManagement() {
         setSearchTerm("");
         setSearchAuthor("");
         setSearchPublisher("");
+        setSearchSupplier("");
         setSelectedStatus("");
         setSelectedLevel("");
+        setSortBy("createdAt");
+        setSortDirection("desc");
         setCurrentPage(0);
+    };
+
+    // Handle column header click for sorting
+    const handleSort = (column: string) => {
+        if (sortBy === column) {
+            // Toggle direction if same column
+            setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+        } else {
+            // Set new column and default to ascending
+            setSortBy(column);
+            setSortDirection("asc");
+        }
+    };
+
+    // Render sort icon based on column state
+    const renderSortIcon = (column: string) => {
+        if (sortBy !== column) {
+            return <FaSort className="ml-1 text-gray-400" />;
+        }
+        return sortDirection === "asc" ? (
+            <FaSortUp className="ml-1 text-blue-500" />
+        ) : (
+            <FaSortDown className="ml-1 text-blue-500" />
+        );
     };
 
     // Get stock status based on quantity
@@ -170,28 +216,7 @@ export default function BookManagement() {
     };
 
     const openViewModal = async (book: Book) => {
-        try {
-            // Fetch full book details including images
-            const response = await bookApi.getBookById(book.id);
-            const fullBookData = response.data;
-
-            // Convert bookImage array to image array with full S3 URLs
-            if (fullBookData.bookImage && fullBookData.bookImage.length > 0) {
-                fullBookData.image = fullBookData.bookImage.map(
-                    (img) =>
-                        `https://hai-project-images.s3.us-east-1.amazonaws.com/${img.imagePath}`
-                );
-            }
-
-            setModalMode("view");
-            setFormData(fullBookData);
-            setSelectedBook(fullBookData);
-            setSelectedImageIndex(0); // Reset to first image
-            setShowModal(true);
-        } catch (error) {
-            console.error("Error fetching book details:", error);
-            toast.error("Không thể tải thông tin sách!");
-        }
+        navigate(`/admin/books/view?id=${book.id}`);
     };
 
     const closeModal = () => {
@@ -370,10 +395,10 @@ export default function BookManagement() {
         if (!bookToDelete) return;
 
         try {
-            // Update status to OUT_OF_STOCK instead of deleting
+            // Update status to STOP_SALE instead of deleting
             await bookApi.updateBook(bookToDelete.id, {
                 ...bookToDelete,
-                status: "OUT_OF_STOCK",
+                status: "STOP_SALE",
             });
             toast.success("Đã ngừng bán sách này!");
             closeDeleteConfirm();
@@ -451,7 +476,7 @@ export default function BookManagement() {
                     </h1>
 
                     {/* Filter Section */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Tên sách:
@@ -464,44 +489,25 @@ export default function BookManagement() {
                                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                             />
                         </div>
-
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Tác giả:
+                                Nhà cung cấp:
                             </label>
                             <input
                                 type="text"
-                                placeholder="Nhập tên tác giả"
-                                value={searchAuthor}
+                                placeholder="Nhập tên nhà cung cấp"
+                                value={searchSupplier}
                                 onChange={(e) =>
-                                    setSearchAuthor(e.target.value)
+                                    setSearchSupplier(e.target.value)
                                 }
                                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                             />
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Trạng thái:
-                            </label>
-                            <select
-                                value={selectedStatus}
-                                onChange={(e) =>
-                                    setSelectedStatus(e.target.value)
-                                }
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                            >
-                                <option value="">Chọn trạng thái</option>
-                                <option value="STOP">Ngừng bán</option>
-                                <option value="SALE">Đang bán</option>
-                                <option value="OUT_OF_STOCK">Hết hàng</option>
-                            </select>
-                        </div>
-
-                        <div className="flex items-end gap-2">
+                        <div className="flex items-end">
                             <button
                                 onClick={handleReset}
-                                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md font-semibold transition-colors"
+                                className="w-30 bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-full font-semibold transition-colors"
                             >
                                 Làm lại
                             </button>
@@ -523,7 +529,7 @@ export default function BookManagement() {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={openCreateModal}
-                                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-semibold transition-colors"
+                                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full font-semibold transition-colors"
                             >
                                 <FaPlus /> Thêm mới
                             </button>
@@ -533,12 +539,6 @@ export default function BookManagement() {
                                 title="Làm mới"
                             >
                                 <FaSync className="text-gray-600" />
-                            </button>
-                            <button
-                                className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-                                title="Import"
-                            >
-                                <FaEdit className="text-gray-600" />
                             </button>
                             <div className="relative">
                                 <button
@@ -558,14 +558,8 @@ export default function BookManagement() {
                                             <span className="font-semibold text-gray-700">
                                                 Cấu hình
                                             </span>
-                                            <button
-                                                onClick={toggleAllColumns}
-                                                className="text-sm text-blue-500 hover:text-blue-600"
-                                            >
-                                                Cột hiện thị
-                                            </button>
                                         </div>
-                                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                                        <div className="space-y-2 max-h-116 overflow-y-auto">
                                             {Object.entries(visibleColumns).map(
                                                 ([key, value]) => (
                                                     <label
@@ -589,6 +583,9 @@ export default function BookManagement() {
                                                                 "Tên sách"}
                                                             {key === "author" &&
                                                                 "Tác giả"}
+                                                            {key ===
+                                                                "supplier" &&
+                                                                "Nhà cung cấp"}
                                                             {key ===
                                                                 "publisher" &&
                                                                 "Nhà xuất bản"}
@@ -614,10 +611,8 @@ export default function BookManagement() {
                                             )}
                                         </div>
                                         <button
-                                            onClick={() =>
-                                                setShowColumnConfig(false)
-                                            }
-                                            className="w-full mt-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition-colors"
+                                            onClick={() => toggleAllColumns()}
+                                            className="w-full mt-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold transition-colors"
                                         >
                                             Làm lại
                                         </button>
@@ -638,28 +633,81 @@ export default function BookManagement() {
                                         </th>
                                     )}
                                     {visibleColumns.title && (
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Tên Sách
+                                        <th
+                                            className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                                            onClick={() => handleSort("title")}
+                                        >
+                                            <div className="flex items-center">
+                                                Tên Sách
+                                                {renderSortIcon("title")}
+                                            </div>
                                         </th>
                                     )}
                                     {visibleColumns.author && (
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Tác giả
+                                        <th
+                                            className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                                            onClick={() => handleSort("author")}
+                                        >
+                                            <div className="flex items-center">
+                                                Tác giả
+                                                {renderSortIcon("author")}
+                                            </div>
+                                        </th>
+                                    )}
+                                    {visibleColumns.supplier && (
+                                        <th
+                                            className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                                            onClick={() =>
+                                                handleSort(
+                                                    "supplier.companyName"
+                                                )
+                                            }
+                                        >
+                                            <div className="flex items-center">
+                                                Nhà cung cấp
+                                                {renderSortIcon(
+                                                    "supplier.companyName"
+                                                )}
+                                            </div>
                                         </th>
                                     )}
                                     {visibleColumns.publisher && (
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Nhà xuất bản
+                                        <th
+                                            className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                                            onClick={() =>
+                                                handleSort("publisher")
+                                            }
+                                        >
+                                            <div className="flex items-center">
+                                                Nhà xuất bản
+                                                {renderSortIcon("publisher")}
+                                            </div>
                                         </th>
                                     )}
                                     {visibleColumns.price && (
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Giá bán
+                                        <th
+                                            className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                                            onClick={() =>
+                                                handleSort("sellingPrice")
+                                            }
+                                        >
+                                            <div className="flex items-center">
+                                                Giá bán
+                                                {renderSortIcon("sellingPrice")}
+                                            </div>
                                         </th>
                                     )}
                                     {visibleColumns.quantity && (
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Số lượng
+                                        <th
+                                            className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                                            onClick={() =>
+                                                handleSort("quantity")
+                                            }
+                                        >
+                                            <div className="flex items-center">
+                                                Số lượng
+                                                {renderSortIcon("quantity")}
+                                            </div>
                                         </th>
                                     )}
                                     {visibleColumns.status && (
@@ -668,13 +716,29 @@ export default function BookManagement() {
                                         </th>
                                     )}
                                     {visibleColumns.createdAt && (
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            CreatedAt
+                                        <th
+                                            className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                                            onClick={() =>
+                                                handleSort("createdAt")
+                                            }
+                                        >
+                                            <div className="flex items-center">
+                                                CreatedAt
+                                                {renderSortIcon("createdAt")}
+                                            </div>
                                         </th>
                                     )}
                                     {visibleColumns.updatedAt && (
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            UpdatedAt
+                                        <th
+                                            className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                                            onClick={() =>
+                                                handleSort("updatedAt")
+                                            }
+                                        >
+                                            <div className="flex items-center">
+                                                UpdatedAt
+                                                {renderSortIcon("updatedAt")}
+                                            </div>
                                         </th>
                                     )}
                                     {visibleColumns.actions && (
@@ -732,6 +796,12 @@ export default function BookManagement() {
                                             {visibleColumns.author && (
                                                 <td className="px-4 py-3 text-sm text-gray-700">
                                                     {book.author}
+                                                </td>
+                                            )}
+                                            {visibleColumns.supplier && (
+                                                <td className="px-4 py-3 text-sm text-gray-700">
+                                                    {book.supplier
+                                                        ?.companyName || "N/A"}
                                                 </td>
                                             )}
                                             {visibleColumns.publisher && (
@@ -1324,13 +1394,13 @@ export default function BookManagement() {
                                                 disabled={modalMode === "view"}
                                                 className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-900"
                                             >
-                                                <option value="STOP">
-                                                    Ngừng bán
-                                                </option>
                                                 <option value="SALE">
                                                     Đang bán
                                                 </option>
-                                                <option value="OUT_OF_STOCK">
+                                                <option value="STOP_SALE">
+                                                    Ngừng bán
+                                                </option>
+                                                <option value="OUT_STOCK">
                                                     Hết hàng
                                                 </option>
                                             </select>

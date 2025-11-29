@@ -17,6 +17,7 @@ import BookDetailPage from "./pages/client/BookDetailPage";
 import CategoryPage from "./pages/client/CategoryPage";
 import BookManagement from "./pages/admin/BookManagement";
 import ViewUpsertBook from "./pages/admin/ViewUpsertBook";
+import ViewBookDetail from "./pages/admin/ViewBookDetail";
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
@@ -92,6 +93,10 @@ function App() {
                     <Route
                         path="/admin/books/edit"
                         element={<ViewUpsertBook />}
+                    />
+                    <Route
+                        path="/admin/books/view"
+                        element={<ViewBookDetail />}
                     />
                 </Routes>
             </div>

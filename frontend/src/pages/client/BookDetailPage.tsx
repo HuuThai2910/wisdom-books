@@ -170,7 +170,7 @@ Chỉ còn ${book?.quantity} cuốn.`);
     const reviewCount = book.review?.length || 0;
 
     return (
-        <div className="min-h-screen wisbook-gradient-overlay pt-20">
+        <div className="min-h-screen wisbook-gradient-overlay pt-20 px-35">
             <div className="container mx-auto px-6 py-8">
                 {/* Breadcrumb */}
                 <nav className="flex items-center gap-2 text-sm text-gray-600 mb-8">
@@ -607,10 +607,14 @@ Chỉ còn ${book?.quantity} cuốn.`);
                                         </p>
                                     </div>
                                 )}
-                                <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                                    {book.description ||
-                                        "Đang cập nhật mô tả sản phẩm..."}
-                                </div>
+                                <div
+                                    className="text-gray-700 leading-relaxed prose max-w-none"
+                                    dangerouslySetInnerHTML={{
+                                        __html:
+                                            book.description ||
+                                            "<p>Đang cập nhật mô tả sản phẩm...</p>",
+                                    }}
+                                />
                             </div>
                         )}
 

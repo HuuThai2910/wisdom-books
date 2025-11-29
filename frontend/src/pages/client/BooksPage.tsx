@@ -127,10 +127,10 @@ export default function BooksPage() {
         setCurrentPage(0);
     };
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        setCurrentPage(0);
-    };
+    // const handleSearch = (e: React.FormEvent) => {
+    //     e.preventDefault();
+    //     setCurrentPage(0);
+    // };
 
     const handlePageChange = (page: number) => {
         if (page >= 0 && page < totalPages) {
@@ -174,21 +174,6 @@ export default function BooksPage() {
     return (
         <div className="min-h-screen wisbook-gradient-overlay pt-20">
             <div className="w-full px-4 md:px-6 py-8">
-                {/* Header */}
-                {/* <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className="mb-8"
-                >
-                    <h1 className="text-4xl font-bold wisbook-gradient-text mb-2">
-                        Tất Cả Sách
-                    </h1>
-                    <p className="text-gray-600">
-                        Khám phá bộ sưu tập {totalBooks.toLocaleString()} đầu
-                        sách của chúng tôi
-                    </p>
-                </motion.div> */}
 
                 {/* Main Content - Flex Layout */}
                 <div className="flex gap-6">
@@ -199,7 +184,7 @@ export default function BooksPage() {
                     />
 
                     {/* Right Content - Books Grid */}
-                    <div className="flex-1">
+                    <div className="flex-1 px-20">
                         {/* Books Grid */}
                         {loading ? (
                             <div className="flex items-center justify-center h-64">

@@ -10,9 +10,9 @@ import {
     Image,
     Form,
     Card,
-    Divider,
     Space,
     Typography,
+    Tabs,
 } from "antd";
 import {
     FooterToolbar,
@@ -25,12 +25,12 @@ import {
 import {
     CheckSquareOutlined,
     PlusOutlined,
-    DeleteOutlined,
     BookOutlined,
     DollarOutlined,
     FileTextOutlined,
     TagsOutlined,
     PictureOutlined,
+    InfoCircleOutlined,
 } from "@ant-design/icons";
 import type { UploadFile } from "antd/es/upload/interface";
 import RichTextEditor from "../../components/common/RichTextEditor";
@@ -64,7 +64,6 @@ const ViewUpsertBook = () => {
                     if (res && res.data) {
                         setDataUpdate(res.data);
 
-                        // Convert bookImage to fileList
                         if (
                             res.data.bookImage &&
                             res.data.bookImage.length > 0
@@ -80,8 +79,13 @@ const ViewUpsertBook = () => {
                         }
 
                         setDescription(res.data.description || "");
+
+                        // Map nested objects to IDs for form fields
                         form.setFieldsValue({
                             ...res.data,
+                            categories:
+                                res.data.category?.map((c: any) => c.id) || [],
+                            supplier: res.data.supplier?.id || undefined,
                         });
                     }
                 } catch (error) {
@@ -99,25 +103,36 @@ const ViewUpsertBook = () => {
             setIsUploading(true);
             let imageFileNames: string[] = [];
 
-            // Upload new images
+            // Upload new files if any
             const newFiles = fileList.filter((file) => file.originFileObj);
             if (newFiles.length > 0) {
-                const files = newFiles.map(
-                    (file) => file.originFileObj as File
-                );
-                const uploadResponse = await fileApi.uploadFiles(
-                    files,
-                    "books"
-                );
-
-                if (uploadResponse.success && uploadResponse.data) {
-                    imageFileNames = uploadResponse.data.map(
-                        (file) => file.fileName
+                try {
+                    const files = newFiles.map(
+                        (file) => file.originFileObj as File
                     );
+                    const uploadResponse = await fileApi.uploadFiles(
+                        files,
+                        "books"
+                    );
+
+                    if (uploadResponse.success && uploadResponse.data) {
+                        imageFileNames = uploadResponse.data.map(
+                            (file) => file.fileName
+                        );
+                    }
+                } catch (uploadError: any) {
+                    console.error("Upload error:", uploadError);
+                    notification.error({
+                        message: "Lỗi upload ảnh",
+                        description:
+                            uploadError.response?.data?.message ||
+                            "Không thể upload ảnh. Vui lòng thử lại!",
+                    });
+                    setIsUploading(false);
+                    return;
                 }
             }
 
-            // Keep existing images
             const existingImages = fileList
                 .filter((file) => !file.originFileObj && file.name)
                 .map((file) => file.name);
@@ -133,10 +148,8 @@ const ViewUpsertBook = () => {
                 description: description || "",
                 sellingPrice: values.sellingPrice,
                 importPrice: values.importPrice,
-                status: values.status,
+                status: values.status || "SALE",
                 quantity: values.quantity,
-                publisher: values.publisher || "",
-                image: allImages.length > 0 ? allImages : undefined,
                 categories: values.categories
                     ? values.categories.map((catId: number) => ({ id: catId }))
                     : [],
@@ -144,39 +157,62 @@ const ViewUpsertBook = () => {
                 inventory: { id: 1 },
             };
 
+            // Only add image field if there are images
+            if (allImages.length > 0) {
+                bookData.image = allImages;
+            }
+
+            console.log("=== BOOK DATA DEBUG ===");
+            console.log("Update mode:", !!dataUpdate?.id);
+            console.log("Book ID:", dataUpdate?.id);
+            console.log("Book data:", JSON.stringify(bookData, null, 2));
+            console.log("All images:", allImages);
+
             if (dataUpdate?.id) {
-                // Update
+                console.log("Calling updateBook with ID:", dataUpdate.id);
+                console.log("Book data being sent:", bookData);
                 const res = await bookApi.updateBook(dataUpdate.id, bookData);
-                if (res.data) {
-                    message.success("Cập nhật sách thành công");
-                    navigate("/admin/books");
+                console.log("Update response:", res);
+
+                if (res && res.success && res.data) {
+                    message.success("Cập nhật sách thành công!");
+                    setTimeout(() => {
+                        navigate("/admin/books");
+                    }, 500);
                 } else {
                     notification.error({
                         message: "Có lỗi xảy ra",
-                        description: res.message || "Không thể cập nhật sách",
+                        description: res?.message || "Không thể cập nhật sách",
                     });
                 }
             } else {
-                // Create
+                console.log("Calling createBook");
+                console.log("Book data being sent:", bookData);
                 const res = await bookApi.createBook(bookData);
-                if (res.data) {
-                    message.success("Tạo mới sách thành công");
-                    navigate("/admin/books");
+                console.log("Create response:", res);
+
+                if (res && res.success && res.data) {
+                    message.success("Tạo mới sách thành công!");
+                    setTimeout(() => {
+                        navigate("/admin/books");
+                    }, 500);
                 } else {
                     notification.error({
                         message: "Có lỗi xảy ra",
-                        description: res.message || "Không thể tạo sách",
+                        description: res?.message || "Không thể tạo sách",
                     });
                 }
             }
         } catch (error: any) {
             console.error("Error saving book:", error);
+            console.error("Error details:", error.response);
             notification.error({
                 message: "Có lỗi xảy ra",
                 description:
                     error.response?.data?.message ||
+                    error.response?.data?.error ||
                     error.message ||
-                    "Có lỗi xảy ra!",
+                    "Có lỗi xảy ra khi lưu sách!",
             });
         } finally {
             setIsUploading(false);
@@ -205,9 +241,9 @@ const ViewUpsertBook = () => {
 
     const uploadButton = (
         <div style={{ padding: "8px" }}>
-            <PlusOutlined style={{ fontSize: "24px", color: "#1890ff" }} />
-            <div style={{ marginTop: 8, fontSize: "13px", color: "#666" }}>
-                Tải ảnh lên
+            <PlusOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
+            <div style={{ marginTop: 6, fontSize: "12px", color: "#666" }}>
+                Tải ảnh
             </div>
         </div>
     );
@@ -215,46 +251,52 @@ const ViewUpsertBook = () => {
     return (
         <div
             style={{
-                padding: "24px",
+                padding: "20px",
                 background: "#f0f2f5",
                 minHeight: "100vh",
             }}
         >
-            {/* Header Section */}
+            {/* Compact Header */}
             <Card
                 bordered={false}
                 style={{
-                    marginBottom: 24,
+                    marginBottom: 16,
                     borderRadius: "8px",
-                    boxShadow: "0 1px 2px 0 rgba(0,0,0,0.03)",
                 }}
             >
-                <Space direction="vertical" size={4} style={{ width: "100%" }}>
-                    <Breadcrumb
-                        separator=">"
-                        items={[
-                            {
-                                title: (
-                                    <Link to="/admin/books">Quản lý sách</Link>
-                                ),
-                            },
-                            {
-                                title: dataUpdate?.id
-                                    ? "Chỉnh sửa sách"
-                                    : "Thêm sách mới",
-                            },
-                        ]}
-                    />
-                    <Title level={3} style={{ margin: "8px 0 0 0" }}>
-                        <BookOutlined style={{ marginRight: 8 }} />
-                        {dataUpdate?.id ? "Chỉnh sửa sách" : "Thêm sách mới"}
-                    </Title>
-                    <Text type="secondary">
-                        {dataUpdate?.id
-                            ? "Cập nhật thông tin chi tiết của sách"
-                            : "Nhập đầy đủ thông tin để thêm sách mới vào hệ thống"}
-                    </Text>
-                </Space>
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}
+                >
+                    <div>
+                        <Breadcrumb
+                            separator=">"
+                            items={[
+                                {
+                                    title: (
+                                        <Link to="/admin/books">
+                                            Quản lý sách
+                                        </Link>
+                                    ),
+                                },
+                                {
+                                    title: dataUpdate?.id
+                                        ? "Chỉnh sửa"
+                                        : "Thêm mới",
+                                },
+                            ]}
+                        />
+                        <Title level={4} style={{ margin: "8px 0 0 0" }}>
+                            <BookOutlined style={{ marginRight: 8 }} />
+                            {dataUpdate?.id
+                                ? "Chỉnh sửa sách"
+                                : "Thêm sách mới"}
+                        </Title>
+                    </div>
+                </div>
             </Card>
 
             <ProForm
@@ -269,85 +311,69 @@ const ViewUpsertBook = () => {
                     },
                     onReset: () => navigate("/admin/books"),
                     render: (_: any, dom: any) => (
-                        <FooterToolbar
-                            style={{
-                                boxShadow: "0 -2px 8px rgba(0,0,0,0.08)",
-                            }}
-                        >
-                            {dom}
-                        </FooterToolbar>
+                        <FooterToolbar>{dom}</FooterToolbar>
                     ),
                     submitButtonProps: {
                         icon: <CheckSquareOutlined />,
                         loading: isUploading,
-                        size: "large",
-                    },
-                    resetButtonProps: {
-                        size: "large",
                     },
                 }}
             >
-                <Row gutter={[24, 24]}>
-                    {/* Upload Images Section */}
-                    <Col span={24}>
+                <Row gutter={16}>
+                    {/* Left Column - Images */}
+                    <Col span={24} lg={8}>
                         <Card
                             bordered={false}
                             style={{
                                 borderRadius: "8px",
-                                boxShadow: "0 1px 2px 0 rgba(0,0,0,0.03)",
+                                marginBottom: 16,
                             }}
                         >
-                            <Space
-                                direction="vertical"
-                                size={16}
-                                style={{ width: "100%" }}
+                            <Title level={5} style={{ marginBottom: 12 }}>
+                                <PictureOutlined style={{ marginRight: 8 }} />
+                                Hình ảnh sách
+                            </Title>
+                            <Text
+                                type="secondary"
+                                style={{
+                                    fontSize: "12px",
+                                    display: "block",
+                                    marginBottom: 12,
+                                }}
                             >
-                                <div>
-                                    <Title level={5} style={{ margin: 0 }}>
-                                        <PictureOutlined
-                                            style={{ marginRight: 8 }}
-                                        />
-                                        Hình ảnh sách
-                                    </Title>
-                                    <Text
-                                        type="secondary"
-                                        style={{ fontSize: "13px" }}
-                                    >
-                                        Tải lên tối đa 8 ảnh (JPG, PNG). Ảnh đầu
-                                        tiên sẽ là ảnh đại diện
-                                    </Text>
-                                </div>
-                                <Form.Item style={{ marginBottom: 0 }}>
-                                    <Upload
-                                        listType="picture-card"
-                                        fileList={fileList}
-                                        onChange={handleUploadChange}
-                                        onPreview={handlePreview}
-                                        beforeUpload={() => false}
-                                        accept="image/png,image/jpeg,image/jpg"
-                                        multiple
-                                        className="book-upload"
-                                    >
-                                        {fileList.length >= 8
-                                            ? null
-                                            : uploadButton}
-                                    </Upload>
-                                </Form.Item>
-                            </Space>
+                                Tải lên tối đa 8 ảnh
+                            </Text>
+                            <Form.Item style={{ marginBottom: 0 }}>
+                                <Upload
+                                    listType="picture-card"
+                                    fileList={fileList}
+                                    onChange={handleUploadChange}
+                                    onPreview={handlePreview}
+                                    beforeUpload={() => false}
+                                    accept="image/png,image/jpeg,image/jpg"
+                                    multiple
+                                    className="compact-upload"
+                                >
+                                    {fileList.length >= 8 ? null : uploadButton}
+                                </Upload>
+                            </Form.Item>
                         </Card>
                     </Col>
 
-                    {/* Basic Information */}
-                    <Col span={24}>
+                    {/* Right Column - All Form Fields */}
+                    <Col span={24} lg={16}>
+                        {/* Basic Info */}
                         <Card
                             bordered={false}
                             style={{
                                 borderRadius: "8px",
-                                boxShadow: "0 1px 2px 0 rgba(0,0,0,0.03)",
+                                marginBottom: 16,
                             }}
                         >
-                            <Title level={5} style={{ marginBottom: 20 }}>
-                                <BookOutlined style={{ marginRight: 8 }} />
+                            <Title level={5} style={{ marginBottom: 16 }}>
+                                <InfoCircleOutlined
+                                    style={{ marginRight: 8 }}
+                                />
                                 Thông tin cơ bản
                             </Title>
                             <Row gutter={[16, 0]}>
@@ -363,12 +389,8 @@ const ViewUpsertBook = () => {
                                             },
                                         ]}
                                         placeholder="Nhập tên sách"
-                                        fieldProps={{
-                                            size: "large",
-                                        }}
                                     />
                                 </Col>
-
                                 <Col span={24} md={12}>
                                     <ProFormText
                                         label="Tác giả"
@@ -381,12 +403,8 @@ const ViewUpsertBook = () => {
                                             },
                                         ]}
                                         placeholder="Nhập tên tác giả"
-                                        fieldProps={{
-                                            size: "large",
-                                        }}
                                     />
                                 </Col>
-
                                 <Col span={24} md={8}>
                                     <ProFormText
                                         label="ISBN"
@@ -397,55 +415,37 @@ const ViewUpsertBook = () => {
                                                 message: "Vui lòng nhập ISBN!",
                                             },
                                         ]}
-                                        placeholder="Ví dụ: 978-3-16-148410-0"
-                                        fieldProps={{
-                                            size: "large",
-                                        }}
+                                        placeholder="978-3-16-148410-0"
                                     />
                                 </Col>
-
-                                <Col span={24} md={8}>
-                                    <ProFormText
-                                        label="Nhà xuất bản"
-                                        name="publisher"
-                                        placeholder="Nhập nhà xuất bản"
-                                        fieldProps={{
-                                            size: "large",
-                                        }}
-                                    />
-                                </Col>
-
-                                <Col span={24} md={8}>
+                                <Col span={24} md={12}>
                                     <ProFormDigit
                                         label="Năm xuất bản"
                                         name="yearOfPublication"
-                                        placeholder="Nhập năm xuất bản"
+                                        placeholder="2024"
                                         fieldProps={{
                                             min: 1900,
                                             max: new Date().getFullYear(),
-                                            size: "large",
                                         }}
                                     />
                                 </Col>
                             </Row>
                         </Card>
-                    </Col>
 
-                    {/* Pricing & Inventory */}
-                    <Col span={24}>
+                        {/* Pricing & Inventory */}
                         <Card
                             bordered={false}
                             style={{
                                 borderRadius: "8px",
-                                boxShadow: "0 1px 2px 0 rgba(0,0,0,0.03)",
+                                marginBottom: 16,
                             }}
                         >
-                            <Title level={5} style={{ marginBottom: 20 }}>
+                            <Title level={5} style={{ marginBottom: 16 }}>
                                 <DollarOutlined style={{ marginRight: 8 }} />
                                 Giá cả & Kho hàng
                             </Title>
                             <Row gutter={[16, 0]}>
-                                <Col span={24} md={8}>
+                                <Col span={24} md={6}>
                                     <ProFormDigit
                                         label="Giá nhập"
                                         name="importPrice"
@@ -456,7 +456,7 @@ const ViewUpsertBook = () => {
                                                     "Vui lòng nhập giá nhập!",
                                             },
                                         ]}
-                                        placeholder="Nhập giá nhập"
+                                        placeholder="0"
                                         fieldProps={{
                                             addonAfter: "₫",
                                             formatter: (value) =>
@@ -470,12 +470,10 @@ const ViewUpsertBook = () => {
                                                     ""
                                                 ),
                                             min: 0,
-                                            size: "large",
                                         }}
                                     />
                                 </Col>
-
-                                <Col span={24} md={8}>
+                                <Col span={24} md={6}>
                                     <ProFormDigit
                                         label="Giá bán"
                                         name="sellingPrice"
@@ -486,7 +484,7 @@ const ViewUpsertBook = () => {
                                                     "Vui lòng nhập giá bán!",
                                             },
                                         ]}
-                                        placeholder="Nhập giá bán"
+                                        placeholder="0"
                                         fieldProps={{
                                             addonAfter: "₫",
                                             formatter: (value) =>
@@ -500,12 +498,10 @@ const ViewUpsertBook = () => {
                                                     ""
                                                 ),
                                             min: 0,
-                                            size: "large",
                                         }}
                                     />
                                 </Col>
-
-                                <Col span={24} md={8}>
+                                <Col span={24} md={6}>
                                     <ProFormDigit
                                         label="Số lượng"
                                         name="quantity"
@@ -516,24 +512,25 @@ const ViewUpsertBook = () => {
                                                     "Vui lòng nhập số lượng!",
                                             },
                                         ]}
-                                        placeholder="Nhập số lượng"
+                                        placeholder="0"
+                                        disabled={!!dataUpdate?.id}
                                         fieldProps={{
                                             min: 0,
-                                            size: "large",
                                         }}
                                     />
                                 </Col>
-
-                                <Col span={24} md={8}>
+                                <Col span={24} md={6}>
                                     <ProFormSelect
                                         name="status"
                                         label="Trạng thái"
+                                        initialValue={
+                                            !dataUpdate?.id ? "SALE" : undefined
+                                        }
                                         valueEnum={{
                                             SALE: "Đang bán",
-                                            STOP: "Ngừng bán",
-                                            OUT_OF_STOCK: "Hết hàng",
+                                            STOP_SALE: "Ngừng bán",
+                                            OUT_STOCK: "Hết hàng",
                                         }}
-                                        placeholder="Chọn trạng thái"
                                         rules={[
                                             {
                                                 required: true,
@@ -541,25 +538,20 @@ const ViewUpsertBook = () => {
                                                     "Vui lòng chọn trạng thái!",
                                             },
                                         ]}
-                                        fieldProps={{
-                                            size: "large",
-                                        }}
                                     />
                                 </Col>
                             </Row>
                         </Card>
-                    </Col>
 
-                    {/* Categories & Supplier */}
-                    <Col span={24}>
+                        {/* Categories & Supplier */}
                         <Card
                             bordered={false}
                             style={{
                                 borderRadius: "8px",
-                                boxShadow: "0 1px 2px 0 rgba(0,0,0,0.03)",
+                                marginBottom: 16,
                             }}
                         >
-                            <Title level={5} style={{ marginBottom: 20 }}>
+                            <Title level={5} style={{ marginBottom: 16 }}>
                                 <TagsOutlined style={{ marginRight: 8 }} />
                                 Phân loại & Nguồn cung cấp
                             </Title>
@@ -589,11 +581,9 @@ const ViewUpsertBook = () => {
                                                     .includes(
                                                         input.toLowerCase()
                                                     ),
-                                            size: "large",
                                         }}
                                     />
                                 </Col>
-
                                 <Col span={24} md={12}>
                                     <ProFormSelect
                                         name="supplier"
@@ -610,7 +600,6 @@ const ViewUpsertBook = () => {
                                                     "Vui lòng chọn nhà cung cấp!",
                                             },
                                         ]}
-                                        initialValue={1}
                                         fieldProps={{
                                             showSearch: true,
                                             filterOption: (input, option) =>
@@ -619,47 +608,41 @@ const ViewUpsertBook = () => {
                                                     .includes(
                                                         input.toLowerCase()
                                                     ),
-                                            size: "large",
                                         }}
                                     />
                                 </Col>
                             </Row>
                         </Card>
-                    </Col>
 
-                    {/* Descriptions */}
-                    <Col span={24}>
+                        {/* Description */}
                         <Card
                             bordered={false}
                             style={{
                                 borderRadius: "8px",
-                                boxShadow: "0 1px 2px 0 rgba(0,0,0,0.03)",
                             }}
                         >
-                            <Title level={5} style={{ marginBottom: 20 }}>
+                            <Title level={5} style={{ marginBottom: 16 }}>
                                 <FileTextOutlined style={{ marginRight: 8 }} />
                                 Mô tả sản phẩm
                             </Title>
-                            <Row gutter={[16, 16]}>
+                            <Row gutter={[16, 0]}>
                                 <Col span={24}>
                                     <ProFormTextArea
                                         label="Mô tả ngắn"
                                         name="shortDes"
-                                        placeholder="Mô tả ngắn gọn về sách (1-2 câu) - Hiển thị trong danh sách sản phẩm"
+                                        placeholder="Mô tả ngắn gọn (1-2 câu)"
                                         fieldProps={{
-                                            rows: 3,
+                                            rows: 2,
                                             maxLength: 200,
                                             showCount: true,
-                                            size: "large",
                                         }}
                                     />
                                 </Col>
-
                                 <Col span={24}>
                                     <Form.Item
                                         label="Mô tả chi tiết"
                                         name="description"
-                                        tooltip="Sử dụng thanh công cụ để format văn bản với bold, italic, danh sách, v.v."
+                                        tooltip="Format văn bản với bold, italic, danh sách"
                                     >
                                         <div
                                             style={{
@@ -671,9 +654,9 @@ const ViewUpsertBook = () => {
                                             <RichTextEditor
                                                 value={description}
                                                 onChange={setDescription}
-                                                placeholder="Nhập mô tả chi tiết về nội dung sách, tác giả, điểm nổi bật..."
+                                                placeholder="Nhập mô tả chi tiết..."
                                                 style={{
-                                                    height: "300px",
+                                                    height: "200px",
                                                     marginBottom: "50px",
                                                 }}
                                             />
@@ -686,7 +669,7 @@ const ViewUpsertBook = () => {
                 </Row>
             </ProForm>
 
-            {/* Image Preview Modal */}
+            {/* Image Preview */}
             {previewImage && (
                 <Image
                     wrapperStyle={{ display: "none" }}
@@ -702,34 +685,32 @@ const ViewUpsertBook = () => {
 
             <style>
                 {`
-                    .book-upload .ant-upload-select {
-                        width: 128px !important;
-                        height: 128px !important;
+                    .compact-upload .ant-upload-select {
+                        width: 104px !important;
+                        height: 104px !important;
                         border-radius: 8px !important;
                         border: 2px dashed #d9d9d9 !important;
-                        transition: all 0.3s ease !important;
                     }
                     
-                    .book-upload .ant-upload-select:hover {
+                    .compact-upload .ant-upload-select:hover {
                         border-color: #1890ff !important;
-                        background: #f0f5ff !important;
                     }
                     
-                    .book-upload .ant-upload-list-picture-card-container {
-                        width: 128px !important;
-                        height: 128px !important;
+                    .compact-upload .ant-upload-list-picture-card-container {
+                        width: 104px !important;
+                        height: 104px !important;
                     }
                     
-                    .book-upload .ant-upload-list-item {
-                        border-radius: 8px !important;
+                    .ant-pro-form-group-title {
+                        margin-bottom: 12px !important;
                     }
                     
-                    .ant-card {
-                        transition: all 0.3s ease;
+                    .ant-form-item {
+                        margin-bottom: 16px !important;
                     }
                     
-                    .ant-card:hover {
-                        box-shadow: 0 4px 12px 0 rgba(0,0,0,0.05) !important;
+                    .ant-tabs-tab {
+                        padding: 8px 16px !important;
                     }
                 `}
             </style>

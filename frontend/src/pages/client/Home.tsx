@@ -11,7 +11,9 @@ export default function Home() {
         <>
             <div className="wisbook-gradient-overlay">
                 <Services />
-                <ProductOffers />
+                <div className="px-4">
+                    <ProductOffers />
+                </div>
             </div>
             <main className="relative wisbook-gradient-overlay">
                 {loading ? (

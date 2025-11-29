@@ -107,7 +107,7 @@ export default function FilterModal({
     };
 
     return (
-        <div className="w-90 bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden sticky top-24 max-h-[calc(100vh-7rem)]">
+        <div className="w-70 bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden sticky top-24 max-h-[calc(100vh-7rem)]">
             {/* Scrollable Content */}
             <div className="overflow-y-auto max-h-[calc(100vh-16rem)] p-6 space-y-6">
                 {/* Danh mục */}

@@ -73,16 +73,16 @@ export default function BookCard({
 
                 {/* Info */}
                 <div className="text-center p-4 rounded-b-lg">
-                    <p className="text-sm text-gray-500 mb-2">
+                    <p className="text-xs text-gray-500 mb-2">
                         Tác giả: {book.author}
                     </p>
                     <Link to={`/books/${book.id}`}>
-                        <p className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 h-14 hover:text-blue-600 transition-colors">
+                        <p className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 h-12 hover:text-blue-600 transition-colors">
                             {book.title}
                         </p>
                     </Link>
                     <div className="space-x-2">
-                        <span className="text-red-600 font-semibold text-lg">
+                        <span className="text-red-600 font-semibold text-sm">
                             {book.sellingPrice.toLocaleString("vi-VN")}₫
                         </span>
                     </div>
