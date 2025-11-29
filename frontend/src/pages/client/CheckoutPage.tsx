@@ -1,4 +1,7 @@
+import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import VoucherModal from "../../components/modal/VoucherModal";
+import OutOfStockModal from "../../components/modal/OutOfStockModal";
 import CheckoutBreadcrumb from "../../components/checkout/CheckoutBreadcrumb";
 import DeliveryInformation from "../../components/checkout/DeliveryInformation";
 import VoucherSelector from "../../components/checkout/VoucherSelector";
@@ -10,6 +13,9 @@ import { usePaymentMethod } from "../../hooks/usePaymentMethod";
 import { useOrderSubmit } from "../../hooks/useOrderSubmit";
 
 const CheckOutPage = () => {
+    const navigate = useNavigate();
+    const validateFormRef = useRef<(() => boolean) | null>(null);
+
     // Custom hooks
     const {
         checkoutItems,
@@ -36,10 +42,25 @@ const CheckOutPage = () => {
 
     const { paymentMethod, handlePaymentMethodChange } = usePaymentMethod();
 
-    const { handleSubmit: submitOrder } = useOrderSubmit();
+    const {
+        handleSubmit: submitOrder,
+        outOfStockModal,
+        closeOutOfStockModal,
+    } = useOrderSubmit();
 
     const handleSubmit = () => {
-        submitOrder(formData, paymentMethod, selectedVoucher, total);
+        submitOrder(
+            formData,
+            paymentMethod,
+            selectedVoucher,
+            total,
+            validateFormRef
+        );
+    };
+
+    const handleGoToCart = () => {
+        closeOutOfStockModal();
+        navigate("/cart");
     };
 
     return (
@@ -56,6 +77,7 @@ const CheckOutPage = () => {
                             defaultAddress={defaultAddress || undefined}
                             checkDefault={checkDefault}
                             onCheckDefaultChange={handleCheckDefaultChange}
+                            triggerValidation={validateFormRef as any}
                         />
 
                         <VoucherSelector
@@ -92,6 +114,13 @@ const CheckOutPage = () => {
                 subtotal={subtotal}
                 selectedVoucher={selectedVoucher}
                 onSelectVoucher={handleSelectVoucher}
+            />
+
+            <OutOfStockModal
+                isOpen={outOfStockModal.isOpen}
+                message={outOfStockModal.message}
+                onClose={closeOutOfStockModal}
+                onGoToCart={handleGoToCart}
             />
         </div>
     );

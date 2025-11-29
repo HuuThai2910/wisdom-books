@@ -9,8 +9,8 @@ import Header from "./components/Header/Header.js";
 import Footer from "./components/Footer/Footer.js";
 import { BookProvider } from "./contexts/BookContext";
 
-createRoot(document.getElementById("root")).render(
-    // <StrictMode>
+createRoot(document.getElementById("root")!).render(
+    <StrictMode>
         <Provider store={store}>
             <BookProvider>
                 <BrowserRouter>

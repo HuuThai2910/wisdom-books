@@ -2,7 +2,7 @@
  * @ (#) .java    1.0
  * Copyright (c)  IUH. All rights reserved.
  */
-package iuh.fit.edu.dto.request;
+package iuh.fit.edu.dto.request.order;
 
 import lombok.Data;
 
@@ -13,6 +13,7 @@ import lombok.Data;
  * @version: 1.0
  */
 @Data
-public class TestRequest {
-    private String value;
+public class UpdateOrderRequest {
+    private Long id;
+    private String status;
 }
