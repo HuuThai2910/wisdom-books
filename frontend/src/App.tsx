@@ -1,6 +1,8 @@
 import "./App.css";
 import CartPage from "./pages/client/CartPage";
 import CheckOutPage from "./pages/client/CheckoutPage";
+import OrdersPage from "./pages/client/OrdersPage";
+import PaymentSuccessPage from "./pages/client/PaymentSuccessPage";
 import { Toaster } from "react-hot-toast";
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/client/Home";
@@ -94,6 +96,10 @@ function App() {
                         path="/admin/books/edit"
                         element={<ViewUpsertBook />}
                     />
+                    <Route path="/orders" element={<OrdersPage />} />
+                    <Route
+                        path="/payment-success"
+                        element={<PaymentSuccessPage />}/>
                     <Route
                         path="/admin/manage-users"
                         element={<ManageUserPage />}

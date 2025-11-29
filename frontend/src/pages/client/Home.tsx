@@ -1,17 +1,14 @@
 import Services from "../../components/Services/Services";
-import Spinner from "../../components/Header/Spinner";
 import OurProducts from "../../components/Product/OurProducts";
 import ProductBanner from "../../components/Product/ProductBanner";
 import SuggestProduct from "../../components/Product/SuggestProduct";
 import ProductOffers from "../../components/ProductOffers/ProductOffers";
 import { useBooks } from "../../contexts/BookContext";
-
 export default function Home() {
     const { books, loading } = useBooks();
 
     return (
         <>
-            <Spinner />
             <div className="wisbook-gradient-overlay">
                 <Services />
                 <ProductOffers />
@@ -22,9 +19,9 @@ export default function Home() {
                         <div className="container mx-auto px-6">
                             <div className="flex items-center justify-center h-64">
                                 <div className="animate-pulse flex flex-col items-center gap-4">
-                                    <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                                     <div className="text-lg text-gray-600">
-                                        Đang tải sách...
+                                        Đang tải dữ liệu, vui lòng chờ...
                                     </div>
                                 </div>
                             </div>

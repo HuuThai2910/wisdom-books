@@ -46,7 +46,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/auth/logout").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/auth/me").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/auth/users").authenticated()
-
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )

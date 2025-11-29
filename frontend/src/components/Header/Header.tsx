@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
     FaSearch,
@@ -12,20 +12,12 @@ import {
     FaTimes,
 } from "react-icons/fa";
 import Carousel from "./Carousel";
-import Spinner from "./Spinner";
 import logoImg from "../../assets/img/logo.png";
 import wisbook from "../../assets/img/wisbook.png";
-
-// Mock data cho giỏ hàng
-const cartItems = [
-    {
-        id: 1,
-        name: "AirPods Pro 2",
-        price: 249.0,
-        quantity: 1,
-        image: "https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7?w=100&h=100&fit=crop",
-    },
-];
+import { useAppDispatch, useAppSelector } from "../../app/store";
+import { fetchCart } from "../../features/cart/cartSlice";
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL as string;
+import { formatCurrency } from "../../util/formatting";
 
 export default function Header() {
     const [opacity, setOpacity] = useState(0);
@@ -39,6 +31,28 @@ export default function Header() {
     const location = useLocation();
     const navigate = useNavigate();
     const isHomePage = location.pathname === "/";
+    const { cartItems } = useAppSelector((state) => state.cart);
+    const dispatch = useAppDispatch();
+
+    // Lấy dữ liệu từ cart để truyền vào cart mini
+    useEffect(() => {
+        dispatch(fetchCart());
+    }, [dispatch]);
+
+    // Size
+    const size = useMemo(() => cartItems.length, [cartItems]);
+    // Tổng giá tiền
+    const totalPrice = useMemo(() => {
+        return cartItems.reduce(
+            (sum, item) => sum + (item.book?.price || 0) * item.quantity,
+            0
+        );
+    }, [cartItems]);
+
+    // Tổng sản phẩm
+    const totalQuantity = useMemo(() => {
+        return cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    }, [cartItems]);
 
     // Danh sách thể loại sách cố định
     const bookCategories = [
@@ -60,16 +74,6 @@ export default function Header() {
         { id: 16, name: "Nông nghiệp – Thú y" },
         { id: 17, name: "Kỹ thuật – Công nghiệp" },
     ];
-
-    // Tính tổng giỏ hàng
-    const cartTotal = cartItems.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-    );
-    const cartItemCount = cartItems.reduce(
-        (sum, item) => sum + item.quantity,
-        0
-    );
 
     useEffect(() => {
         const timer = setTimeout(() => setLoading(false), 10);
@@ -115,8 +119,6 @@ export default function Header() {
         return () => document.removeEventListener("click", handleClickOutside);
     }, []);
 
-    if (loading) return <Spinner />;
-
     return (
         <div className="relative">
             {/* Navbar cố định */}
@@ -124,30 +126,8 @@ export default function Header() {
                 className="fixed top-0 left-0 w-full z-50 transition-all duration-500"
                 style={{
                     background: isHomePage
-                        ? `
-        linear-gradient(
-          5deg,
-          rgba(98,53,233,${opacity}) 0%,
-          rgba(238,232,252,${opacity}) 0%,
-          rgba(229,221,251,${opacity}) 7%,
-          rgba(248,245,254,${opacity}) 16%,
-          rgba(238,238,238,${opacity}) 39%,
-          rgba(206,202,250,${opacity}) 76%,
-          rgba(33,18,232,${opacity}) 100%
-        )
-      `
-                        : `
-        linear-gradient(
-          5deg,
-          rgba(98,53,233,1) 0%,
-          rgba(238,232,252,1) 0%,
-          rgba(229,221,251,1) 7%,
-          rgba(248,245,254,1) 16%,
-          rgba(238,238,238,1) 39%,
-          rgba(206,202,250,1) 76%,
-          rgba(33,18,232,1) 100%
-        )
-      `,
+                        ? `rgba(37, 99, 235, ${opacity})` // Blue-600 + opacity
+                        : `#2563eb`, // Blue-600 thuần
                     boxShadow:
                         opacity > 0.2 || !isHomePage
                             ? "0 4px 15px rgba(0,0,0,0.15)"
@@ -183,47 +163,19 @@ export default function Header() {
                             to="/"
                             className="relative group transition-colors"
                         >
-                            <span
-                                className="text-blue-500 font-bold text-xl tracking-wide hover:text-blue-700 transition-colors duration-200"
-                            >
+                            <span className="text-white font-bold text-2xl">
                                 Trang chủ
                             </span>
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00D2FF] via-[#3A7BFF] to-[#9B3DFF] group-hover:w-full transition-all duration-300"></span>
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
                         </Link>
-
-                        <Link
-                            to="/about"
-                            className="relative group transition-colors"
-                        >
-                            <span
-                               className="text-blue-500 font-bold text-xl tracking-wide hover:text-blue-700 transition-colors duration-200"
-                            >
-                                Tin tức
-                            </span>
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00D2FF] via-[#3A7BFF] to-[#9B3DFF] group-hover:w-full transition-all duration-300"></span>
-                        </Link>
-
                         <Link
                             to="/books"
                             className="relative group transition-colors"
                         >
-                            <span
-                                className="text-blue-500 font-bold text-xl tracking-wide hover:text-blue-700 transition-colors duration-200"
-                            >
+                            <span className="text-white font-bold text-2xl">
                                 Sản phẩm
                             </span>
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00D2FF] via-[#3A7BFF] to-[#9B3DFF] group-hover:w-full transition-all duration-300"></span>
-                        </Link>
-                        <Link
-                            to="/admin/books"
-                            className="relative group transition-colors"
-                        >
-                            <span
-                                className="text-blue-500 font-bold text-xl tracking-wide hover:text-blue-700 transition-colors duration-200"
-                            >
-                                Quản lý sách
-                            </span>
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00D2FF] via-[#3A7BFF] to-[#9B3DFF] group-hover:w-full transition-all duration-300"></span>
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
                         </Link>
 
                         <div
@@ -241,9 +193,7 @@ export default function Header() {
                             }}
                         >
                             <button className="relative group transition-colors flex items-center gap-1">
-                                <span
-                                    className="text-blue-500 font-bold text-xl tracking-wide hover:text-blue-700 transition-colors duration-200"
-                                >
+                                <span className="text-white font-bold text-2xl">
                                     Thể loại
                                 </span>
                                 <svg
@@ -265,15 +215,15 @@ export default function Header() {
                                         >
                                             <stop
                                                 offset="0%"
-                                                stopColor="#00D2FF"
+                                                stopColor="#ffffff"
                                             />
                                             <stop
                                                 offset="50%"
-                                                stopColor="#3A7BFF"
+                                                stopColor="#ffffff"
                                             />
                                             <stop
                                                 offset="100%"
-                                                stopColor="#9B3DFF"
+                                                stopColor="#ffffff"
                                             />
                                         </linearGradient>
                                     </defs>
@@ -283,7 +233,7 @@ export default function Header() {
                                         d="M19 9l-7 7-7-7"
                                     />
                                 </svg>
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00D2FF] via-[#3A7BFF] to-[#9B3DFF] group-hover:w-full transition-all duration-300"></span>
+                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
                             </button>
 
                             {/* Category Dropdown */}
@@ -341,8 +291,8 @@ export default function Header() {
                                             </div>
                                         </div>
                                         <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-t border-gray-200">
-                                            <a
-                                                href="#all-categories"
+                                            <Link
+                                                to="/books"
                                                 className="text-blue-600 hover:text-blue-700 font-semibold text-sm flex items-center justify-center gap-2 group"
                                             >
                                                 Xem tất cả thể loại
@@ -359,22 +309,29 @@ export default function Header() {
                                                         d="M17 8l4 4m0 0l-4 4m4-4H3"
                                                     />
                                                 </svg>
-                                            </a>
+                                            </Link>
                                         </div>
                                     </div>
                                 </div>
                             )}
                         </div>
                         <Link
+                            to="/about"
+                            className="relative group transition-colors"
+                        >
+                            <span className="text-white font-bold text-2xl">
+                                Tin tức
+                            </span>
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                        </Link>
+                        <Link
                             to="/contact"
                             className="relative group transition-colors"
                         >
-                            <span
-                                className="text-blue-500 font-bold text-xl tracking-wide hover:text-blue-700 transition-colors duration-200"
-                            >
+                            <span className="text-white font-bold text-2xl">
                                 Liên hệ
                             </span>
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00D2FF] via-[#3A7BFF] to-[#9B3DFF] group-hover:w-full transition-all duration-300"></span>
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
                         </Link>
                     </div>
 
@@ -394,22 +351,10 @@ export default function Header() {
                                 style={{
                                     boxShadow: "none",
                                 }}
-                                onFocus={(e) => {
-                                    e.target.style.background =
-                                        "linear-gradient(5deg, rgba(98,53,233,0.1) 0%, rgba(238,232,252,0.1) 0%, rgba(229,221,251,0.1) 7%, rgba(248,245,254,0.1) 16%, rgba(238,238,238,0.1) 39%, rgba(206,202,250,0.1) 76%, rgba(33,18,232,0.1) 100%)";
-                                    e.target.style.borderColor = "transparent";
-                                    e.target.style.boxShadow =
-                                        "0 0 0 2px rgba(98,53,233,0.5), 0 0 0 4px rgba(33,18,232,0.3)";
-                                }}
-                                onBlur={(e) => {
-                                    e.target.style.background = "";
-                                    e.target.style.borderColor = "";
-                                    e.target.style.boxShadow = "none";
-                                }}
                             />
                             <button
                                 type="submit"
-                                className="absolute right-3 top-1/2 -translate-y-1/2 bg-gradient-to-r from-[#00D2FF] via-[#3A7BFF] to-[#9B3DFF] hover:from-[#00B8E6] hover:via-[#2D66E6] hover:to-[#8829E6] text-white w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-white w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg bg-gray-400"
                             >
                                 <FaSearch className="text-sm" />
                             </button>
@@ -417,20 +362,17 @@ export default function Header() {
                         {/* Cart Icon với Badge */}
                         <div className="cart-menu relative">
                             <button
-                                className={`relative p-2 rounded-full transition-all duration-500 ${
-                                    isHomePage && opacity < 0.2
-                                        ? "bg-white shadow-md"
-                                        : "hover:bg-gray-200"
-                                }`}
+                                className="text-white relative flex items-center p-2 rounded-full transition-all duration-500 "
                                 onMouseEnter={() => {
                                     setIsCartClosing(false);
                                     setShowCartMenu(true);
                                 }}
+                                onClick={() => navigate("/cart")}
                             >
-                                <FaShoppingCart className="text-2xl text-gray-700" />
-                                {cartItemCount > 0 && (
+                                <FaShoppingCart className="text-3xl text-white" />
+                                {size > 0 && (
                                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                                        {cartItemCount}
+                                        {size}
                                     </span>
                                 )}
                             </button>
@@ -459,60 +401,91 @@ export default function Header() {
                                                 : "slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards",
                                         }}
                                     >
-                                        {/* Cart Items */}
-                                        <div className="max-h-[300px] overflow-y-auto">
-                                            {cartItems
-                                                .slice(0, 1)
-                                                .map((item) => (
-                                                    <div
-                                                        key={item.id}
-                                                        className="flex items-center gap-3 p-4 border-b border-gray-100"
-                                                    >
-                                                        <img
-                                                            src={item.image}
-                                                            alt={item.name}
-                                                            className="w-16 h-16 object-cover rounded"
-                                                        />
-                                                        <div className="flex-1 flex flex-col justify-center">
-                                                            <h4 className="text-sm text-gray-800 mb-1">
-                                                                {item.name}
-                                                            </h4>
-                                                            <p className="text-xs text-gray-500">
-                                                                Số lượng:{" "}
-                                                                {item.quantity}
-                                                            </p>
-                                                        </div>
-                                                        <button className="text-gray-400 hover:text-gray-600 p-1">
-                                                            <FaTimes className="text-sm" />
+                                        {cartItems.length === 0 ? (
+                                            <p className="p-20 text-center text-gray-500 font-bold">
+                                                Giỏ hàng trống
+                                            </p>
+                                        ) : (
+                                            <>
+                                                {/* Cart Items */}
+                                                <div className="max-h-[300px] overflow-y-auto">
+                                                    {cartItems
+                                                        .slice(0, 5)
+                                                        .map((item) => (
+                                                            <div
+                                                                key={item.id}
+                                                                className="flex items-center gap-3 p-4 border-b border-gray-100"
+                                                            >
+                                                                <img
+                                                                    src={
+                                                                        `${IMAGE_BASE_URL}${item.book.image}` ||
+                                                                        "/default-image.png"
+                                                                    }
+                                                                    alt={
+                                                                        item
+                                                                            .book
+                                                                            ?.title ||
+                                                                        "Book"
+                                                                    }
+                                                                    className="w-16 h-16 object-cover rounded"
+                                                                />
+                                                                <div className="flex-1 flex flex-col justify-center">
+                                                                    <h4 className="text-sm text-gray-800 mb-1 line-clamp-1">
+                                                                        {item
+                                                                            .book
+                                                                            ?.title ||
+                                                                            "Không có tiêu đề"}
+                                                                    </h4>
+                                                                    <p className="text-xs text-gray-500">
+                                                                        Số
+                                                                        lượng:{" "}
+                                                                        {
+                                                                            item.quantity
+                                                                        }
+                                                                    </p>
+                                                                </div>
+                                                                <button className="text-gray-400 hover:text-gray-600 p-1">
+                                                                    <FaTimes className="text-sm" />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                </div>
+
+                                                {/* Footer */}
+                                                <div className="p-4 bg-white border-t border-gray-100">
+                                                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
+                                                        <span className="text-sm text-gray-600">
+                                                            Tổng sản phẩm
+                                                        </span>
+                                                        <span className="text-sm font-semibold text-gray-800">
+                                                            {totalQuantity}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <span className="text-sm text-gray-600">
+                                                            Tổng tiền
+                                                        </span>
+                                                        <span className="text-lg font-bold text-red-600">
+                                                            {formatCurrency(
+                                                                totalPrice
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            className="flex-1 border border-gray-300 text-gray-700 text-sm font-medium py-2.5 rounded-full hover:bg-gray-50 transition"
+                                                            onClick={() =>
+                                                                navigate(
+                                                                    "/cart"
+                                                                )
+                                                            }
+                                                        >
+                                                            Xem giỏ hàng
                                                         </button>
                                                     </div>
-                                                ))}
-                                        </div>
-
-                                        {/* Footer */}
-                                        <div className="p-4 bg-white border-t border-gray-100">
-                                            <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
-                                                <span className="text-sm text-gray-600">
-                                                    Tổng sản phẩm
-                                                </span>
-                                                <span className="text-sm font-semibold text-gray-800">
-                                                    {cartItemCount}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center justify-between mb-4">
-                                                <span className="text-sm text-gray-600">
-                                                    Tổng tiền
-                                                </span>
-                                                <span className="text-lg font-bold text-red-600">
-                                                    {cartTotal.toFixed(3)} đ
-                                                </span>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <button className="flex-1 border border-gray-300 text-gray-700 text-sm font-medium py-2.5 rounded-full hover:bg-gray-50 transition">
-                                                    Xem giỏ hàng
-                                                </button>
-                                            </div>
-                                        </div>
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -523,13 +496,9 @@ export default function Header() {
                                 onClick={() =>
                                     setShowAccountMenu(!showAccountMenu)
                                 }
-                                className={`flex items-center gap-2 p-2 rounded-full transition-all duration-500 ${
-                                    isHomePage && opacity < 0.2
-                                        ? "bg-white shadow-md"
-                                        : "hover:bg-gray-200"
-                                }`}
+                                className="text-white relative flex items-center p-2 rounded-full transition-all duration-500 "
                             >
-                                <FaUser className="text-2xl text-gray-700" />
+                                <FaUser className="text-3xl text-white" />
                             </button>
 
                             {/* Account Dropdown */}

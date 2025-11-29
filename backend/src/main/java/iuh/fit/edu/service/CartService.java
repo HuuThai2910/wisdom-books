@@ -9,9 +9,9 @@ package iuh.fit.edu.service;/*
  * @version: 1.0
  */
 
-import iuh.fit.edu.dto.request.AddCartItemRequest;
-import iuh.fit.edu.dto.request.UpdateCartItemRequest;
-import iuh.fit.edu.dto.request.UpdateCartSelectRequest;
+import iuh.fit.edu.dto.request.cart.AddCartItemRequest;
+import iuh.fit.edu.dto.request.cart.UpdateCartItemRequest;
+import iuh.fit.edu.dto.request.cart.UpdateCartSelectRequest;
 import iuh.fit.edu.dto.response.cart.CartItemResponse;
 import iuh.fit.edu.dto.response.cart.CartResponse;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +33,7 @@ public interface CartService {
     @Transactional
     void updateSelectAll(String email, boolean selected);
 
-    void removeItem(String emal, Long id);
+    void removeItem(String emal, List<Long> id);
 
     void clearCart(String email);
 }

@@ -60,15 +60,15 @@ export default function Services() {
                             }`}
                             style={{ minWidth: "300px" }}
                         >
-                            <div className="flex items-center gap-4 text-blue-500">
-                                <div className="text-3xl">
+                            <div className="flex items-center gap-4 text-blue-600">
+                                <div className="text-5xl">
                                     <item.icon />
                                 </div>
                                 <div>
-                                    <h6 className="font-semibold uppercase mb-1 text-sm tracking-wide">
+                                    <h6 className="font-semibold uppercase mb-1 text-2xl tracking-wide">
                                         {item.title}
                                     </h6>
-                                    <p className="text-xs text-gray-500">
+                                    <p className="text-sm text-black">
                                         {item.desc}
                                     </p>
                                 </div>

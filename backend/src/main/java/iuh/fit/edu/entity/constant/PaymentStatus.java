@@ -1,9 +1,9 @@
 package iuh.fit.edu.entity.constant;
-
-/**
- * @author Nguyen Tan Nghi
- * @version 1.0
- * @created 11/25/2025 9:10 PM
+/*
+ * @description
+ * @author: Huu Thai
+ * @date:
+ * @version: 1.0
  */
 public enum PaymentStatus {
     UNPAID {
@@ -19,3 +19,4 @@ public enum PaymentStatus {
         }
     }
 }
+

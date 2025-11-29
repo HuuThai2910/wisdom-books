@@ -70,7 +70,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 
             <button
                 onClick={onSubmit}
-                className="w-full bg-black text-white py-3 rounded-full font-medium hover:bg-gray-800 transition-colors"
+                className="w-full bg-blue-700 text-white py-3 rounded-full font-medium hover:bg-gray-800 transition-colors"
             >
                 Đặt hàng
             </button>

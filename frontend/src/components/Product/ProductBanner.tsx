@@ -79,7 +79,7 @@ export default function ProductBanner() {
     };
 
     return (
-        <section className="py-16 bg-white overflow-hidden">
+        <section className="py-5 bg-white overflow-hidden">
             <style>{`
                 .crosshair-container {
                     cursor: none;

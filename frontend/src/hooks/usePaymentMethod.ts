@@ -2,7 +2,7 @@ import { useState } from "react";
 import { UsePaymentMethodReturn } from "../types";
 
 export const usePaymentMethod = (
-    initialMethod: string = "bank-transfer"
+    initialMethod: string = "COD"
 ): UsePaymentMethodReturn => {
     const [paymentMethod, setPaymentMethod] = useState<string>(initialMethod);
 

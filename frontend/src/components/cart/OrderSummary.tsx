@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import { selectTotals } from "../../features/cart/cartSlice";
 import { formatCurrency } from "../../util/formatting";
+import { useNavigate } from "react-router-dom";
 
 interface OrderSummaryProps {
     onCheckout: () => void;
@@ -8,6 +9,7 @@ interface OrderSummaryProps {
 
 export default function OrderSummary({ onCheckout }: OrderSummaryProps) {
     const { totalQuantity, totalPrice } = useSelector(selectTotals);
+    const navigate = useNavigate();
 
     return (
         <div className="lg:col-span-1">
@@ -31,7 +33,10 @@ export default function OrderSummary({ onCheckout }: OrderSummaryProps) {
                         </span>
                     </div>
 
-                    <button className="w-full py-3 border-2 border-gray-900 rounded-full text-gray-900 font-medium hover:bg-gray-900 hover:text-white transition-colors mb-3">
+                    <button
+                        className="w-full py-3 border-2  rounded-full text-gray-900 font-medium hover:bg-blue-700 hover:text-white transition-colors mb-3"
+                        onClick={() => navigate("/books")}
+                    >
                         Tiếp tục mua sắm
                     </button>
 
@@ -40,7 +45,7 @@ export default function OrderSummary({ onCheckout }: OrderSummaryProps) {
                         className={`w-full py-3 font-medium rounded-full transition-colors ${
                             totalQuantity === 0
                                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                : "bg-black text-white hover:bg-gray-800"
+                                : "bg-blue-700 text-white hover:bg-blue-700"
                         }`}
                         onClick={onCheckout}
                     >

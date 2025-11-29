@@ -8,6 +8,7 @@ import img1 from "../../assets/img/banner_01.jpg";
 import img2 from "../../assets/img/banner_02.jpg";
 import img3 from "../../assets/img/banner_03.jpg";
 import img4 from "../../assets/img/banner_04.jpg";
+import { Link } from "react-router-dom";
 
 const NextArrow = (props: any) => {
     const { currentSlide, slideCount, ...rest } = props;
@@ -104,12 +105,12 @@ export default function Carousel() {
                             <p className="text-lg max-w-2xl mx-auto mb-5 animate__animated animate__fadeInUp leading-relaxed">
                                 {slide.desc}
                             </p>
-                            <a
-                                href="#books"
-                                className="border-2 border-yellow-400 text-yellow-400 px-6 py-3 rounded-full hover:bg-yellow-400 hover:text-white transition"
+                            <Link
+                                to="/books"
+                                className="border-2 border-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-500 hover:text-white transition"
                             >
                                 Khám Phá Ngay
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 ))}
