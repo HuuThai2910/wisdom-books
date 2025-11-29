@@ -28,7 +28,8 @@ public class Book {
 
     private double sellingPrice;
     private double importPrice;
-    @ElementCollection
+    
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "book_images", joinColumns = @JoinColumn(name = "book_id"))
     @Column(name = "image_path")
     private List<String> image;
@@ -50,7 +51,7 @@ public class Book {
     @OneToMany(mappedBy = "book")
     private List<Review> reviews;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "book_categories",
             joinColumns = @JoinColumn(name = "book_id"),

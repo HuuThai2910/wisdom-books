@@ -65,10 +65,10 @@ export default function Services() {
                                     <item.icon />
                                 </div>
                                 <div>
-                                    <h6 className="font-semibold uppercase mb-1 text-2xl tracking-wide">
+                                    <h6 className="font-semibold uppercase mb-1 text-sm tracking-wide">
                                         {item.title}
                                     </h6>
-                                    <p className="text-sm text-black">
+                                    <p className="text-black text-xs">
                                         {item.desc}
                                     </p>
                                 </div>

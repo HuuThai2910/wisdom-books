@@ -17,6 +17,7 @@ import BookDetailPage from "./pages/client/BookDetailPage";
 import CategoryPage from "./pages/client/CategoryPage";
 import BookManagement from "./pages/admin/BookManagement";
 import ViewUpsertBook from "./pages/admin/ViewUpsertBook";
+import ViewBookDetail from "./pages/admin/ViewBookDetail";
 import ScrollToTop from "./components/ScrollToTop";
 import ClientLayout from "./components/common/ClientLayout";
 
@@ -99,6 +100,7 @@ function App() {
               </ClientLayout>
             }
           />
+          <Route path="/category/:categoryName" element={<CategoryPage />} />
           <Route
             path="/checkout"
             element={
@@ -175,6 +177,7 @@ function App() {
           <Route path="/admin/books" element={<BookManagement />} />
           <Route path="/admin/books/create" element={<ViewUpsertBook />} />
           <Route path="/admin/books/edit" element={<ViewUpsertBook />} />
+          <Route path="/admin/books/view" element={<ViewBookDetail />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/employees" element={<EmployeesPage />} />
           <Route path="/admin/customers" element={<CustomersPage />} />

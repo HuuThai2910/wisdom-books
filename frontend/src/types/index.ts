@@ -36,7 +36,7 @@ export interface Book {
     sellingPrice: number;
     importPrice: number;
     image?: string[];
-    status: "AVAILABLE" | "SALE" | "OUT_OF_STOCK";
+    status: "SALE" | "STOP_SALE" | "OUT_STOCK";
     createdAt?: string;
     updatedAt?: string;
     createdBy?: string;
@@ -249,8 +249,8 @@ export interface OrderData {
 
 export interface RegisterFormData {
     fullName: string;
-    email:string;
-    phone:string;
+    email: string;
+    phone: string;
     password: string;
     confirmPassword: string;
 }

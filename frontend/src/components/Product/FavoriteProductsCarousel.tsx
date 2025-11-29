@@ -158,7 +158,7 @@ export default function FavoriteProductsCarousel({
     }, [productListData.length, currentGroupIndex, isHoveringOuterCarousel]);
 
     return (
-        <section className="products productList overflow-hidden bg-gray-50 py-16">
+        <section className="products productList overflow-hidden bg-gray-50 py-16 px-35">
             <div className="container mx-auto px-6">
                 {/* Header */}
                 <div className="mx-auto text-center mb-12 max-w-3xl">
@@ -166,7 +166,7 @@ export default function FavoriteProductsCarousel({
                         initial={{ opacity: 0, y: -20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
-                        className="text-blue-500 text-5xl font-bold mb-2 pb-2 border-b-2 border-blue-500 inline-block rounded-b-lg"
+                        className="text-blue-500 text-4xl font-bold mb-2 pb-2 border-b-2 border-blue-500 inline-block rounded-b-lg"
                         style={{
                             fontFamily: "Playfair Display, serif",
                             fontStyle: "italic",

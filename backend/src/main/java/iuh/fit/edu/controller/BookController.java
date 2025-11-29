@@ -73,13 +73,6 @@ public class BookController {
     @ApiMessage("Cập nhật book")
     public ResponseEntity<ResUpdateBookDTO> updateBook(@RequestBody Book book) throws IdInvalidException {
         try {
-            System.out.println("=== UPDATE BOOK ===");
-            System.out.println("Book ID: " + book.getId());
-            System.out.println("ISBN: " + book.getIsbn());
-            System.out.println("Title: " + book.getTitle());
-            System.out.println("Categories: " + (book.getCategories() != null ? book.getCategories().size() : 0));
-            System.out.println("Supplier: " + (book.getSupplier() != null ? book.getSupplier().getId() : "null"));
-            System.out.println("Inventory: " + (book.getInventory() != null ? book.getInventory().getId() : "null"));
 
             if (book.getId() == null) {
                 throw new IdInvalidException("ID sách không được để trống");

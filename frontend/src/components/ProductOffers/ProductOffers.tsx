@@ -27,7 +27,7 @@ const offers = [
 
 export default function ProductOffers() {
     return (
-        <section className="bg-gray-50 py-16">
+        <section className="bg-gray-50 py-10 px-35">
             <div className="container mx-auto px-6 grid md:grid-cols-2 gap-8">
                 {offers.map((offer, i) => (
                     <MotionLink
@@ -46,11 +46,11 @@ export default function ProductOffers() {
                         <div>
                             <p className="text-gray-500 mb-3">{offer.subtitle}</p>
 
-                            <h3 className="text-blue-500 text-2xl font-semibold mb-2">
+                            <h3 className="text-blue-500 text-xl font-semibold mb-2">
                                 {offer.title}
                             </h3>
 
-                            <h1 className="text-xl font-bold text-gray-800 group-hover:text-red-600 transition">
+                            <h1 className="text-sm font-bold text-gray-800 group-hover:text-red-600 transition">
                                 {offer.highlight} →
                             </h1>
                         </div>
@@ -59,7 +59,7 @@ export default function ProductOffers() {
                             src={offer.image}
                             alt={offer.title}
                             className="
-                                w-52 h-52
+                                w-40 h-40
                                 object-cover object-center
                                 rounded-xl border border-gray-200 shadow-md
                                 transform transition-transform duration-500 ease-out
