@@ -1,6 +1,8 @@
 import "./App.css";
 import CartPage from "./pages/client/CartPage";
 import CheckOutPage from "./pages/client/CheckoutPage";
+import OrdersPage from "./pages/client/OrdersPage";
+import PaymentSuccessPage from "./pages/client/PaymentSuccessPage";
 import { Toaster } from "react-hot-toast";
 import { Route, Routes } from "react-router-dom";
 import HomePage from "./pages/client/HomePage";
@@ -42,6 +44,11 @@ function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/cart" element={<CartPage />} />
                     <Route path="/checkout" element={<CheckOutPage />} />
+                    <Route path="/orders" element={<OrdersPage />} />
+                    <Route
+                        path="/payment-success"
+                        element={<PaymentSuccessPage />}
+                    />
                 </Routes>
             </div>
         </>

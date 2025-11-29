@@ -49,6 +49,46 @@ export interface Voucher {
     isActive?: boolean;
 }
 
+export interface OrderItem {
+    id: number;
+    quantity: number;
+    price: number;
+    book: Book;
+}
+
+export interface Order {
+    id: number;
+    orderCode: string;
+    orderDate: string;
+    expiredAt: string;
+    status: "PENDING" | "PROCESSING" | "SHIPPING" | "DELIVERED" | "CANCELLED";
+    totalPrice: number;
+    orderItems: OrderItem[];
+    receiverName: string;
+    receiverPhone: string;
+    receiverEmail: string;
+    receiverAddress: string;
+    paymentMethod: "COD" | "VNPAY";
+    paymentStatus: "UNPAID" | "PAID";
+    note?: string;
+}
+
+export interface Payment {
+    code: String;
+    message: String;
+    paymentUrl: String;
+    orderCode: String;
+}
+
+export interface PaymentReturnResponse {
+    code: string;
+    message: string;
+    orderCode: string;
+    totalPrice: number;
+    orderDate: string;
+    status: string;
+}
+
 export interface CheckoutItem {
     id: number;
     quantity: number;
@@ -117,6 +157,7 @@ export interface DeliveryInformationProps {
     defaultAddress?: User;
     checkDefault: boolean;
     onCheckDefaultChange: (checked: boolean) => void;
+    triggerValidation?: () => boolean;
 }
 
 export interface VoucherSelectorProps {
@@ -178,7 +219,8 @@ export interface UseOrderSubmitReturn {
         formData: DeliveryFormData,
         paymentMethod: string,
         selectedVoucher: number | null,
-        total: number
+        total: number,
+        validateFormRef?: React.MutableRefObject<(() => boolean) | null>
     ) => void;
 }
 
