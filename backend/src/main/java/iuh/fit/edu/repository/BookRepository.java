@@ -12,7 +12,7 @@ import java.util.Optional;
 
    
 @Repository
-public interface BookRepository extends JpaRepository<Book, Long> {
+public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificationExecutor<Book> {
      boolean existsByIsbn(String isbn);
      Optional<Book> findByIsbn(String isbn);
 

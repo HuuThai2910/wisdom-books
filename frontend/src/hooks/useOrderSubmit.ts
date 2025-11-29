@@ -107,23 +107,9 @@ export const useOrderSubmit = (): UseOrderSubmitReturn & {
                         );
                         window.location.href = `/payment-success?${params.toString()}`;
                     }
-                } else {
-                    // Check if error is out of stock in response
-                    const errorMessage = response.data.message || "";
-
-                    if (errorMessage.includes("không đủ số lượng")) {
-                        setOutOfStockModal({
-                            isOpen: true,
-                            message: errorMessage,
-                        });
-                    } else {
-                        toast.error(
-                            errorMessage || "Có lỗi xảy ra khi đặt hàng"
-                        );
-                    }
                 }
             } catch (error: any) {
-                const errorMessage = error.message || "";
+                const errorMessage = error?.response?.data?.message || "";
                 if (errorMessage.includes("không đủ số lượng")) {
                     setOutOfStockModal({
                         isOpen: true,

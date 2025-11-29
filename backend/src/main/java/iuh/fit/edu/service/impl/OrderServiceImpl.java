@@ -90,7 +90,7 @@ public class OrderServiceImpl implements OrderService {
             );
             return this.orderMapper.toOrderResponse(order);
         }else {
-            order.setExpiredAt(LocalDateTime.now().plusMinutes(1));
+            order.setExpiredAt(LocalDateTime.now().plusMinutes(2));
             orderRepository.save(order);
             String paymentUrl = paymentService.createVNPayUrl(order, httpServletRequest);
             return PaymentResponse.builder()
