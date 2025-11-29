@@ -18,7 +18,7 @@ public class AccountController {
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> registerAccount(@Valid @RequestBody RegisterRequest request){
-        RegisterResponse response = this.accountService.registerUser(request);
+        RegisterResponse response = this.accountService.registerUser(request,true);
         System.out.println("Registration response: " + response);
         return ResponseEntity.ok(response);
     }

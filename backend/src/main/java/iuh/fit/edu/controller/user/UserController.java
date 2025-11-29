@@ -2,7 +2,7 @@ package iuh.fit.edu.controller.user;
 
 import iuh.fit.edu.dto.request.user.CreateUserRequest;
 import iuh.fit.edu.dto.request.user.UpdateUserRequest;
-import iuh.fit.edu.dto.response.account.RegisterResponse;
+import iuh.fit.edu.dto.response.user.UserResponseById;
 import iuh.fit.edu.dto.response.user.UsersResponse;
 import iuh.fit.edu.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +14,17 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     @Autowired
     UserService userService;
+
     @GetMapping("/users")
     public ResponseEntity<UsersResponse> getAllUser(){
         return ResponseEntity.ok(userService.findAll());
     }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<UserResponseById> updateUser(@PathVariable Long id){
+        return ResponseEntity.ok(userService.findUserById(id));
+    }
+
     @PostMapping("/users")
     public ResponseEntity<String> createUser(@RequestBody CreateUserRequest request){
             if(userService.createUser(request)){
