@@ -11,6 +11,7 @@ package iuh.fit.edu.service;/*
 
 import iuh.fit.edu.dto.response.UserCheckoutReponse;
 import iuh.fit.edu.dto.response.voucher.VoucherResponse;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,4 +19,7 @@ public interface VoucherService {
     List<VoucherResponse> getListVoucherByUser(String email);
 
     UserCheckoutReponse getUserToCheckOut(String email);
+
+    @Transactional
+    void removeVoucherFromUser(String email, Long voucherId);
 }
