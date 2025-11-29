@@ -7,10 +7,9 @@ package iuh.fit.edu.controller.client;
 import iuh.fit.edu.dto.response.UserCheckoutReponse;
 import iuh.fit.edu.dto.response.voucher.VoucherResponse;
 import iuh.fit.edu.service.VoucherService;
+import iuh.fit.edu.util.anotation.ApiMessage;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -37,5 +36,16 @@ public class VoucherController {
     @GetMapping("/user/me")
     public ResponseEntity<UserCheckoutReponse> getUserToCheckOut(){
         return ResponseEntity.ok(this.voucherService.getUserToCheckOut("admin@bookstore.com"));
+    }
+
+    /**
+     * Xóa voucher khỏi user hiện tại
+     * DELETE /api/vouchers/{voucherId}/me
+     */
+    @DeleteMapping("/{voucherId}/me")
+    @ApiMessage("Voucher removed from your account successfully")
+    public ResponseEntity<Void> removeVoucherFromUser(@PathVariable Long voucherId){
+        this.voucherService.removeVoucherFromUser("admin@bookstore.com", voucherId);
+        return ResponseEntity.ok(null);
     }
 }

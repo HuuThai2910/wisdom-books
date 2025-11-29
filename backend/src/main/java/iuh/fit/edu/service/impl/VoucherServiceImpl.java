@@ -6,11 +6,14 @@ package iuh.fit.edu.service.impl;
 
 import iuh.fit.edu.dto.response.UserCheckoutReponse;
 import iuh.fit.edu.dto.response.voucher.VoucherResponse;
+import iuh.fit.edu.entity.User;
+import iuh.fit.edu.entity.Voucher;
 import iuh.fit.edu.mapper.UserMapper;
 import iuh.fit.edu.mapper.VoucherMapper;
 import iuh.fit.edu.repository.UserRepository;
 import iuh.fit.edu.repository.VoucherRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -42,5 +45,18 @@ public class VoucherServiceImpl implements iuh.fit.edu.service.VoucherService {
     @Override
     public UserCheckoutReponse getUserToCheckOut(String email){
         return userMapper.toUserCheckoutReponse(this.userRepository.findByEmail(email));
+    }
+
+    @Transactional
+    @Override
+    public void removeVoucherFromUser(String email, Long voucherId){
+        User user = userRepository.findByEmail(email);
+        Voucher voucher = voucherRepository.findById(voucherId)
+                .orElseThrow(() -> new RuntimeException("Voucher not found"));
+        boolean removed = user.getVouchers().remove(voucher);
+        if(!removed){
+            throw new RuntimeException("Voucher does not belong to this user");
+        }
+        userRepository.save(user);
     }
 }
