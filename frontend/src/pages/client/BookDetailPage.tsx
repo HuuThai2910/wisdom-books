@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { BookOpen, Info, MessageSquare } from "lucide-react";
 import {
@@ -17,19 +17,25 @@ import bookApi from "../../api/bookApi";
 import { Book } from "../../types";
 import { useBooks } from "../../contexts/BookContext";
 import BookCard from "../../components/common/BookCard";
-
+import toast from "react-hot-toast";
+import { useAppDispatch } from "../../app/store";
+import { addItem } from "../../features/cart/cartSlice";
+import { setCheckoutItems } from "../../features/checkout/checkoutSlice";
 export default function BookDetailPage() {
     const { id } = useParams<{ id: string }>();
     const [book, setBook] = useState<Book | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
+    const [prevQuantity, setPrevQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState<
         "description" | "specs" | "reviews"
     >("description");
     const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
     const [isZooming, setIsZooming] = useState(false);
     const { books } = useBooks();
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     // Random 10 suggested books (excluding current book)
     const suggestedBooks = useMemo(() => {
@@ -66,24 +72,51 @@ export default function BookDetailPage() {
         }
     };
     const handleAddToCart = () => {
-        if (quantity > (book?.quantity || 1)) {
-            alert(`❌ Số lượng vượt quá tồn kho!\n
-Chỉ còn ${book?.quantity} cuốn.`);
-            return;
+        if (!book) {
+            toast.error("Không tìm thấy sách!");
+            return; // thoát nếu book null
         }
-
-        if (quantity < 1) {
-            alert("❌ Số lượng không hợp lệ!");
+        if (!book || quantity < 1 || quantity > book.quantity) {
+            toast.error(
+                quantity < 1
+                    ? "Số lượng phải lớn hơn 0!"
+                    : `Số lượng vượt quá tồn kho! Chỉ còn ${book?.quantity} cuốn.`
+            );
             return;
         }
 
         // TODO: gọi hàm addToCart thật sự
-        console.log("Thêm vào giỏ hàng:", {
-            bookId: book?.id,
-            quantity,
-        });
+        dispatch(
+            addItem({
+                bookId: book.id,
+                quantity,
+            })
+        );
+    };
 
-        alert("✅ Đã thêm vào giỏ hàng!");
+    // Hàm mua sách ngay lập tức mà không thêm vào giỏ hàng
+    const handleBuyNow = () => {
+        if (!book) {
+            toast.error("Không tìm thấy sách!");
+            return; // thoát nếu book null
+        }
+
+        dispatch(
+            setCheckoutItems([
+                {
+                    id: book.id,
+                    quantity,
+                    book: {
+                        id: book.id,
+                        title: book.title,
+                        price: book.sellingPrice,
+                        image: book.bookImage?.[0]?.imagePath ?? "",
+                        quantity: book.quantity,
+                    },
+                },
+            ])
+        );
+        navigate("/checkout");
     };
 
     const handleImageChange = (index: number) => {
@@ -422,6 +455,9 @@ Chỉ còn ${book?.quantity} cuốn.`);
                                         type="number"
                                         value={quantity}
                                         min={1}
+                                        onFocus={() => {
+                                            setPrevQuantity(quantity);
+                                        }}
                                         onChange={(e) => {
                                             const val = e.target.value;
                                             if (val === "") {
@@ -429,17 +465,18 @@ Chỉ còn ${book?.quantity} cuốn.`);
                                                 return;
                                             }
                                             const num = parseInt(val);
-                                            if (!isNaN(num) && num >= 1)
+                                            if (!isNaN(num) && num >= 1) {
                                                 setQuantity(num);
+                                            }
                                         }}
                                         onBlur={() => {
                                             if (
                                                 quantity > (book.quantity || 1)
                                             ) {
-                                                alert(
-                                                    `❌ Số lượng vượt quá tồn kho!\nChỉ còn ${book.quantity} cuốn.`
+                                                toast.error(
+                                                    `Số lượng vượt quá tồn kho!\n Chỉ còn ${book?.quantity} cuốn.`
                                                 );
-                                                setQuantity(book.quantity || 1);
+                                                setQuantity(prevQuantity);
                                             }
                                         }}
                                         className="w-14 text-center font-semibold text-lg text-gray-900 outline-none bg-transparent rounded-full"
@@ -476,7 +513,7 @@ Chỉ còn ${book?.quantity} cuốn.`);
                         <div className="flex gap-4 mb-6 w-full">
                             {/* Nút MUA NGAY */}
                             <button
-                                onClick={handleAddToCart}
+                                onClick={handleBuyNow}
                                 disabled={!book.quantity || book.quantity <= 0}
                                 className="
             flex-1 

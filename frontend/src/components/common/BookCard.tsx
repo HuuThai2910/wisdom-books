@@ -2,6 +2,9 @@ import { motion } from "framer-motion";
 import { FaShoppingCart, FaStar, FaRandom, FaEye } from "react-icons/fa";
 import { Book } from "../../types";
 import { Link } from "react-router-dom";
+import { useAppDispatch } from "../../app/store";
+import { addItem } from "../../features/cart/cartSlice";
+
 
 interface BookCardProps {
     book: Book;
@@ -16,6 +19,17 @@ export default function BookCard({
     showAddToCart = true,
     variant = "default",
 }: BookCardProps) {
+    const dispatch = useAppDispatch();
+    // Hàm thêm sản phẩm vào cart
+    const handleAddToCart = (bookId: number) => {
+        dispatch(
+            addItem({
+                bookId,
+                quantity: 1,
+            })
+        );
+    };
+    
     const imageUrl =
         book.bookImage && book.bookImage.length > 0
             ? `https://hai-project-images.s3.us-east-1.amazonaws.com/${book.bookImage[0].imagePath}`
@@ -99,7 +113,7 @@ export default function BookCard({
                 <div className="product-item-add absolute bottom-0 left-0 w-full opacity-0 group-hover:opacity-100 group-hover:-mb-[100px] transition-all duration-500 z-10 bg-white border border-t-0 border-gray-200 rounded-b-lg p-4 pt-0">
                     <div className="flex justify-center mb-4">
                         <button
-                            onClick={() => alert(`Đã thêm sách: ${book.id}`)}
+                            onClick={() => handleAddToCart(book.id)}
                             className="inline-flex items-center justify-center gap-2 font-semibold rounded-full py-2 px-6 transition-all duration-500 bg-blue-600 hover:bg-orange-600 text-white hover:scale-[1.05]"
                         >
                             <FaShoppingCart className="text-base" />
