@@ -2,6 +2,7 @@ package iuh.fit.edu.repository;
 
 import iuh.fit.edu.entity.Inventory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 /**
  * @author Nguyen Tan Nghi
@@ -9,4 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @version 1.0
  */
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
+    
+    @Query("SELECT COALESCE(SUM(i.quantity), 0) FROM Inventory i")
+    Integer getTotalQuantity();
 }

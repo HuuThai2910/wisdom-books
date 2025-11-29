@@ -14,80 +14,48 @@
 // Đọc file CSV
 // npm install papaparse
 // npm install --save-dev @types/papaparse   # (tốt cho TypeScript)
-
-import { useMemo, useState } from "react";
-import AdminLayout from "../admin/AdminLayout";
-import { FaSync, FaCog, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-
-interface Book {
-  id: number;
-  isbn: string;
-  title: string;
-  yearOfPublication: number;
-  sellingPrice: number;
-  importPrice: number;
-  quantity: number;
-}
-
-const mockBooks: Book[] = [
-  {
-    id: 1,
-    isbn: "978-0-395-19395-9",
-    title: "Harry Potter và Hòn đá Phù thủy",
-    yearOfPublication: 1997,
-    sellingPrice: 150000,
-    importPrice: 95000,
-    quantity: 0,
-  },
-  {
-    id: 2,
-    isbn: "978-0-7432-4722-1",
-    title: "Đắc Nhân Tâm",
-    yearOfPublication: 1936,
-    sellingPrice: 89000,
-    importPrice: 55000,
-    quantity: 0,
-  },
-  {
-    id: 3,
-    isbn: "978-0-452-28423-4",
-    title: "1984 - George Orwell",
-    yearOfPublication: 1949,
-    sellingPrice: 120000,
-    importPrice: 78000,
-    quantity: 25,
-  },
-  {
-    id: 4,
-    isbn: "978-0-06-112008-7",
-    title: "Nhà Giả Kim",
-    yearOfPublication: 1988,
-    sellingPrice: 99000,
-    importPrice: 62000,
-    quantity: 12,
-  },
-  {
-    id: 5,
-    isbn: "978-0-14-017739-8",
-    title: "Ông Già Và Biển Cả",
-    yearOfPublication: 1952,
-    sellingPrice: 85000,
-    importPrice: 50000,
-    quantity: 0,
-  },
-  {
-    id: 6,
-    isbn: "978-0-553-21311-9",
-    title: "Chúa tể những chiếc nhẫn",
-    yearOfPublication: 1954,
-    sellingPrice: 280000,
-    importPrice: 180000,
-    quantity: 8,
-  },
-];
+import { useMemo, useState, useEffect } from "react";
+import AdminLayout from "./AdminLayout";
+import bookApi from "../../api/bookApi";
+import entryFormApi, {
+  EntryForm,
+  EntryFormDetail,
+} from "../../api/entryFormApi";
+import { Book as ApiBook } from "../../types";
+import toast from "react-hot-toast";
+import { format } from "date-fns";
+import {
+  RefreshCw,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+} from "lucide-react";
+import CreateImportModal from "../../components/warehouse/CreateImportModal";
+import EntryFormDetailModal from "../../components/warehouse/EntryFormDetailModal";
+import {
+  FaSort,
+  FaSortUp,
+  FaSortDown,
+  FaEye,
+  FaTrash,
+  FaDownload,
+} from "react-icons/fa";
 
 export default function WarehousePage() {
+  const [books, setBooks] = useState<ApiBook[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalBooks, setTotalBooks] = useState(0);
+  const [entryForms, setEntryForms] = useState<EntryForm[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [totalPagesHistory, setTotalPagesHistory] = useState(1);
+  const [totalEntryForms, setTotalEntryForms] = useState(0);
+  const [activeTab, setActiveTab] = useState<"inventory" | "history">(
+    "inventory"
+  );
   const [searchTerm, setSearchTerm] = useState("");
+  const [historySearchTerm, setHistorySearchTerm] = useState("");
   const [importPriceRange, setImportPriceRange] = useState({
     min: "",
     max: "",
@@ -96,6 +64,7 @@ export default function WarehousePage() {
     min: "",
     max: "",
   });
+  const [dateRange, setDateRange] = useState({ from: "", to: "" });
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(0);
   const [showColumnConfig, setShowColumnConfig] = useState(false);
@@ -107,70 +76,393 @@ export default function WarehousePage() {
     importPrice: true,
     sellingPrice: true,
     quantity: true,
+    status: true,
+  });
+  const [visibleHistoryColumns, setVisibleHistoryColumns] = useState({
+    stt: true,
+    id: true,
+    totalQuantity: true,
+    totalAmount: true,
+    createdDate: true,
+    createdBy: true,
   });
   const [showCreateImportModal, setShowCreateImportModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedImport, setSelectedImport] = useState<EntryForm | null>(null);
+  const [entryFormDetails, setEntryFormDetails] = useState<EntryFormDetail[]>(
+    []
+  );
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState({
+    totalQuantityMin: "",
+    totalQuantityMax: "",
+    totalAmountMin: "",
+    totalAmountMax: "",
+  });
+  const [sortBy, setSortBy] = useState<string>("title");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [historySortBy, setHistorySortBy] = useState<string>("createdAt");
+  const [historySortDirection, setHistorySortDirection] = useState<
+    "asc" | "desc"
+  >("desc");
 
-  // Lọc sách dựa trên tiêu chí tìm kiếm và bộ lọc
-  const filteredBooks = useMemo(() => {
-    return mockBooks.filter((book) => {
-      const matchSearch =
-        searchTerm === "" ||
-        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        book.isbn.includes(searchTerm);
+  // Debounced search effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchBooks();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
-      const matchImportPrice =
-        (importPriceRange.min === "" ||
-          book.importPrice >= Number(importPriceRange.min)) &&
-        (importPriceRange.max === "" ||
-          book.importPrice <= Number(importPriceRange.max));
+  useEffect(() => {
+    if (activeTab === "inventory") {
+      fetchBooks();
+    } else {
+      fetchEntryForms();
+    }
+  }, [
+    activeTab,
+    currentPage,
+    pageSize,
+    sortBy,
+    sortDirection,
+    importPriceRange.min,
+    importPriceRange.max,
+    sellingPriceRange.min,
+    sellingPriceRange.max,
+  ]);
 
-      const matchSellingPrice =
-        (sellingPriceRange.min === "" ||
-          book.sellingPrice >= Number(sellingPriceRange.min)) &&
-        (sellingPriceRange.max === "" ||
-          book.sellingPrice <= Number(sellingPriceRange.max));
+  useEffect(() => {
+    if (activeTab === "history") {
+      const timer = setTimeout(() => {
+        fetchEntryForms();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [historySearchTerm]);
 
-      return matchSearch && matchImportPrice && matchSellingPrice;
-    });
-  }, [searchTerm, importPriceRange, sellingPriceRange]);
+  useEffect(() => {
+    if (activeTab === "history") {
+      fetchEntryForms();
+    }
+  }, [
+    historySortBy,
+    historySortDirection,
+    advancedFilters.totalQuantityMin,
+    advancedFilters.totalQuantityMax,
+    advancedFilters.totalAmountMin,
+    advancedFilters.totalAmountMax,
+    dateRange.from,
+    dateRange.to,
+  ]);
 
-  // Mở modal tạo phiếu nhập kho
+  const fetchEntryForms = async () => {
+    try {
+      setLoadingHistory(true);
+      const filterParts: string[] = [];
+
+      // Search by ID or user's full name
+      if (historySearchTerm.trim()) {
+        const searchValue = historySearchTerm.trim();
+        // Check if search term is a number (ID search)
+        if (/^\d+$/.test(searchValue)) {
+          filterParts.push(`id:${searchValue}`);
+        } else {
+          // Search by user's full name
+          filterParts.push(`user.fullName~'*${searchValue}*'`);
+        }
+      }
+
+      // Filter by total quantity
+      if (advancedFilters.totalQuantityMin) {
+        filterParts.push(`totalQuantity>=${advancedFilters.totalQuantityMin}`);
+      }
+      if (advancedFilters.totalQuantityMax) {
+        filterParts.push(`totalQuantity<=${advancedFilters.totalQuantityMax}`);
+      }
+
+      // Filter by total amount (totalPrice)
+      if (advancedFilters.totalAmountMin) {
+        filterParts.push(`totalPrice>=${advancedFilters.totalAmountMin}`);
+      }
+      if (advancedFilters.totalAmountMax) {
+        filterParts.push(`totalPrice<=${advancedFilters.totalAmountMax}`);
+      }
+
+      // Filter by date range
+      if (dateRange.from) {
+        filterParts.push(`createdAt>='${dateRange.from}T00:00:00'`);
+      }
+      if (dateRange.to) {
+        filterParts.push(`createdAt<='${dateRange.to}T23:59:59'`);
+      }
+
+      const filterQuery = filterParts.join(" and ");
+      const sortQuery = `${historySortBy},${historySortDirection}`;
+
+      const response = await entryFormApi.getAllEntryForms({
+        page: currentPage,
+        size: pageSize,
+        sort: sortQuery,
+        filter: filterQuery || undefined,
+      });
+
+      if (response.data) {
+        const { result, meta } = response.data;
+        setEntryForms(result || []);
+        setTotalPagesHistory(meta?.pages || 1);
+        setTotalEntryForms(meta?.total || 0);
+      }
+    } catch (error) {
+      console.error("Error fetching entry forms:", error);
+      toast.error("Không thể tải dữ liệu lịch sử nhập kho");
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  const fetchBooks = async () => {
+    try {
+      setLoading(true);
+      const filterParts: string[] = [];
+
+      // Search by title or ISBN
+      if (searchTerm.trim()) {
+        filterParts.push(`(title~'*${searchTerm}*' or isbn~'*${searchTerm}*')`);
+      }
+
+      // Filter by import price range
+      if (importPriceRange.min) {
+        filterParts.push(`importPrice>=${importPriceRange.min}`);
+      }
+      if (importPriceRange.max) {
+        filterParts.push(`importPrice<=${importPriceRange.max}`);
+      }
+
+      // Filter by selling price range
+      if (sellingPriceRange.min) {
+        filterParts.push(`sellingPrice>=${sellingPriceRange.min}`);
+      }
+      if (sellingPriceRange.max) {
+        filterParts.push(`sellingPrice<=${sellingPriceRange.max}`);
+      }
+
+      // Only show low stock or out of stock books (quantity <= 10)
+      filterParts.push(`quantity<=10`);
+
+      const filterQuery = filterParts.join(" and ");
+      const sortQuery = `${sortBy},${sortDirection}`;
+
+      const response = await bookApi.getAllBooks({
+        page: currentPage,
+        size: pageSize,
+        sort: sortQuery,
+        filter: filterQuery || undefined,
+      });
+
+      if (response.data) {
+        const { result, meta } = response.data;
+        setBooks(result || []);
+        setTotalPages(meta?.pages || 1);
+        setTotalBooks(meta?.total || 0);
+      }
+    } catch (error) {
+      console.error("Error fetching books:", error);
+      toast.error("Không thể tải dữ liệu sách");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredHistory = entryForms;
+
   const handleOpenCreateImportModal = () => {
     setShowCreateImportModal(true);
   };
 
-  // Đặt lại bộ lọc
+  const handleSubmitImport = async (importData: {
+    supplier: string;
+    invoiceNumber: string;
+    books: any[];
+  }) => {
+    try {
+      await entryFormApi.createEntryForm(importData);
+      toast.success("Tạo phiếu nhập kho thành công!");
+      setShowCreateImportModal(false);
+      fetchEntryForms();
+      if (activeTab === "inventory") {
+        fetchBooks();
+      }
+    } catch (error: any) {
+      console.error("Error creating import:", error);
+      const errorMessage =
+        error.response?.data?.message || "Không thể tạo phiếu nhập kho";
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleViewDetail = async (importItem: EntryForm) => {
+    setSelectedImport(importItem);
+    setShowDetailModal(true);
+    setLoadingDetails(true);
+    try {
+      const response = await entryFormApi.getEntryFormDetails(importItem.id);
+      if (response.data) {
+        setEntryFormDetails(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching entry form details:", error);
+      toast.error("Không thể tải chi tiết phiếu nhập kho");
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  const handlePrintInvoice = async (importItem: EntryForm) => {
+    const loadingToast = toast.loading("Đang tạo file PDF...");
+    try {
+      const response = await entryFormApi.getEntryFormDetails(importItem.id);
+      if (response.data) {
+        const { downloadEntryFormPDF } = await import(
+          "../../util/pdfGenerator"
+        );
+        await downloadEntryFormPDF(importItem, response.data);
+        toast.success("Đã tải xuống phiếu nhập kho", { id: loadingToast });
+      } else {
+        toast.error("Không có dữ liệu chi tiết", { id: loadingToast });
+      }
+    } catch (error: any) {
+      console.error("Error printing invoice:", error);
+      toast.error(
+        `Không thể tải PDF: ${error?.message || "Lỗi không xác định"}`,
+        { id: loadingToast }
+      );
+    }
+  };
+
   const handleReset = () => {
-    setSearchTerm("");
-    setImportPriceRange({ min: "", max: "" });
-    setSellingPriceRange({ min: "", max: "" });
+    if (activeTab === "inventory") {
+      setSearchTerm("");
+      setImportPriceRange({ min: "", max: "" });
+      setSellingPriceRange({ min: "", max: "" });
+      setSortBy("title");
+      setSortDirection("asc");
+      setCurrentPage(0);
+    } else {
+      setHistorySearchTerm("");
+      setDateRange({ from: "", to: "" });
+      setAdvancedFilters({
+        totalQuantityMin: "",
+        totalQuantityMax: "",
+        totalAmountMin: "",
+        totalAmountMax: "",
+      });
+      setHistorySortBy("createdAt");
+      setHistorySortDirection("desc");
+      setCurrentPage(0);
+    }
   };
 
-  // Làm mới dữ liệu
   const handleRefresh = () => {
-    handleReset();
+    setCurrentPage(0);
+    if (activeTab === "inventory") {
+      fetchBooks();
+    } else {
+      fetchEntryForms();
+    }
   };
 
-  // Chuyển đổi cột, sử dụng cho cấu hình cột
+  const getStockStatus = (quantity: number) => {
+    if (quantity === 0) {
+      return {
+        label: "Hết hàng",
+        className: "bg-red-100 text-red-800",
+      };
+    } else if (quantity < 10) {
+      return {
+        label: "Gần hết hàng",
+        className: "bg-yellow-100 text-yellow-800",
+      };
+    } else {
+      return {
+        label: "Còn hàng",
+        className: "bg-green-100 text-green-800",
+      };
+    }
+  };
+
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const renderSortIcon = (column: string) => {
+    if (sortBy !== column) {
+      return <FaSort className="ml-1 text-gray-400" />;
+    }
+    return sortDirection === "asc" ? (
+      <FaSortUp className="ml-1 text-blue-500" />
+    ) : (
+      <FaSortDown className="ml-1 text-blue-500" />
+    );
+  };
+
+  const handleHistorySort = (column: string) => {
+    if (historySortBy === column) {
+      setHistorySortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setHistorySortBy(column);
+      setHistorySortDirection("asc");
+    }
+  };
+
+  const renderHistorySortIcon = (column: string) => {
+    if (historySortBy !== column) {
+      return <FaSort className="ml-1 text-gray-400" />;
+    }
+    return historySortDirection === "asc" ? (
+      <FaSortUp className="ml-1 text-blue-500" />
+    ) : (
+      <FaSortDown className="ml-1 text-blue-500" />
+    );
+  };
+
   const toggleColumn = (key: keyof typeof visibleColumns) => {
     setVisibleColumns((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Chuyển đổi tất cả cột, sử dụng cho nút "Cột hiện thị"
-  const toggleAllColumns = () => {
-    const allVisible = Object.values(visibleColumns).every((v) => v);
-    const newState = Object.keys(visibleColumns).reduce(
-      (acc, key) => ({ ...acc, [key]: !allVisible }),
-      {} as typeof visibleColumns
-    );
-    setVisibleColumns(newState);
+  const toggleHistoryColumn = (key: keyof typeof visibleHistoryColumns) => {
+    setVisibleHistoryColumns((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Phân trang
-  const totalPages = Math.ceil(filteredBooks.length / pageSize);
+  const toggleAllColumns = () => {
+    if (activeTab === "inventory") {
+      const allVisible = Object.values(visibleColumns).every((v) => v);
+      const newState = Object.keys(visibleColumns).reduce(
+        (acc, key) => ({ ...acc, [key]: !allVisible }),
+        {} as typeof visibleColumns
+      );
+      setVisibleColumns(newState);
+    } else {
+      const allVisible = Object.values(visibleHistoryColumns).every((v) => v);
+      const newState = Object.keys(visibleHistoryColumns).reduce(
+        (acc, key) => ({ ...acc, [key]: !allVisible }),
+        {} as typeof visibleHistoryColumns
+      );
+      setVisibleHistoryColumns(newState);
+    }
+  };
+
   const startIndex = currentPage * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedBooks = filteredBooks.slice(startIndex, endIndex);
+  const paginatedBooks = books;
+  const paginatedHistory = entryForms;
+  const currentTotalPages =
+    activeTab === "inventory" ? totalPages : totalPagesHistory;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -180,7 +472,7 @@ export default function WarehousePage() {
     const pages = [];
     const maxVisible = 5;
     let start = Math.max(0, currentPage - Math.floor(maxVisible / 2));
-    let end = Math.min(totalPages - 1, start + maxVisible - 1);
+    let end = Math.min(currentTotalPages - 1, start + maxVisible - 1);
 
     if (end - start < maxVisible - 1) {
       start = Math.max(0, end - maxVisible + 1);
@@ -208,303 +500,641 @@ export default function WarehousePage() {
     <AdminLayout>
       <div className="bg-gray-50">
         <div className="container mx-auto px-6">
-          {/* Header Section */}
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h1 className="text-3xl font-bold wisbook-gradient-text mb-6">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent mb-6">
               Quản Lý Kho
             </h1>
 
-            {/* Filter Section */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tên sách / ISBN:
-                </label>
-                <input
-                  type="text"
-                  placeholder="Nhập tên sách hoặc ISBN"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Giá nhập:
-                </label>
-                <div className="flex gap-2">
+            {activeTab === "inventory" ? (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tên sách / ISBN:
+                  </label>
                   <input
-                    type="number"
-                    placeholder="Từ"
-                    value={importPriceRange.min}
-                    onChange={(e) =>
-                      setImportPriceRange((prev) => ({
-                        ...prev,
-                        min: e.target.value,
-                      }))
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Đến"
-                    value={importPriceRange.max}
-                    onChange={(e) =>
-                      setImportPriceRange((prev) => ({
-                        ...prev,
-                        max: e.target.value,
-                      }))
-                    }
+                    type="text"
+                    placeholder="Nhập tên sách hoặc ISBN"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Giá bán:
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    placeholder="Từ"
-                    value={sellingPriceRange.min}
-                    onChange={(e) =>
-                      setSellingPriceRange((prev) => ({
-                        ...prev,
-                        min: e.target.value,
-                      }))
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Đến"
-                    value={sellingPriceRange.max}
-                    onChange={(e) =>
-                      setSellingPriceRange((prev) => ({
-                        ...prev,
-                        max: e.target.value,
-                      }))
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                  />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Giá nhập:
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="Từ"
+                      value={importPriceRange.min}
+                      onChange={(e) =>
+                        setImportPriceRange((prev) => ({
+                          ...prev,
+                          min: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Đến"
+                      value={importPriceRange.max}
+                      onChange={(e) =>
+                        setImportPriceRange((prev) => ({
+                          ...prev,
+                          max: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex items-end gap-2">
-                <button
-                  onClick={handleReset}
-                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md font-semibold transition-colors"
-                >
-                  Làm lại
-                </button>
-              </div>
-            </div>
-          </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Giá bán:
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="Từ"
+                      value={sellingPriceRange.min}
+                      onChange={(e) =>
+                        setSellingPriceRange((prev) => ({
+                          ...prev,
+                          min: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Đến"
+                      value={sellingPriceRange.max}
+                      onChange={(e) =>
+                        setSellingPriceRange((prev) => ({
+                          ...prev,
+                          max: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    />
+                  </div>
+                </div>
 
-          {/* Table Section */}
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            {/* Table Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-800">
-                Danh sách Tồn kho
-              </h2>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleOpenCreateImportModal()}
-                  className="p-2 px-4 bg-green-900 text-white hover:bg-green-600 font-bold rounded-md transition-colors"
-                  title="Tạo phiếu nhập kho"
-                >
-                  Tạo phiếu nhập kho
-                </button>
-                <button
-                  onClick={handleRefresh}
-                  className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-                  title="Làm mới"
-                >
-                  <FaSync className="text-gray-600" />
-                </button>
-                <div className="relative">
+                <div className="flex items-end gap-2">
                   <button
-                    onClick={() => setShowColumnConfig(!showColumnConfig)}
-                    className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-                    title="Cấu hình cột"
+                    onClick={handleReset}
+                    className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md font-semibold transition-colors"
                   >
-                    <FaCog className="text-gray-600" />
+                    Làm lại
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Mã phiếu / Người tạo:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Nhập mã phiếu hoặc tên người tạo"
+                    value={historySearchTerm}
+                    onChange={(e) => setHistorySearchTerm(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  />
+                </div>
+
+                <div className="md:col-span-2 flex items-end gap-4">
+                  <button
+                    onClick={() => setShowAdvancedFilter(true)}
+                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-semibold transition-colors"
+                  >
+                    Lọc tổng hợp
                   </button>
 
-                  {/* Column Config Dropdown */}
-                  {showColumnConfig && (
-                    <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50 w-64">
-                      <div className="flex items-center justify-between mb-3 pb-2 border-b">
-                        <span className="font-semibold text-gray-700">
-                          Cấu hình
-                        </span>
+                  <button
+                    onClick={handleReset}
+                    className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md font-semibold transition-colors"
+                  >
+                    Làm lại
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="border-b border-gray-200">
+              <div className="flex items-center justify-between px-4 pt-4">
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => {
+                      setActiveTab("inventory");
+                      setCurrentPage(0);
+                    }}
+                    className={`px-6 py-3 font-semibold transition-colors ${
+                      activeTab === "inventory"
+                        ? "text-blue-600 border-b-2 border-blue-600"
+                        : "text-gray-600 hover:text-gray-800"
+                    }`}
+                  >
+                    Danh sách Tồn kho
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveTab("history");
+                      setCurrentPage(0);
+                    }}
+                    className={`px-6 py-3 font-semibold transition-colors ${
+                      activeTab === "history"
+                        ? "text-blue-600 border-b-2 border-blue-600"
+                        : "text-gray-600 hover:text-gray-800"
+                    }`}
+                  >
+                    Lịch sử Nhập kho
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleOpenCreateImportModal}
+                    className="p-2 px-4 bg-green-600 text-white hover:bg-green-700 font-bold rounded-md transition-colors flex items-center gap-2"
+                    title="Tạo phiếu nhập kho"
+                  >
+                    <Plus size={18} />
+                    Tạo phiếu nhập
+                  </button>
+                  <button
+                    onClick={handleRefresh}
+                    className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+                    title="Làm mới"
+                  >
+                    <RefreshCw className="text-gray-600" size={18} />
+                  </button>
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowColumnConfig(!showColumnConfig)}
+                      className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+                      title="Cấu hình cột"
+                    >
+                      <Settings className="text-gray-600" size={18} />
+                    </button>
+
+                    {showColumnConfig && (
+                      <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50 w-64">
+                        <div className="flex items-center justify-between mb-3 pb-2 border-b">
+                          <span className="font-semibold text-gray-700">
+                            Cấu hình
+                          </span>
+                          <button
+                            onClick={toggleAllColumns}
+                            className="text-sm text-blue-500 hover:text-blue-600"
+                          >
+                            Cột hiện thị
+                          </button>
+                        </div>
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                          {activeTab === "inventory"
+                            ? Object.entries(visibleColumns).map(
+                                ([key, value]) => (
+                                  <label
+                                    key={key}
+                                    className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={value}
+                                      onChange={() =>
+                                        toggleColumn(
+                                          key as keyof typeof visibleColumns
+                                        )
+                                      }
+                                      className="w-4 h-4 text-blue-500 rounded focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm text-gray-700">
+                                      {key === "stt" && "STT"}
+                                      {key === "isbn" && "ISBN"}
+                                      {key === "title" && "Tên Sách"}
+                                      {key === "year" && "Năm XB"}
+                                      {key === "importPrice" && "Giá nhập"}
+                                      {key === "sellingPrice" && "Giá bán"}
+                                      {key === "quantity" && "Tồn kho"}
+                                      {key === "status" && "Trạng thái"}
+                                    </span>
+                                  </label>
+                                )
+                              )
+                            : Object.entries(visibleHistoryColumns).map(
+                                ([key, value]) => (
+                                  <label
+                                    key={key}
+                                    className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={value}
+                                      onChange={() =>
+                                        toggleHistoryColumn(
+                                          key as keyof typeof visibleHistoryColumns
+                                        )
+                                      }
+                                      className="w-4 h-4 text-blue-500 rounded focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm text-gray-700">
+                                      {key === "stt" && "STT"}
+                                      {key === "id" && "Mã phiếu"}
+                                      {key === "totalQuantity" &&
+                                        "Tổng số lượng"}
+                                      {key === "totalAmount" && "Tổng tiền"}
+                                      {key === "createdDate" && "Ngày tạo"}
+                                      {key === "createdBy" && "Người tạo"}
+                                    </span>
+                                  </label>
+                                )
+                              )}
+                        </div>
                         <button
-                          onClick={toggleAllColumns}
-                          className="text-sm text-blue-500 hover:text-blue-600"
+                          onClick={() => setShowColumnConfig(false)}
+                          className="w-full mt-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition-colors"
                         >
-                          Cột hiện thị
+                          Đóng
                         </button>
                       </div>
-                      <div className="space-y-2 max-h-96 overflow-y-auto">
-                        {Object.entries(visibleColumns).map(([key, value]) => (
-                          <label
-                            key={key}
-                            className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={value}
-                              onChange={() =>
-                                toggleColumn(key as keyof typeof visibleColumns)
-                              }
-                              className="w-4 h-4 text-blue-500 rounded focus:ring-2 focus:ring-blue-500"
-                            />
-                            <span className="text-sm text-gray-700">
-                              {key === "stt" && "STT"}
-                              {key === "isbn" && "ISBN"}
-                              {key === "title" && "Tên Sách"}
-                              {key === "year" && "Năm XB"}
-                              {key === "importPrice" && "Giá nhập"}
-                              {key === "sellingPrice" && "Giá bán"}
-                              {key === "quantity" && "Tồn kho"}
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                      <button
-                        onClick={() => setShowColumnConfig(false)}
-                        className="w-full mt-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition-colors"
-                      >
-                        Đóng
-                      </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Table */}
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    {visibleColumns.stt && (
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        STT
-                      </th>
-                    )}
-                    {visibleColumns.isbn && (
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        ISBN
-                      </th>
-                    )}
-                    {visibleColumns.title && (
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        Tên Sách
-                      </th>
-                    )}
-                    {visibleColumns.year && (
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        Năm XB
-                      </th>
-                    )}
-                    {visibleColumns.importPrice && (
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        Giá nhập
-                      </th>
-                    )}
-                    {visibleColumns.sellingPrice && (
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        Giá bán
-                      </th>
-                    )}
-                    {visibleColumns.quantity && (
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        Tồn kho
-                      </th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {paginatedBooks.length === 0 ? (
+              {activeTab === "inventory" ? (
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <td
-                        colSpan={
-                          Object.values(visibleColumns).filter((v) => v).length
-                        }
-                        className="px-4 py-8 text-center text-gray-500"
-                      >
-                        Không có dữ liệu
-                      </td>
+                      {visibleColumns.stt && (
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                          STT
+                        </th>
+                      )}
+                      {visibleColumns.isbn && (
+                        <th
+                          className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleSort("isbn")}
+                        >
+                          <div className="flex items-center">
+                            ISBN
+                            {renderSortIcon("isbn")}
+                          </div>
+                        </th>
+                      )}
+                      {visibleColumns.title && (
+                        <th
+                          className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleSort("title")}
+                        >
+                          <div className="flex items-center">
+                            Tên Sách
+                            {renderSortIcon("title")}
+                          </div>
+                        </th>
+                      )}
+                      {visibleColumns.year && (
+                        <th
+                          className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleSort("year")}
+                        >
+                          <div className="flex items-center">
+                            Năm XB
+                            {renderSortIcon("year")}
+                          </div>
+                        </th>
+                      )}
+                      {visibleColumns.importPrice && (
+                        <th
+                          className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleSort("importPrice")}
+                        >
+                          <div className="flex items-center">
+                            Giá nhập
+                            {renderSortIcon("importPrice")}
+                          </div>
+                        </th>
+                      )}
+                      {visibleColumns.sellingPrice && (
+                        <th
+                          className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleSort("sellingPrice")}
+                        >
+                          <div className="flex items-center">
+                            Giá bán
+                            {renderSortIcon("sellingPrice")}
+                          </div>
+                        </th>
+                      )}
+                      {visibleColumns.quantity && (
+                        <th
+                          className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleSort("quantity")}
+                        >
+                          <div className="flex items-center">
+                            Tồn kho
+                            {renderSortIcon("quantity")}
+                          </div>
+                        </th>
+                      )}
+                      {visibleColumns.status && (
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 w-36">
+                          Trạng thái
+                        </th>
+                      )}
                     </tr>
-                  ) : (
-                    paginatedBooks.map((book, index) => (
-                      <tr
-                        key={book.id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        {visibleColumns.stt && (
-                          <td className="px-4 py-3 text-sm text-gray-900">
-                            {startIndex + index + 1}
-                          </td>
-                        )}
-                        {visibleColumns.isbn && (
-                          <td className="px-4 py-3 text-sm text-gray-600">
-                            {book.isbn}
-                          </td>
-                        )}
-                        {visibleColumns.title && (
-                          <td className="px-4 py-3 text-sm text-gray-900 font-medium">
-                            {book.title}
-                          </td>
-                        )}
-                        {visibleColumns.year && (
-                          <td className="px-4 py-3 text-sm text-gray-600">
-                            {book.yearOfPublication}
-                          </td>
-                        )}
-                        {visibleColumns.importPrice && (
-                          <td className="px-4 py-3 text-sm text-gray-900 font-medium">
-                            {book.importPrice.toLocaleString()}₫
-                          </td>
-                        )}
-                        {visibleColumns.sellingPrice && (
-                          <td className="px-4 py-3 text-sm text-blue-600 font-medium">
-                            {book.sellingPrice.toLocaleString()}₫
-                          </td>
-                        )}
-                        {visibleColumns.quantity && (
-                          <td className="px-4 py-3 text-sm">
-                            <span
-                              className={`font-bold ${
-                                book.quantity === 0
-                                  ? "text-red-600"
-                                  : book.quantity < 20
-                                  ? "text-yellow-600"
-                                  : "text-green-600"
-                              }`}
-                            >
-                              {book.quantity}
-                            </span>
-                          </td>
-                        )}
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {loading ? (
+                      <tr>
+                        <td
+                          colSpan={
+                            Object.values(visibleColumns).filter((v) => v)
+                              .length
+                          }
+                          className="px-4 py-8 text-center text-gray-500"
+                        >
+                          <div className="flex items-center justify-center gap-2">
+                            <RefreshCw className="animate-spin" size={18} />
+                            <span>Đang tải dữ liệu...</span>
+                          </div>
+                        </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : paginatedBooks.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={
+                            Object.values(visibleColumns).filter((v) => v)
+                              .length
+                          }
+                          className="px-4 py-8 text-center text-gray-500"
+                        >
+                          Không có dữ liệu
+                        </td>
+                      </tr>
+                    ) : (
+                      paginatedBooks.map((book, index) => (
+                        <tr
+                          key={book.id}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
+                          {visibleColumns.stt && (
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {startIndex + index + 1}
+                            </td>
+                          )}
+                          {visibleColumns.isbn && (
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {book.isbn}
+                            </td>
+                          )}
+                          {visibleColumns.title && (
+                            <td className="px-4 py-3 text-sm text-gray-900 font-medium">
+                              {book.title}
+                            </td>
+                          )}
+                          {visibleColumns.year && (
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {book.yearOfPublication}
+                            </td>
+                          )}
+                          {visibleColumns.importPrice && (
+                            <td className="px-4 py-3 text-sm text-gray-900 font-medium">
+                              {book.importPrice.toLocaleString()}₫
+                            </td>
+                          )}
+                          {visibleColumns.sellingPrice && (
+                            <td className="px-4 py-3 text-sm text-blue-600 font-medium">
+                              {book.sellingPrice.toLocaleString()}₫
+                            </td>
+                          )}
+                          {visibleColumns.quantity && (
+                            <td className="px-4 py-3 text-sm w-20">
+                              <span
+                                className={`font-bold ${
+                                  book.quantity === 0
+                                    ? "text-red-600"
+                                    : book.quantity < 20
+                                    ? "text-yellow-600"
+                                    : "text-green-600"
+                                }`}
+                              >
+                                {book.quantity}
+                              </span>
+                            </td>
+                          )}
+                          {visibleColumns.status && (
+                            <td className="px-4 py-3 text-sm">
+                              <span
+                                className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                  getStockStatus(book.quantity).className
+                                }`}
+                              >
+                                {getStockStatus(book.quantity).label}
+                              </span>
+                            </td>
+                          )}
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              ) : (
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      {visibleHistoryColumns.stt && (
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                          STT
+                        </th>
+                      )}
+                      {visibleHistoryColumns.id && (
+                        <th
+                          className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleHistorySort("id")}
+                        >
+                          <div className="flex items-center">
+                            Mã phiếu
+                            {renderHistorySortIcon("id")}
+                          </div>
+                        </th>
+                      )}
+                      {visibleHistoryColumns.totalQuantity && (
+                        <th
+                          className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleHistorySort("totalQuantity")}
+                        >
+                          <div className="flex items-center">
+                            Tổng số lượng
+                            {renderHistorySortIcon("totalQuantity")}
+                          </div>
+                        </th>
+                      )}
+                      {visibleHistoryColumns.totalAmount && (
+                        <th
+                          className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleHistorySort("totalPrice")}
+                        >
+                          <div className="flex items-center">
+                            Tổng tiền
+                            {renderHistorySortIcon("totalPrice")}
+                          </div>
+                        </th>
+                      )}
+                      {visibleHistoryColumns.createdDate && (
+                        <th
+                          className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleHistorySort("createdAt")}
+                        >
+                          <div className="flex items-center">
+                            Ngày tạo
+                            {renderHistorySortIcon("createdAt")}
+                          </div>
+                        </th>
+                      )}
+                      {visibleHistoryColumns.createdBy && (
+                        <th
+                          className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 select-none"
+                          onClick={() => handleHistorySort("user.fullName")}
+                        >
+                          <div className="flex items-center">
+                            Người tạo
+                            {renderHistorySortIcon("user.fullName")}
+                          </div>
+                        </th>
+                      )}
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                        Tác vụ
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {loadingHistory ? (
+                      <tr>
+                        <td
+                          colSpan={
+                            Object.values(visibleHistoryColumns).filter(
+                              (v) => v
+                            ).length + 1
+                          }
+                          className="px-4 py-8 text-center text-gray-500"
+                        >
+                          <div className="flex items-center justify-center gap-2">
+                            <RefreshCw className="animate-spin" size={18} />
+                            <span>Đang tải dữ liệu...</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : paginatedHistory.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={
+                            Object.values(visibleHistoryColumns).filter(
+                              (v) => v
+                            ).length + 1
+                          }
+                          className="px-4 py-8 text-center text-gray-500"
+                        >
+                          Không có dữ liệu
+                        </td>
+                      </tr>
+                    ) : (
+                      paginatedHistory.map((item, index) => (
+                        <tr
+                          key={item.id}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
+                          {visibleHistoryColumns.stt && (
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {startIndex + index + 1}
+                            </td>
+                          )}
+                          {visibleHistoryColumns.id && (
+                            <td className="px-4 py-3 text-sm text-blue-600 font-semibold">
+                              {item.id}
+                            </td>
+                          )}
+                          {visibleHistoryColumns.totalQuantity && (
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {item.totalQuantity}
+                            </td>
+                          )}
+                          {visibleHistoryColumns.totalAmount && (
+                            <td className="px-4 py-3 text-sm text-gray-900 font-medium">
+                              {item.totalPrice.toLocaleString()}₫
+                            </td>
+                          )}
+                          {visibleHistoryColumns.createdDate && (
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {format(
+                                new Date(item.createdAt),
+                                "dd/MM/yyyy HH:mm"
+                              )}
+                            </td>
+                          )}
+                          {visibleHistoryColumns.createdBy && (
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {item.createdBy}
+                            </td>
+                          )}
+                          <td className="px-4 py-3 text-sm">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleViewDetail(item)}
+                                className="p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
+                                title="Xem chi tiết"
+                              >
+                                <FaEye size={14} />
+                              </button>
+                              <button
+                                onClick={() => handlePrintInvoice(item)}
+                                className="p-1.5 bg-green-500 hover:bg-green-600 text-white rounded transition-colors"
+                                title="Tải PDF"
+                              >
+                                <FaDownload size={14} />
+                              </button>
+                              <button
+                                className="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded transition-colors"
+                                title="Xóa"
+                              >
+                                <FaTrash size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              )}
             </div>
 
-            {/* Pagination */}
             <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
               <div className="text-sm text-gray-700">
-                {currentPage * pageSize + 1}-
-                {Math.min((currentPage + 1) * pageSize, filteredBooks.length)}{" "}
-                trên {filteredBooks.length} rows
+                {activeTab === "inventory" ? (
+                  <>
+                    Hiển thị {Math.min(books.length, pageSize)} trên{" "}
+                    {totalBooks} sách
+                  </>
+                ) : (
+                  <>
+                    {currentPage * pageSize + 1}-
+                    {Math.min(
+                      (currentPage + 1) * pageSize,
+                      filteredHistory.length
+                    )}{" "}
+                    trên {filteredHistory.length} rows
+                  </>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -512,17 +1142,17 @@ export default function WarehousePage() {
                   disabled={currentPage === 0}
                   className="p-2 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <FaChevronLeft className="text-gray-600" />
+                  <ChevronLeft className="text-gray-600" size={18} />
                 </button>
 
                 <div className="flex gap-1">{renderPagination()}</div>
 
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages - 1}
+                  disabled={currentPage >= currentTotalPages - 1}
                   className="p-2 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <FaChevronRight className="text-gray-600" />
+                  <ChevronRight className="text-gray-600" size={18} />
                 </button>
 
                 <select
@@ -543,15 +1173,27 @@ export default function WarehousePage() {
         </div>
       </div>
 
-      {/* Modal tạo phiếu nhập kho */}
-      {showCreateImportModal && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 overflow-auto p-4">
-          <div className="bg-white w-full max-w-6xl rounded-lg shadow-2xl max-h-[90vh] overflow-y-auto">
-            {/* Header Modal */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 flex justify-between items-center sticky top-0 z-10">
-              <h2 className="text-2xl font-bold">Tạo phiếu nhập kho</h2>
+      <CreateImportModal
+        isOpen={showCreateImportModal}
+        onClose={() => setShowCreateImportModal(false)}
+        onSubmit={handleSubmitImport}
+      />
+
+      <EntryFormDetailModal
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        entryForm={selectedImport}
+        details={entryFormDetails}
+        loading={loadingDetails}
+      />
+
+      {showAdvancedFilter && (
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
+          <div className="bg-white w-full max-w-2xl rounded-lg shadow-2xl">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 flex justify-between items-center rounded-t-lg">
+              <h2 className="text-xl font-bold">Lọc tổng hợp</h2>
               <button
-                onClick={() => setShowCreateImportModal(false)}
+                onClick={() => setShowAdvancedFilter(false)}
                 className="text-white hover:bg-white/20 rounded-full p-2 transition"
               >
                 <svg
@@ -570,276 +1212,130 @@ export default function WarehousePage() {
               </button>
             </div>
 
-            <div className="p-6">
-              {/* PHẦN 1: PHIẾU NHẬP KHO (Ở TRÊN) */}
-              <div className="bg-gray-50 border-2 border-gray-300 rounded-lg p-6 mb-6">
-                <div className="text-center mb-4">
-                  <h3 className="text-xl font-bold text-gray-800 uppercase">
-                    Phiếu nhập kho
-                  </h3>
-                  <p className="text-gray-600 mt-2">
-                    Ngày:{" "}
-                    <span className="font-semibold text-gray-800">
-                      {new Date().toLocaleDateString("vi-VN")}
-                    </span>
-                    {" - "}
-                    Số:{" "}
-                    <span className="font-semibold text-blue-600">NK00012</span>
-                  </p>
-                </div>
-
-                {/* Thông tin người giao */}
-                <div className="mb-4 space-y-2 text-gray-700">
-                  <p>
-                    <span className="font-medium">Người giao:</span>{" "}
-                    <span className="text-gray-900">
-                      CÔNG TY TNHH THIẾT BỊ TÂN AN PHÁT
-                    </span>
-                  </p>
-                  <p>
-                    <span className="font-medium">Hóa đơn số:</span>{" "}
-                    <span className="text-gray-900">1379</span>
-                    {" - "}
-                    <span className="text-gray-600">ngày 14/07/2022</span>
-                  </p>
-                </div>
-
-                {/* Bảng sách đã thêm */}
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-gray-300 text-sm">
-                    <thead>
-                      <tr className="bg-blue-50">
-                        <th className="border border-gray-300 px-3 py-2 text-gray-700">
-                          STT
-                        </th>
-                        <th className="border border-gray-300 px-3 py-2 text-gray-700">
-                          ISBN
-                        </th>
-                        <th className="border border-gray-300 px-3 py-2 text-gray-700">
-                          Tên sách
-                        </th>
-                        <th className="border border-gray-300 px-3 py-2 text-gray-700">
-                          Năm XB
-                        </th>
-                        <th className="border border-gray-300 px-3 py-2 text-gray-700">
-                          Giá nhập
-                        </th>
-                        <th className="border border-gray-300 px-3 py-2 text-gray-700">
-                          Số lượng
-                        </th>
-                        <th className="border border-gray-300 px-3 py-2 text-gray-700">
-                          Thành tiền
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="bg-white">
-                        <td className="border border-gray-300 px-3 py-2 text-center text-gray-800">
-                          1
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-gray-800">
-                          9786043557121
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-gray-800">
-                          Lập trình React từ A-Z
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-center text-gray-800">
-                          2024
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-right text-gray-800">
-                          165.000
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-center text-gray-800">
-                          200
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-right text-gray-800">
-                          33.000.000
-                        </td>
-                      </tr>
-                      <tr className="bg-white">
-                        <td className="border border-gray-300 px-3 py-2 text-center text-gray-800">
-                          2
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-gray-800">
-                          9786042112345
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-gray-800">
-                          JavaScript Nâng Cao
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-center text-gray-800">
-                          2023
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-right text-gray-800">
-                          150.000
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-center text-gray-800">
-                          100
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-right text-gray-800">
-                          15.000.000
-                        </td>
-                      </tr>
-                      <tr className="bg-blue-50 font-bold">
-                        <td
-                          colSpan={6}
-                          className="border border-gray-300 px-3 py-2 text-right text-gray-800"
-                        >
-                          Tổng cộng:
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-right text-blue-600">
-                          48.000.000
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Tổng tiền bằng chữ */}
-                <div className="mt-4 text-gray-700">
-                  <p>
-                    <span className="font-medium">
-                      - Tổng số tiền (Viết bằng chữ):
-                    </span>{" "}
-                    <span className="border-b border-gray-400 inline-block min-w-[400px] text-gray-900">
-                      Bốn mươi tám triệu đồng chẵn
-                    </span>
-                  </p>
-                  <p className="mt-2">
-                    <span className="font-medium">
-                      - Số chứng từ gốc kèm theo:
-                    </span>{" "}
-                    <span className="border-b border-gray-400 inline-block w-32 text-center text-gray-900"></span>
-                  </p>
-                </div>
-
-                <p className="text-right mt-6 text-gray-700">
-                  Ngày {new Date().getDate()} tháng {new Date().getMonth() + 1}{" "}
-                  năm {new Date().getFullYear()}
-                </p>
-
-                {/* Phần chữ ký - 4 cột */}
-                <div className="grid grid-cols-4 gap-4 text-center mt-8 mb-30 text-gray-700">
-                  <div>
-                    <p className="font-bold text-gray-800">Người lập phiếu</p>
-                    <p className="italic text-sm text-gray-600">(Ký, họ tên)</p>
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-800">Người giao hàng</p>
-                    <p className="italic text-sm text-gray-600">(Ký, họ tên)</p>
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-800">Thủ kho</p>
-                    <p className="italic text-sm text-gray-600">(Ký, họ tên)</p>
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-800">Kế toán trưởng</p>
-                    <p className="italic text-sm text-gray-600">
-                      (Hoặc bộ phận có nhu cầu nhập)
-                    </p>
-                  </div>
+            <div className="p-6 space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ngày tạo:
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="date"
+                    value={dateRange.from}
+                    onChange={(e) =>
+                      setDateRange((prev) => ({
+                        ...prev,
+                        from: e.target.value,
+                      }))
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    placeholder="Từ ngày"
+                  />
+                  <input
+                    type="date"
+                    value={dateRange.to}
+                    onChange={(e) =>
+                      setDateRange((prev) => ({
+                        ...prev,
+                        to: e.target.value,
+                      }))
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    placeholder="Đến ngày"
+                  />
                 </div>
               </div>
 
-              {/* PHẦN 2: TÌM KIẾM VÀ THÊM SÁCH (Ở DƯỚI) */}
-              <div className="bg-white border border-gray-300 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                  Thêm sách vào phiếu
-                </h3>
-
-                {/* Thanh tìm kiếm và nút Import Excel */}
-                <div className="flex gap-3 mb-4">
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      placeholder="Tìm kiếm sách theo tên hoặc ISBN..."
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    />
-                  </div>
-                  <button className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium flex items-center gap-2 transition">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                      />
-                    </svg>
-                    Import Excel
-                  </button>
-                </div>
-
-                {/* Bảng kết quả tìm kiếm */}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50 border-b border-gray-200">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                          ISBN
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                          Tên sách
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                          Năm XB
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                          Giá nhập
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                          Tồn kho
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                          Thao tác
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {mockBooks.slice(0, 3).map((book) => (
-                        <tr key={book.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 text-gray-800">
-                            {book.isbn}
-                          </td>
-                          <td className="px-4 py-3 text-gray-800">
-                            {book.title}
-                          </td>
-                          <td className="px-4 py-3 text-gray-800">
-                            {book.yearOfPublication}
-                          </td>
-                          <td className="px-4 py-3 text-gray-800">
-                            {book.importPrice.toLocaleString()}₫
-                          </td>
-                          <td className="px-4 py-3 text-gray-800">
-                            {book.quantity}
-                          </td>
-                          <td className="px-4 py-3">
-                            <button className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs transition">
-                              Thêm
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tổng số lượng:
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    value={advancedFilters.totalQuantityMin}
+                    onChange={(e) =>
+                      setAdvancedFilters((prev) => ({
+                        ...prev,
+                        totalQuantityMin: e.target.value,
+                      }))
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    placeholder="Từ"
+                  />
+                  <input
+                    type="number"
+                    value={advancedFilters.totalQuantityMax}
+                    onChange={(e) =>
+                      setAdvancedFilters((prev) => ({
+                        ...prev,
+                        totalQuantityMax: e.target.value,
+                      }))
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    placeholder="Đến"
+                  />
                 </div>
               </div>
 
-              {/* Nút hành động */}
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  onClick={() => setShowCreateImportModal(false)}
-                  className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition"
-                >
-                  Hủy
-                </button>
-                <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">
-                  Lưu phiếu nhập
-                </button>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tổng tiền:
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    value={advancedFilters.totalAmountMin}
+                    onChange={(e) =>
+                      setAdvancedFilters((prev) => ({
+                        ...prev,
+                        totalAmountMin: e.target.value,
+                      }))
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    placeholder="Từ (VNĐ)"
+                  />
+                  <input
+                    type="number"
+                    value={advancedFilters.totalAmountMax}
+                    onChange={(e) =>
+                      setAdvancedFilters((prev) => ({
+                        ...prev,
+                        totalAmountMax: e.target.value,
+                      }))
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    placeholder="Đến (VNĐ)"
+                  />
+                </div>
               </div>
+            </div>
+
+            <div className="flex justify-end gap-3 px-6 pb-6">
+              <button
+                onClick={() => {
+                  setAdvancedFilters({
+                    totalQuantityMin: "",
+                    totalQuantityMax: "",
+                    totalAmountMin: "",
+                    totalAmountMax: "",
+                  });
+                  setDateRange({ from: "", to: "" });
+                  setCurrentPage(0);
+                }}
+                className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition"
+              >
+                Xóa bộ lọc
+              </button>
+              <button
+                onClick={() => {
+                  setCurrentPage(0);
+                  setShowAdvancedFilter(false);
+                  fetchEntryForms();
+                }}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+              >
+                Áp dụng
+              </button>
             </div>
           </div>
         </div>

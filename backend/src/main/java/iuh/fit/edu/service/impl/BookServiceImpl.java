@@ -8,6 +8,7 @@ import iuh.fit.edu.dto.response.book.ResCreateBookDTO;
 import iuh.fit.edu.dto.response.book.ResUpdateBookDTO;
 import iuh.fit.edu.entity.*;
 import iuh.fit.edu.entity.constant.BookStatus;
+import iuh.fit.edu.exception.IdInvalidException;
 import iuh.fit.edu.mapper.BookMapper;
 import iuh.fit.edu.repository.BookRepository;
 import iuh.fit.edu.repository.CategoryRepository;
@@ -233,7 +234,6 @@ public class BookServiceImpl implements BookService {
         }
     }
 
-
     @Override
     @Transactional
     public void deleteBook(Long id) {
@@ -369,8 +369,6 @@ public class BookServiceImpl implements BookService {
         return this.updateBook(book);
     }
 
-
-
     @Override
     public ResultPaginationDTO getAllBooks(Specification<Book> specification, Pageable pageable) {
 
@@ -469,4 +467,24 @@ public class BookServiceImpl implements BookService {
             // Không throw exception để không làm gián đoạn việc tạo/cập nhật sách
         }
     }
+
+    @Override
+public Book updateBookQuantity(Long bookId, int quantity) throws IdInvalidException {
+    if (quantity < 0) {
+        throw new IdInvalidException("Số lượng không được nhỏ hơn 0");
+    }
+    
+    Book book = this.findBookById(bookId);
+    if (book == null) {
+        throw new IdInvalidException("Book với id: " + bookId + " không tồn tại");
+    }
+    
+    if (book.getInventory() != null) {
+        book.getInventory().setQuantity(quantity);
+    } else {
+        throw new IdInvalidException("Book không có inventory");
+    }
+    
+    return this.bookRepository.save(book);
+}
 }

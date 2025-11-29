@@ -94,5 +94,15 @@ public class BookController {
             throw new IdInvalidException("Lỗi khi cập nhật sách: " + e.getMessage());
         }
     }
+    
+    @PatchMapping("/{id}/quantity")
+    @ApiMessage("Cập nhật số lượng sách")
+    public ResponseEntity<ResUpdateBookDTO> updateBookQuantity(
+            @PathVariable Long id,
+            @RequestParam int quantity
+    ) throws IdInvalidException {
+        Book updatedBook = this.bookService.updateBookQuantity(id, quantity);
+        return ResponseEntity.ok(this.bookService.convertToResUpdateBookDTO(updatedBook));
+    }
 }
 

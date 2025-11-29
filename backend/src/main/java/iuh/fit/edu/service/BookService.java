@@ -7,6 +7,8 @@ import iuh.fit.edu.dto.response.book.ResBookDTO;
 import iuh.fit.edu.dto.response.book.ResCreateBookDTO;
 import iuh.fit.edu.dto.response.book.ResUpdateBookDTO;
 import iuh.fit.edu.entity.Book;
+import iuh.fit.edu.exception.IdInvalidException;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -41,5 +43,6 @@ public interface BookService {
     ResUpdateBookDTO convertToResUpdateBookDTO(Book book);
 
     boolean existsByIsbn(String isbn);
-
+    
+    Book updateBookQuantity(Long id, int quantity) throws IdInvalidException;
 }
