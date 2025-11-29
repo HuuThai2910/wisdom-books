@@ -39,6 +39,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/users").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/api/users/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/api/users/delete/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/users/**").permitAll()
+
                         // Protected endpoints - cần authentication
                         .requestMatchers(HttpMethod.POST,"/api/auth/logout").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/auth/me").authenticated()

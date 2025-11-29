@@ -20,6 +20,7 @@ import CategoryPage from "./pages/client/CategoryPage";
 import BookManagement from "./pages/admin/BookManagement";
 import ViewUpsertBook from "./pages/admin/ViewUpsertBook";
 import ScrollToTop from "./components/ScrollToTop";
+import ManageUserPage from "./pages/admin/ManageUserPage";
 
 function App() {
     return (
@@ -98,7 +99,10 @@ function App() {
                     <Route path="/orders" element={<OrdersPage />} />
                     <Route
                         path="/payment-success"
-                        element={<PaymentSuccessPage />}
+                        element={<PaymentSuccessPage />}/>
+                    <Route
+                        path="/admin/manage-users"
+                        element={<ManageUserPage />}
                     />
                 </Routes>
             </div>

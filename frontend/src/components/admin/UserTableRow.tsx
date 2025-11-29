@@ -1,37 +1,60 @@
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  role: string;
-  status: string;
-}
+import { UserData } from '@/types';
 
 interface UserTableRowProps {
-  user: User;
+  user: UserData;
   index: number;
-  onView: (user: User) => void;
-  onEdit: (user: User) => void;
-  onDelete: (user: User) => void;
+  onView: (user: UserData) => void;
+  onEdit: (user: UserData) => void;
+  onDelete: (user: UserData) => void;
 }
 
 const UserTableRow = ({ user, index, onView, onEdit, onDelete }: UserTableRowProps) => {
-  const getRoleBadgeClass = (role: string) => {
-    const roleMap: { [key: string]: string } = {
-      'Admin': 'bg-blue-50 text-[#0071e3] border-[#0071e3]',
-      'Attendee': 'bg-purple-50 text-purple-600 border-purple-600',
-      'Organizer': 'bg-green-50 text-green-600 border-green-600',
+  const getGenderText = (gender?: string): string => {
+    if (!gender) return 'N/A';
+    const genderMap: { [key: string]: string } = {
+      'MALE': 'Nam',
+      'FEMALE': 'Nữ',
     };
-    return roleMap[role] || 'bg-gray-50 text-gray-600 border-gray-600';
+    return genderMap[gender] || gender;
+  };
+
+  const getRoleText = (role: any): string => {
+    if (!role) return 'N/A';
+    if (typeof role === 'object' && role !== null) {
+      return role.roleName || role.name || 'N/A';
+    }
+    return String(role);
+  };
+
+  const getRoleBadgeClass = (role: any) => {
+    const roleText = getRoleText(role).toLowerCase();
+    const roleMap: { [key: string]: string } = {
+      'admin': 'bg-blue-50 text-[#0071e3] border-[#0071e3]',
+      'customer': 'bg-purple-50 text-purple-600 border-purple-600',
+      'employee': 'bg-green-50 text-green-600 border-green-600',
+      'khách hàng': 'bg-purple-50 text-purple-600 border-purple-600',
+      'nhân viên': 'bg-green-50 text-green-600 border-green-600',
+      'thủ kho': 'bg-yellow-50 text-yellow-600 border-yellow-600',
+    };
+    return roleMap[roleText] || 'bg-gray-50 text-gray-600 border-gray-600';
   };
 
   const getStatusClass = (status: string) => {
     const statusMap: { [key: string]: string } = {
-      'Active': 'bg-green-50 text-green-700 border-green-500',
-      'Pending': 'bg-orange-50 text-orange-700 border-orange-500',
-      'Banned': 'bg-red-50 text-red-700 border-red-500',
+      'ACTIVE': 'bg-green-50 text-green-700 border-green-500',
+      'INACTIVE': 'bg-orange-50 text-orange-700 border-orange-500',
+      'BANNED': 'bg-red-50 text-red-700 border-red-500',
     };
     return statusMap[status] || 'bg-gray-50 text-gray-600 border-gray-500';
+  };
+
+  const getStatusText = (status: string) => {
+    const statusMap: { [key: string]: string } = {
+      'ACTIVE': 'Hoạt động',
+      'INACTIVE': 'Không hoạt động',
+      'BANNED': 'Bị cấm',
+    };
+    return statusMap[status] || status;
   };
 
   return (
@@ -41,19 +64,19 @@ const UserTableRow = ({ user, index, onView, onEdit, onDelete }: UserTableRowPro
       </td>
       <td className="px-4 py-4 border-b border-gray-100 text-sm text-gray-900">{index + 1}</td>
       <td className="px-4 py-4 border-b border-gray-100">
-        <strong className="text-sm text-gray-900">{user.name}</strong>
+        <strong className="text-sm text-gray-900">{user.fullName}</strong>
       </td>
       <td className="px-4 py-4 border-b border-gray-100 text-sm text-gray-900">{user.email}</td>
       <td className="px-4 py-4 border-b border-gray-100 text-sm text-gray-900">{user.phone}</td>
       <td className="px-4 py-4 border-b border-gray-100">
         <span className={`inline-block px-3 py-1 rounded-xl text-xs font-medium border ${getRoleBadgeClass(user.role)}`}>
-          {user.role}
+          {getRoleText(user.role)}
         </span>
       </td>
       <td className="px-4 py-4 border-b border-gray-100">
-        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-medium border ${getStatusClass(user.status)}`}>
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-medium border ${getStatusClass(user.userStatus)}`}>
           <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
-          {user.status}
+          {getStatusText(user.userStatus)}
         </span>
       </td>
       <td className="px-4 py-4 border-b border-gray-100">

@@ -38,7 +38,7 @@ public class AccountServiceImpl implements AccountService {
 
 
     @Override
-    public RegisterResponse registerUser(RegisterRequest request) {
+    public RegisterResponse registerUser(RegisterRequest request,boolean check) {
         String phoneNumber = request.getPhone();
         phoneNumber = "+84" + phoneNumber.substring(1);//switch phone standard international
 
@@ -48,7 +48,9 @@ public class AccountServiceImpl implements AccountService {
             String sub=cognitoService.registerUser(request);
             //save database
             User user=userMapper.toUserAccount(request);
-            userRepository.save(user);
+            if (check){
+                userRepository.save(user);
+            }
 
             return userMapper.toRegisterResponse(user,sub);
         }else {
