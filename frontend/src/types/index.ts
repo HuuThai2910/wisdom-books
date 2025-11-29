@@ -54,13 +54,19 @@ export interface Book {
     originalPrice?: number;
     categories?: string[];
 }
-
+export interface BookSummary {
+    id: number;
+    title: string;
+    price: number;
+    image: string;
+    quantity: number;
+}
 export interface CartItem {
     id: number;
     bookId: number;
     quantity: number;
     selected: boolean;
-    book: Book;
+    book: BookSummary;
 }
 
 export interface Address {
@@ -94,7 +100,7 @@ export interface Voucher {
 export interface CheckoutItem {
     id: number;
     quantity: number;
-    book: Book;
+    book: BookSummary;
 }
 
 // Form Types
@@ -249,8 +255,8 @@ export interface OrderData {
 
 export interface RegisterFormData {
     fullName: string;
-    email:string;
-    phone:string;
+    email: string;
+    phone: string;
     password: string;
     confirmPassword: string;
 }
