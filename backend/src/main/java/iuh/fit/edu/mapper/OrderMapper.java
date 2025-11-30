@@ -5,6 +5,7 @@
 package iuh.fit.edu.mapper;
 
 import iuh.fit.edu.dto.response.order.OrderResponse;
+import iuh.fit.edu.dto.response.order.UpdateOrderStatusResponse;
 import iuh.fit.edu.entity.Order;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -20,4 +21,6 @@ public interface OrderMapper {
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "userName", source = "user.fullName")
     OrderResponse toOrderResponse(Order order);
+
+    UpdateOrderStatusResponse toUpdateOrderStatusResponse(Order order);
 }
