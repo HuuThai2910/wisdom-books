@@ -96,13 +96,14 @@ function App() {
                         path="/admin/books/edit"
                         element={<ViewUpsertBook />}
                     />
-                    <Route
-                        path="/admin/manage-users"
-                        element={<ManageUserPage />}
+
                     <Route path="/orders" element={<OrdersPage />} />
                     <Route
                         path="/payment-success"
-                        element={<PaymentSuccessPage />}
+                        element={<PaymentSuccessPage />}/>
+                    <Route
+                        path="/admin/manage-users"
+                        element={<ManageUserPage />}
                     />
                 </Routes>
             </div>

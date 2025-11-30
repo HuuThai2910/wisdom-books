@@ -34,7 +34,6 @@ export default function Header() {
     const { cartItems } = useAppSelector((state) => state.cart);
     const dispatch = useAppDispatch();
 
-
     // Lấy dữ liệu từ cart để truyền vào cart mini
     useEffect(() => {
         dispatch(fetchCart());
@@ -368,6 +367,7 @@ export default function Header() {
                                     setIsCartClosing(false);
                                     setShowCartMenu(true);
                                 }}
+                                onClick={() => navigate("/cart")}
                             >
                                 <FaShoppingCart className="text-3xl text-white" />
                                 {size > 0 && (
