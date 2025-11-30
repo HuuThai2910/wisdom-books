@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import voucherApi from "../api/voucherApi";
-import { UseCheckoutReturn, Voucher, User } from "../types";
-import { RootState } from "../app/store";
+import voucherApi from "../../api/voucherApi";
+import { UseCheckoutReturn, Voucher, User } from "../../types";
+import { RootState } from "../../app/store";
 
 export const useCheckout = (): UseCheckoutReturn => {
     const checkoutItems = useSelector(

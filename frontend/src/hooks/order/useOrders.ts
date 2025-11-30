@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { Order } from "../types";
-import orderApi from "../api/orderApi";
-import paymentApi from "../api/paymentApi";
+import { Order } from "../../types";
+import orderApi from "../../api/orderApi";
+import paymentApi from "../../api/paymentApi";
 import toast from "react-hot-toast";
 
 type OrderStatus = "ALL" | Order["status"];
@@ -24,7 +24,7 @@ export const useOrders = () => {
     const fetchOrders = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await orderApi.fetchOrders();
+            const response = await orderApi.fetchOrdersByUser();
             setOrders(response.data.data);
         } catch (error: any) {
             toast.error("Không thể tải danh sách đơn hàng");

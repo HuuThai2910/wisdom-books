@@ -62,11 +62,14 @@ const OrderCard = ({
 
                 {/* Status Badges */}
                 <div className="flex items-center gap-3">
-                    <PaymentStatusBadge
-                        paymentStatus={order.paymentStatus}
-                        paymentMethod={order.paymentMethod}
-                        orderStatus={order.status}
-                    />
+                    {order.paymentMethod === "VNPAY" &&
+                        order.status === "PENDING" && (
+                            <PaymentStatusBadge
+                                paymentStatus={order.paymentStatus}
+                                paymentMethod={order.paymentMethod}
+                                orderStatus={order.status}
+                            />
+                        )}
                     <OrderStatusBadge status={order.status} />
                 </div>
             </div>

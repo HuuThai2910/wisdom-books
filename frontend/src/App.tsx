@@ -21,6 +21,7 @@ import BookManagement from "./pages/admin/BookManagement";
 import ViewUpsertBook from "./pages/admin/ViewUpsertBook";
 import ScrollToTop from "./components/ScrollToTop";
 import ManageUserPage from "./pages/admin/ManageUserPage";
+import OrderManagement from "./pages/admin/OrderManagement";
 
 function App() {
     return (
@@ -96,7 +97,7 @@ function App() {
                         path="/admin/books/edit"
                         element={<ViewUpsertBook />}
                     />
-
+                    <Route path="/admin/orders" element={<OrderManagement />} />
                     <Route path="/orders" element={<OrdersPage />} />
                     <Route
                         path="/payment-success"

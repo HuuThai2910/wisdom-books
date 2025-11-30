@@ -7,10 +7,10 @@ import DeliveryInformation from "../../components/checkout/DeliveryInformation";
 import VoucherSelector from "../../components/checkout/VoucherSelector";
 import PaymentMethod from "../../components/checkout/PaymentMethod";
 import OrderSummary from "../../components/checkout/OrderSummary";
-import { useCheckout } from "../../hooks/useCheckout";
-import { useDeliveryForm } from "../../hooks/useDeliveryForm";
-import { usePaymentMethod } from "../../hooks/usePaymentMethod";
-import { useOrderSubmit } from "../../hooks/useOrderSubmit";
+import { useCheckout } from "../../hooks/checkout/useCheckout";
+import { useDeliveryForm } from "../../hooks/checkout/useDeliveryForm";
+import { usePaymentMethod } from "../../hooks/checkout/usePaymentMethod";
+import { useOrderSubmit } from "../../hooks/checkout/useOrderSubmit";
 
 const CheckOutPage = () => {
     const navigate = useNavigate();
