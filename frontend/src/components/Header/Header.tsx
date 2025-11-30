@@ -129,7 +129,7 @@ export default function Header() {
                             : "none",
                 }}
             >
-                <div className="container mx-auto flex items-center justify-between px-6 py-6 text-gray-800">
+                <div className="container mx-auto flex items-center justify-between px-6 py-3 text-gray-800">
                     {/* Logo */}
                     <Link
                         to="/"
@@ -158,7 +158,7 @@ export default function Header() {
                             to="/"
                             className="relative group transition-colors"
                         >
-                            <span className="text-white font-bold text-2xl">
+                            <span className="text-white font-bold text-xl">
                                 Trang chủ
                             </span>
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
@@ -167,7 +167,7 @@ export default function Header() {
                             to="/books"
                             className="relative group transition-colors"
                         >
-                            <span className="text-white font-bold text-2xl">
+                            <span className="text-white font-bold text-xl">
                                 Sản phẩm
                             </span>
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
@@ -188,7 +188,7 @@ export default function Header() {
                             }}
                         >
                             <button className="relative group transition-colors flex items-center gap-1">
-                                <span className="text-white font-bold text-2xl">
+                                <span className="text-white font-bold text-xl">
                                     Thể loại
                                 </span>
                                 <svg
@@ -233,7 +233,7 @@ export default function Header() {
 
                             {/* Category Dropdown */}
                             {showCategoryMenu && (
-                                <div className="absolute top-full left-0 pt-4 w-[900px] z-50">
+                                <div className="absolute top-full left-0 pt-4 w-[700px] z-50">
                                     <div
                                         className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200"
                                         style={{
@@ -256,10 +256,10 @@ export default function Header() {
                                                                     category.name
                                                                 )
                                                             }
-                                                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-purple-50 transition-all duration-300 group border border-transparent hover:border-purple-200 text-left w-full"
+                                                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 transition-all duration-300 group border border-transparent hover:border-blue-200 text-left w-full"
                                                         >
                                                             <div className="flex-1">
-                                                                <h4 className="font-semibold text-gray-800 group-hover:text-purple-600 transition-colors text-sm">
+                                                                <h4 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors text-sm">
                                                                     {
                                                                         category.name
                                                                     }
@@ -314,7 +314,7 @@ export default function Header() {
                             to="/about"
                             className="relative group transition-colors"
                         >
-                            <span className="text-white font-bold text-2xl">
+                            <span className="text-white font-bold text-xl">
                                 Tin tức
                             </span>
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
@@ -323,7 +323,7 @@ export default function Header() {
                             to="/contact"
                             className="relative group transition-colors"
                         >
-                            <span className="text-white font-bold text-2xl">
+                            <span className="text-white font-bold text-xl">
                                 Liên hệ
                             </span>
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
@@ -342,7 +342,7 @@ export default function Header() {
                                 value={searchValue}
                                 onChange={(e) => setSearchValue(e.target.value)}
                                 placeholder="Tìm kiếm sách, tác giả, thể loại"
-                                className="w-80 px-4 py-2 pr-12 rounded-full bg-gray-100 border-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-transparent focus:ring-2 transition-all duration-300"
+                                className="w-76 px-4 py-2 pr-12 rounded-full bg-gray-100 border-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-transparent focus:ring-2 transition-all duration-300"
                                 style={{
                                     boxShadow: "none",
                                 }}
