@@ -1,6 +1,9 @@
 package iuh.fit.edu.service.impl;
 
 import iuh.fit.edu.dto.response.dashboard.DashboardStatsDTO;
+import iuh.fit.edu.dto.response.dashboard.MonthlyRevenueDTO;
+import iuh.fit.edu.dto.response.dashboard.TopBookDTO;
+import iuh.fit.edu.dto.response.dashboard.TopCategoryDTO;
 import iuh.fit.edu.repository.BookRepository;
 import iuh.fit.edu.repository.InventoryRepository;
 import iuh.fit.edu.repository.OrderRepository;
@@ -10,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -71,5 +77,52 @@ public class DashboardServiceImpl implements DashboardService {
         stats.setCancelledOrders(cancelledOrders);
         
         return stats;
+    }
+
+    @Override
+    public List<MonthlyRevenueDTO> getMonthlyRevenue(int year) {
+        List<Object[]> results = orderRepository.getMonthlyRevenueByYear(year);
+        
+        // Tạo list 12 tháng với giá trị mặc định là 0
+        List<MonthlyRevenueDTO> monthlyRevenue = new ArrayList<>();
+        for (int i = 1; i <= 12; i++) {
+            monthlyRevenue.add(new MonthlyRevenueDTO("Tháng " + i, 0, 0));
+        }
+        
+        // Cập nhật dữ liệu thực tế
+        for (Object[] result : results) {
+            int month = (int) result[0];
+            double revenue = (double) result[1];
+            long orders = (long) result[2];
+            monthlyRevenue.set(month - 1, new MonthlyRevenueDTO("Tháng " + month, revenue, orders));
+        }
+        
+        return monthlyRevenue;
+    }
+
+    @Override
+    public List<TopBookDTO> getTopBooks(LocalDateTime startDate, LocalDateTime endDate, int limit) {
+        List<Object[]> results = orderRepository.getTopBooksByDateRange(startDate, endDate);
+        
+        return results.stream()
+                .limit(limit)
+                .map(result -> new TopBookDTO(
+                        (String) result[0],  // name
+                        (Long) result[1]     // sales
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TopCategoryDTO> getTopCategories(LocalDateTime startDate, LocalDateTime endDate, int limit) {
+        List<Object[]> results = orderRepository.getTopCategoriesByDateRange(startDate, endDate);
+        
+        return results.stream()
+                .limit(limit)
+                .map(result -> new TopCategoryDTO(
+                        (String) result[0],  // category
+                        (Long) result[1]     // sales
+                ))
+                .collect(Collectors.toList());
     }
 }

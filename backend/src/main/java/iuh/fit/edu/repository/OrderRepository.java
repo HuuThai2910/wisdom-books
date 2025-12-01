@@ -30,5 +30,40 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     
     @Query("SELECT COUNT(o) FROM Order o WHERE o.orderDate >= :startDate AND o.orderDate <= :endDate AND o.status = 'CANCELLED'")
     long countCancelledOrdersByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+    
+    // Query cho monthly revenue
+    @Query("SELECT MONTH(o.orderDate) as month, " +
+           "COALESCE(SUM(CASE WHEN o.paymentStatus = 'PAID' THEN o.totalPrice ELSE 0 END), 0) as revenue, " +
+           "COUNT(o) as orders " +
+           "FROM Order o " +
+           "WHERE YEAR(o.orderDate) = :year " +
+           "GROUP BY MONTH(o.orderDate) " +
+           "ORDER BY MONTH(o.orderDate)")
+    List<Object[]> getMonthlyRevenueByYear(@Param("year") int year);
+    
+    // Query cho top books
+    @Query("SELECT b.title, SUM(oi.quantity) " +
+           "FROM Order o " +
+           "JOIN o.orderItems oi " +
+           "JOIN oi.book b " +
+           "WHERE o.orderDate >= :startDate AND o.orderDate <= :endDate " +
+           "AND o.paymentStatus = 'PAID' " +
+           "GROUP BY b.id, b.title " +
+           "ORDER BY SUM(oi.quantity) DESC")
+    List<Object[]> getTopBooksByDateRange(@Param("startDate") LocalDateTime startDate, 
+                                          @Param("endDate") LocalDateTime endDate);
+    
+    // Query cho top categories
+    @Query("SELECT c.name, SUM(oi.quantity) " +
+           "FROM Order o " +
+           "JOIN o.orderItems oi " +
+           "JOIN oi.book b " +
+           "JOIN b.categories c " +
+           "WHERE o.orderDate >= :startDate AND o.orderDate <= :endDate " +
+           "AND o.paymentStatus = 'PAID' " +
+           "GROUP BY c.id, c.name " +
+           "ORDER BY SUM(oi.quantity) DESC")
+    List<Object[]> getTopCategoriesByDateRange(@Param("startDate") LocalDateTime startDate, 
+                                                @Param("endDate") LocalDateTime endDate);
 }
 

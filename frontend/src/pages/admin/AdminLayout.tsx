@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Home,
@@ -11,10 +11,10 @@ import {
   Shield,
   Menu,
   MoreVertical,
-  ChevronDown,
-  LogOut,
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
+import AdminHeader from "../../components/Header/AdminHeader";
+import AdminFooter from "../../components/Footer/AdminFooter";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -24,22 +24,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarHovered, setSidebarHovered] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const isSidebarExpanded = sidebarOpen || sidebarHovered;
 
@@ -158,90 +143,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           sidebarOpen ? "lg:ml-64" : "lg:ml-20"
         } transition-[margin] duration-200 ease-in-out will-change-[margin]`}
       >
-        {/* Header */}
-        <header className="bg-white shadow-sm sticky top-0 z-20">
-          <div className="flex items-center justify-between p-4">
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden text-gray-600 hover:text-gray-900"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
-
-            {/* Spacer for mobile to push avatar right */}
-            <div className="flex-1 lg:hidden"></div>
-
-            {/* User Profile - always on the right */}
-            <div className="flex items-center ml-auto" ref={dropdownRef}>
-              <div
-                className="flex items-center space-x-3 cursor-pointer group relative"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-              >
-                <div className="text-right hidden sm:block">
-                  <p className="text-sm text-gray-500">Hi,</p>
-                  <p className="text-sm font-semibold text-gray-700">Admin</p>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
-                  A
-                </div>
-                <ChevronDown
-                  className={`w-4 h-4 text-gray-500 transition-transform ${
-                    dropdownOpen ? "rotate-180" : ""
-                  }`}
-                />
-
-                {/* Dropdown Menu */}
-                {dropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                    <Link
-                      to="/"
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                      onClick={() => setDropdownOpen(false)}
-                    >
-                      <Home className="w-4 h-4" />
-                      Trang chủ
-                    </Link>
-                    <button
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        // TODO: Implement logout
-                      }}
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Đăng xuất
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
+        <AdminHeader
+          onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
+        />
 
         {/* Page Content */}
         <main className="flex-1 p-6">{children}</main>
 
-        {/* Footer */}
-        <footer className="bg-white border-t border-gray-200 py-4 px-6 mt-auto">
-          <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-gray-600">
-            <div>
-              2025, made with <span className="text-red-500"></span> by Wisdom
-              Book Team
-            </div>
-            <div className="mt-2 sm:mt-0">
-              <a href="#" className="hover:text-blue-600 mx-2">
-                Help
-              </a>
-              <a href="#" className="hover:text-blue-600 mx-2">
-                Licenses
-              </a>
-            </div>
-          </div>
-        </footer>
+        <AdminFooter />
       </div>
 
-      {/* Mobile Overlay */}
       {mobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
