@@ -8,6 +8,7 @@ import iuh.fit.edu.dto.response.entryform.ResEntryFormDetailDTO;
 import iuh.fit.edu.entity.Book;
 import iuh.fit.edu.entity.EntryForm;
 import iuh.fit.edu.entity.EntryFormDetail;
+import iuh.fit.edu.entity.Inventory;
 import iuh.fit.edu.repository.BookRepository;
 import iuh.fit.edu.repository.EntryFormDetailRepository;
 import iuh.fit.edu.repository.EntryFormRepository;
@@ -136,6 +137,14 @@ public class EntryFormServiceImpl implements EntryFormService {
             
             // Update book quantity
             book.setQuantity(book.getQuantity() + bookItem.getQuantity());
+            
+            // Update inventory quantity
+            if (book.getInventory() != null) {
+                Inventory inventory = book.getInventory();
+                inventory.setQuantity(inventory.getQuantity() + bookItem.getQuantity());
+                inventoryRepository.save(inventory);
+            }
+            
             bookRepository.save(book);
         }
         

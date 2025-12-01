@@ -87,6 +87,13 @@ public class BookServiceImpl implements BookService {
         // Lưu sách vào database
         Book savedBook = this.bookRepository.save(book);
 
+        // Cập nhật inventory quantity khi tạo sách mới
+        if (savedBook.getQuantity() > 0 && savedBook.getInventory() != null) {
+            Inventory inventory = savedBook.getInventory();
+            inventory.setQuantity(inventory.getQuantity() + savedBook.getQuantity());
+            this.inventoryRepository.save(inventory);
+        }
+
         // Tạo EntryForm và EntryFormDetail khi thêm sách mới
         if (savedBook.getQuantity() > 0) {
             createEntryFormForBook(savedBook, savedBook.getQuantity(), savedBook.getImportPrice());
@@ -196,6 +203,14 @@ public class BookServiceImpl implements BookService {
                 // Tính toán chênh lệch số lượng
                 int newQuantity = updatedBook.getQuantity();
                 int quantityDiff = newQuantity - oldQuantity;
+
+                // Cập nhật inventory quantity nếu có thay đổi số lượng
+                if (quantityDiff != 0 && updatedBook.getInventory() != null) {
+                    Inventory inventory = updatedBook.getInventory();
+                    inventory.setQuantity(inventory.getQuantity() + quantityDiff);
+                    this.inventoryRepository.save(inventory);
+                    System.out.println("Updated inventory quantity by: " + quantityDiff);
+                }
 
                 // Cập nhật thông tin audit
                 updatedBook.setUpdatedAt(LocalDateTime.now());

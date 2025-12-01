@@ -365,3 +365,24 @@ export interface UserData {
     userStatus: string;
     avatarURL?: string;
 }
+
+// Dashboard Types
+export interface DateRange {
+    from: string;
+    to: string;
+}
+
+export interface DashboardStats {
+    totalBooks: number;
+    totalCustomers: number;
+    outOfStockBooks: number;
+    lowStockBooks: number;
+    totalOrders: number;
+    totalRevenue: number;
+    totalProfit: number;
+    customerGrowthRate: number;
+    cancelledOrderRate: number;
+    newCustomersThisMonth: number;
+    cancelledOrders: number;
+}
+

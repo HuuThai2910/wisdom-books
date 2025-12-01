@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { format, subMonths } from "date-fns";
 import {
   LineChart,
@@ -26,36 +26,145 @@ import {
   DollarSign,
   TrendingUp,
   AlertCircle,
+  RotateCcw,
 } from "lucide-react";
 import html2canvas from "html2canvas";
 import AdminLayout from "../admin/AdminLayout";
+import dashboardApi from "../../api/dashboardApi";
+import toast from "react-hot-toast";
+import { DateRange, DashboardStats } from "../../types";
 
 // Thư viện cần cài: npm install recharts lucide-react date-fns html2canvas
 
-interface DateRange {
-  from: string;
-  to: string;
-}
-
 export default function AdminDashboard() {
+  const now = new Date();
+  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+  const [filterType, setFilterType] = useState<"day" | "month" | "year">(
+    "month"
+  );
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+
   const [dateRange, setDateRange] = useState<DateRange>({
-    from: format(subMonths(new Date(), 1), "yyyy-MM-dd"),
-    to: format(new Date(), "yyyy-MM-dd"),
+    from: format(firstDayOfMonth, "yyyy-MM-dd"),
+    to: format(lastDayOfMonth, "yyyy-MM-dd"),
   });
+
+  const [stats, setStats] = useState<DashboardStats>({
+    totalBooks: 0,
+    totalCustomers: 0,
+    outOfStockBooks: 0,
+    lowStockBooks: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+    totalProfit: 0,
+    customerGrowthRate: 0,
+    cancelledOrderRate: 0,
+    newCustomersThisMonth: 0,
+    cancelledOrders: 0,
+  });
+
+  const [loading, setLoading] = useState(false);
 
   // Refs để export biểu đồ
   const chart1Ref = useRef<HTMLDivElement>(null);
   const chart2Ref = useRef<HTMLDivElement>(null);
   const chart3Ref = useRef<HTMLDivElement>(null);
 
-  // Dữ liệu tĩnh
-  const totalBooks = 1294;
-  const totalCustomers = 1303;
-  const outOfStockBooks = 87;
-  const totalOrders = 1345;
-  const totalRevenue = 4578.58;
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      const startDateTime = `${dateRange.from}T00:00:00`;
+      const endDateTime = `${dateRange.to}T23:59:59`;
 
-  // Top 10 sách bán chạy trong 12 tháng
+      const response = await dashboardApi.getStats(startDateTime, endDateTime);
+      if (response.data && response.data.data) {
+        setStats(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+      toast.error("Không thể tải dữ liệu dashboard");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const handleApplyFilter = () => {
+    fetchStats();
+  };
+
+  const handleReset = () => {
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    setFilterType("month");
+    setSelectedMonth(now.getMonth() + 1);
+    setSelectedYear(now.getFullYear());
+    setDateRange({
+      from: format(firstDayOfMonth, "yyyy-MM-dd"),
+      to: format(lastDayOfMonth, "yyyy-MM-dd"),
+    });
+    setTimeout(fetchStats, 100);
+  };
+
+  const handleFilterTypeChange = (type: "day" | "month" | "year") => {
+    setFilterType(type);
+    const now = new Date();
+
+    if (type === "month") {
+      const month = selectedMonth;
+      const year = selectedYear;
+      const firstDay = new Date(year, month - 1, 1);
+      const lastDay = new Date(year, month, 0);
+      setDateRange({
+        from: format(firstDay, "yyyy-MM-dd"),
+        to: format(lastDay, "yyyy-MM-dd"),
+      });
+    } else if (type === "year") {
+      const year = selectedYear;
+      const firstDay = new Date(year, 0, 1);
+      const lastDay = new Date(year, 11, 31);
+      setDateRange({
+        from: format(firstDay, "yyyy-MM-dd"),
+        to: format(lastDay, "yyyy-MM-dd"),
+      });
+    }
+  };
+
+  const handleMonthChange = (month: number) => {
+    setSelectedMonth(month);
+    const firstDay = new Date(selectedYear, month - 1, 1);
+    const lastDay = new Date(selectedYear, month, 0);
+    setDateRange({
+      from: format(firstDay, "yyyy-MM-dd"),
+      to: format(lastDay, "yyyy-MM-dd"),
+    });
+  };
+
+  const handleYearChange = (year: number) => {
+    setSelectedYear(year);
+    if (filterType === "month") {
+      const firstDay = new Date(year, selectedMonth - 1, 1);
+      const lastDay = new Date(year, selectedMonth, 0);
+      setDateRange({
+        from: format(firstDay, "yyyy-MM-dd"),
+        to: format(lastDay, "yyyy-MM-dd"),
+      });
+    } else if (filterType === "year") {
+      const firstDay = new Date(year, 0, 1);
+      const lastDay = new Date(year, 11, 31);
+      setDateRange({
+        from: format(firstDay, "yyyy-MM-dd"),
+        to: format(lastDay, "yyyy-MM-dd"),
+      });
+    }
+  }; // Top 10 sách bán chạy trong 12 tháng
   const topBooksData = [
     { name: "Lược Sử Thời Gian", sales: 892 },
     { name: "Nhà Giả Kim", sales: 756 },
@@ -85,8 +194,12 @@ export default function AdminDashboard() {
 
   // Tỷ lệ tồn kho
   const stockStatusData = [
-    { name: "Còn hàng", value: totalBooks - outOfStockBooks, color: "#3B82F6" },
-    { name: "Hết hàng", value: outOfStockBooks, color: "#EF4444" },
+    {
+      name: "Còn hàng",
+      value: (stats?.totalBooks ?? 0) - (stats?.lowStockBooks ?? 0),
+      color: "#3B82F6",
+    },
+    { name: "Sắp hết", value: stats?.lowStockBooks ?? 0, color: "#EF4444" },
   ];
 
   // Doanh thu theo tháng (12 tháng gần nhất)
@@ -122,15 +235,15 @@ export default function AdminDashboard() {
         </div>
 
         {/* Top Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           <div className="bg-white rounded-lg shadow p-5 flex items-center space-x-4">
             <div className="p-3 bg-blue-100 rounded-lg">
               <Package className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Tổng sách</p>
+              <p className="text-sm text-gray-600">Tổng sách trong kho</p>
               <p className="text-2xl font-bold">
-                {totalBooks.toLocaleString()}
+                {loading ? "..." : (stats?.totalBooks ?? 0).toLocaleString()}
               </p>
             </div>
           </div>
@@ -140,9 +253,11 @@ export default function AdminDashboard() {
               <Users className="w-6 h-6 text-cyan-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Khách hàng (tháng)</p>
+              <p className="text-sm text-gray-600">Tổng khách hàng</p>
               <p className="text-2xl font-bold">
-                {totalCustomers.toLocaleString()}
+                {loading
+                  ? "..."
+                  : (stats?.totalCustomers ?? 0).toLocaleString()}
               </p>
             </div>
           </div>
@@ -154,7 +269,7 @@ export default function AdminDashboard() {
             <div>
               <p className="text-sm text-gray-600">Sách hết hàng</p>
               <p className="text-2xl font-bold text-red-600">
-                {outOfStockBooks}
+                {loading ? "..." : stats?.outOfStockBooks ?? 0}
               </p>
             </div>
           </div>
@@ -164,9 +279,9 @@ export default function AdminDashboard() {
               <ShoppingCart className="w-6 h-6 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Đơn hàng (tháng)</p>
+              <p className="text-sm text-gray-600">Tổng đơn hàng</p>
               <p className="text-2xl font-bold">
-                {totalOrders.toLocaleString()}
+                {loading ? "..." : (stats?.totalOrders ?? 0).toLocaleString()}
               </p>
             </div>
           </div>
@@ -176,8 +291,66 @@ export default function AdminDashboard() {
               <DollarSign className="w-6 h-6 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Doanh thu (tháng)</p>
-              <p className="text-2xl font-bold">${totalRevenue.toFixed(2)}</p>
+              <p className="text-sm text-gray-600">Doanh thu</p>
+              <p className="text-2xl font-bold">
+                {loading
+                  ? "..."
+                  : `${(stats?.totalRevenue ?? 0).toLocaleString()}₫`}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-5 flex items-center space-x-4">
+            <div className="p-3 bg-amber-100 rounded-lg">
+              <TrendingUp className="w-6 h-6 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Lợi nhuận</p>
+              <p className="text-2xl font-bold text-amber-600">
+                {loading
+                  ? "..."
+                  : `${(stats?.totalProfit ?? 0).toLocaleString()}₫`}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-5 flex items-center space-x-4">
+            <div className="p-3 bg-orange-100 rounded-lg">
+              <AlertCircle className="w-6 h-6 text-orange-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Sách sắp hết (≤10 cuốn)</p>
+              <p className="text-2xl font-bold text-orange-600">
+                {loading ? "..." : stats?.lowStockBooks ?? 0}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-5 flex items-center space-x-4">
+            <div className="p-3 bg-teal-100 rounded-lg">
+              <TrendingUp className="w-6 h-6 text-teal-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Tăng trưởng KH</p>
+              <p className="text-2xl font-bold text-teal-600">
+                {loading
+                  ? "..."
+                  : `${(stats?.customerGrowthRate ?? 0).toFixed(1)}%`}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-5 flex items-center space-x-4">
+            <div className="p-3 bg-rose-100 rounded-lg">
+              <ShoppingCart className="w-6 h-6 text-rose-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Tỉ lệ hoàn đơn</p>
+              <p className="text-2xl font-bold text-rose-600">
+                {loading
+                  ? "..."
+                  : `${(stats?.cancelledOrderRate ?? 0).toFixed(1)}%`}
+              </p>
             </div>
           </div>
         </div>
@@ -185,27 +358,114 @@ export default function AdminDashboard() {
         {/* Filter Bar */}
         <div className="bg-white rounded-lg shadow p-4 mb-6 flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-gray-500" />
-            <input
-              type="date"
-              value={dateRange.from}
+            <label className="text-sm text-gray-600">Lọc theo:</label>
+            <select
+              value={filterType}
               onChange={(e) =>
-                setDateRange({ ...dateRange, from: e.target.value })
+                handleFilterTypeChange(
+                  e.target.value as "day" | "month" | "year"
+                )
               }
-              className="px-3 py-2 border rounded-lg text-sm"
-            />
-            <span className="text-gray-500">đến</span>
-            <input
-              type="date"
-              value={dateRange.to}
-              onChange={(e) =>
-                setDateRange({ ...dateRange, to: e.target.value })
-              }
-              className="px-3 py-2 border rounded-lg text-sm"
-            />
+              className="px-3 py-2 border rounded-lg text-sm bg-white"
+            >
+              <option value="day">Ngày</option>
+              <option value="month">Tháng</option>
+              <option value="year">Năm</option>
+            </select>
           </div>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
-            Áp dụng
+
+          {filterType === "day" && (
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-gray-500" />
+              <input
+                type="date"
+                value={dateRange.from}
+                onChange={(e) =>
+                  setDateRange({ ...dateRange, from: e.target.value })
+                }
+                className="px-3 py-2 border rounded-lg text-sm"
+              />
+              <span className="text-gray-500">đến</span>
+              <input
+                type="date"
+                value={dateRange.to}
+                onChange={(e) =>
+                  setDateRange({ ...dateRange, to: e.target.value })
+                }
+                className="px-3 py-2 border rounded-lg text-sm"
+              />
+            </div>
+          )}
+
+          {filterType === "month" && (
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-gray-600">Tháng:</label>
+              <select
+                value={selectedMonth}
+                onChange={(e) => handleMonthChange(Number(e.target.value))}
+                className="px-3 py-2 border rounded-lg text-sm bg-white"
+              >
+                {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                  <option key={month} value={month}>
+                    Tháng {month}
+                  </option>
+                ))}
+              </select>
+              <label className="text-sm text-gray-600">Năm:</label>
+              <select
+                value={selectedYear}
+                onChange={(e) => handleYearChange(Number(e.target.value))}
+                className="px-3 py-2 border rounded-lg text-sm bg-white"
+              >
+                {Array.from(
+                  { length: new Date().getFullYear() - 2000 + 1 },
+                  (_, i) => 2000 + i
+                )
+                  .reverse()
+                  .map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
+
+          {filterType === "year" && (
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-gray-600">Năm:</label>
+              <select
+                value={selectedYear}
+                onChange={(e) => handleYearChange(Number(e.target.value))}
+                className="px-3 py-2 border rounded-lg text-sm bg-white"
+              >
+                {Array.from(
+                  { length: new Date().getFullYear() - 2000 + 1 },
+                  (_, i) => 2000 + i
+                )
+                  .reverse()
+                  .map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
+          <button
+            onClick={handleApplyFilter}
+            disabled={loading}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+          >
+            {loading ? "Đang tải..." : "Áp dụng"}
+          </button>
+          <button
+            onClick={handleReset}
+            disabled={loading}
+            className="px-4 py-2 bg-gray-500 text-white rounded-lg text-sm hover:bg-gray-600 disabled:opacity-50 flex items-center gap-2"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Reset
           </button>
         </div>
 
@@ -335,47 +595,15 @@ export default function AdminDashboard() {
             <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
               <div className="flex items-center">
                 <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                <span>Còn hàng: {totalBooks - outOfStockBooks}</span>
+                <span>
+                  Còn hàng:{" "}
+                  {(stats?.totalBooks ?? 0) - (stats?.lowStockBooks ?? 0)}
+                </span>
               </div>
               <div className="flex items-center">
                 <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-                <span>Hết hàng: {outOfStockBooks}</span>
+                <span>Sắp hết: {stats?.lowStockBooks ?? 0}</span>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Cảnh báo & Tăng trưởng */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-5 border border-yellow-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-yellow-800">
-                  Sách sắp hết (≤10 cuốn)
-                </p>
-                <p className="text-2xl font-bold text-yellow-900">12</p>
-              </div>
-              <AlertCircle className="w-8 h-8 text-yellow-600" />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-5 border border-green-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-green-800">Tăng trưởng khách hàng</p>
-                <p className="text-2xl font-bold text-green-900">+18.2%</p>
-              </div>
-              <TrendingUp className="w-8 h-8 text-green-600" />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-lg p-5 border border-red-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-red-800">Tỷ lệ hoàn đơn</p>
-                <p className="text-2xl font-bold text-red-900">2.4%</p>
-              </div>
-              <ShoppingCart className="w-8 h-8 text-red-600" />
             </div>
           </div>
         </div>

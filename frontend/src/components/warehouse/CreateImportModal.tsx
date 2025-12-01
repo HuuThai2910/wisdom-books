@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import entryFormApi from "../../api/entryFormApi";
+import bookApi from "../../api/bookApi";
 import { Book as ApiBook } from "../../types";
 import toast from "react-hot-toast";
 import { X, Trash2, Upload } from "lucide-react";
 import * as XLSX from "xlsx";
-import { useBooks } from "../../contexts/BookContext";
 
 interface BookInImport {
   isbn: string;
@@ -30,7 +30,7 @@ export default function CreateImportModal({
   onClose,
   onSubmit,
 }: CreateImportModalProps) {
-  const { books: allBooks, fetchBooks } = useBooks();
+  const [allBooks, setAllBooks] = useState<ApiBook[]>([]);
   const [filteredBooks, setFilteredBooks] = useState<ApiBook[]>([]);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [supplier, setSupplier] = useState("");
@@ -39,30 +39,63 @@ export default function CreateImportModal({
   const [selectedBookIsbn, setSelectedBookIsbn] = useState("");
   const [importQuantity, setImportQuantity] = useState("");
   const [totalInventoryQty, setTotalInventoryQty] = useState(0);
+  const [bookPageSize, setBookPageSize] = useState(10);
+  const [bookCurrentPage, setBookCurrentPage] = useState(0);
+  const [bookTotalPages, setBookTotalPages] = useState(1);
+  const [totalBooksCount, setTotalBooksCount] = useState(0);
+  const [loadingBooks, setLoadingBooks] = useState(false);
+
+  const fetchAllBooks = async () => {
+    try {
+      setLoadingBooks(true);
+      const response = await bookApi.getAllBooks({
+        page: bookCurrentPage,
+        size: bookPageSize,
+        sort: "quantity,asc",
+        filter: undefined,
+      });
+
+      if (response.data) {
+        const { result, meta } = response.data;
+        const books = result || [];
+        setAllBooks(books);
+        setFilteredBooks(books);
+        setBookTotalPages(meta?.pages || 1);
+        setTotalBooksCount(meta?.total || 0);
+      }
+    } catch (error) {
+      console.error("Error fetching books:", error);
+      toast.error("Không thể tải dữ liệu sách");
+    } finally {
+      setLoadingBooks(false);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
-      fetchBooks(0, 20, "quantity,asc", "quantity<100");
+      fetchAllBooks();
       generateInvoiceNumber();
       fetchTotalInventory();
+      setSupplier("Admin");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, bookCurrentPage, bookPageSize]);
 
   useEffect(() => {
-    if (searchKeyword.trim()) {
-      const keyword = searchKeyword.toLowerCase();
-      const filtered = allBooks.filter(
-        (book) =>
-          book.isbn.toLowerCase().includes(keyword) ||
-          book.title.toLowerCase().includes(keyword) ||
-          book.author?.toLowerCase().includes(keyword) ||
-          book.publisher?.toLowerCase().includes(keyword)
-      );
-      setFilteredBooks(filtered);
-    } else {
+    if (!searchKeyword.trim()) {
       setFilteredBooks(allBooks);
+      return;
     }
+
+    const keyword = searchKeyword.toLowerCase();
+    const filtered = allBooks.filter(
+      (book) =>
+        book.isbn.toLowerCase().includes(keyword) ||
+        book.title.toLowerCase().includes(keyword) ||
+        book.author?.toLowerCase().includes(keyword) ||
+        book.publisher?.toLowerCase().includes(keyword)
+    );
+    setFilteredBooks(filtered);
   }, [searchKeyword, allBooks]);
 
   const fetchTotalInventory = async () => {
@@ -212,11 +245,11 @@ export default function CreateImportModal({
           );
           const newTotal = booksToAdd.reduce((sum, b) => sum + b.quantity, 0);
 
-          if (currentTotal + newTotal > totalInventoryQty) {
+          if (currentTotal + newTotal > 50000) {
             toast.error(
               `Tổng số lượng nhập (${(
                 currentTotal + newTotal
-              ).toLocaleString()}) vượt quá tổng số lượng trong kho (${totalInventoryQty.toLocaleString()})`
+              ).toLocaleString()}) vượt quá giới hạn cho phép (50,000)`
             );
             return;
           }
@@ -278,11 +311,11 @@ export default function CreateImportModal({
       (sum, b) => sum + b.quantity,
       0
     );
-    if (currentTotalInForm + quantity > totalInventoryQty) {
+    if (currentTotalInForm + quantity > 50000) {
       toast.error(
         `Tổng số lượng sách trong phiếu nhập (${
           currentTotalInForm + quantity
-        }) không được vượt quá tổng số lượng sách trong kho (${totalInventoryQty})`
+        }) không được vượt quá giới hạn cho phép (50,000)`
       );
       return;
     }
@@ -392,7 +425,7 @@ export default function CreateImportModal({
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
       <div className="bg-white w-full max-w-6xl max-h-[90vh] rounded-lg shadow-2xl flex flex-col">
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 flex justify-between items-center sticky top-0 z-10 rounded-t-lg">
+        <div className="bg-linear-to-r from-blue-600 to-blue-700 text-white px-6 py-4 flex justify-between items-center sticky top-0 z-10 rounded-t-lg">
           <h2 className="text-xl font-bold">Tạo phiếu nhập kho</h2>
           <button
             onClick={handleClose}
@@ -411,14 +444,14 @@ export default function CreateImportModal({
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Người giao:
+                  Người tạo:
                 </label>
                 <input
                   type="text"
                   value={supplier}
-                  onChange={(e) => setSupplier(e.target.value)}
-                  placeholder="Nhập tên người/công ty giao hàng"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  readOnly
+                  placeholder="Người tạo phiếu nhập kho"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 cursor-not-allowed"
                 />
               </div>
               <div>
@@ -588,7 +621,16 @@ export default function CreateImportModal({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {filteredBooks.length === 0 ? (
+                  {loadingBooks ? (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        className="px-4 py-8 text-center text-gray-500"
+                      >
+                        Đang tải dữ liệu...
+                      </td>
+                    </tr>
+                  ) : filteredBooks.length === 0 ? (
                     <tr>
                       <td
                         colSpan={7}
@@ -598,7 +640,7 @@ export default function CreateImportModal({
                       </td>
                     </tr>
                   ) : (
-                    filteredBooks.slice(0, 20).map((book) => {
+                    filteredBooks.map((book) => {
                       const status = getStockStatus(book.quantity);
                       return (
                         <tr key={book.isbn} className="hover:bg-gray-50">
@@ -655,6 +697,73 @@ export default function CreateImportModal({
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between mt-4">
+              <div className="text-sm text-gray-700">
+                Hiển thị {bookCurrentPage * bookPageSize + 1} -{" "}
+                {Math.min(
+                  (bookCurrentPage + 1) * bookPageSize,
+                  totalBooksCount
+                )}{" "}
+                trên {totalBooksCount} sách
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setBookCurrentPage(0)}
+                  disabled={bookCurrentPage === 0}
+                  className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-700"
+                  title="Trang đầu"
+                >
+                  «
+                </button>
+                <button
+                  onClick={() =>
+                    setBookCurrentPage(Math.max(0, bookCurrentPage - 1))
+                  }
+                  disabled={bookCurrentPage === 0}
+                  className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-700"
+                  title="Trang trước"
+                >
+                  ‹
+                </button>
+                <span className="text-sm text-gray-700">
+                  Trang {bookCurrentPage + 1} / {bookTotalPages}
+                </span>
+                <button
+                  onClick={() =>
+                    setBookCurrentPage(
+                      Math.min(bookTotalPages - 1, bookCurrentPage + 1)
+                    )
+                  }
+                  disabled={bookCurrentPage >= bookTotalPages - 1}
+                  className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-700"
+                  title="Trang sau"
+                >
+                  ›
+                </button>
+                <button
+                  onClick={() => setBookCurrentPage(bookTotalPages - 1)}
+                  disabled={bookCurrentPage >= bookTotalPages - 1}
+                  className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed text-gray-700"
+                  title="Trang cuối"
+                >
+                  »
+                </button>
+                <select
+                  value={bookPageSize}
+                  onChange={(e) => {
+                    setBookPageSize(Number(e.target.value));
+                    setBookCurrentPage(0);
+                  }}
+                  className="ml-2 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                >
+                  <option value={10}>10 / trang</option>
+                  <option value={20}>20 / trang</option>
+                  <option value={50}>50 / trang</option>
+                </select>
+              </div>
             </div>
           </div>
 
