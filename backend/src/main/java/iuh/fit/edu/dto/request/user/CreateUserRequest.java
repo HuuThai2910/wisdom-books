@@ -1,5 +1,6 @@
 package iuh.fit.edu.dto.request.user;
 
+import iuh.fit.edu.entity.Address;
 import iuh.fit.edu.entity.Role;
 import iuh.fit.edu.entity.constant.Gender;
 import iuh.fit.edu.entity.constant.UserStatus;
@@ -17,7 +18,7 @@ public class CreateUserRequest {
     private String email;
     private String phone;
     private Gender gender;
-    private String diaChi;
+    private Address address;
     private Role role;
     private UserStatus userStatus;
     private String password;

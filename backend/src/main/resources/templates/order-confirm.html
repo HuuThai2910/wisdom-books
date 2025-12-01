@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Đặt hàng thành công</title>
+    <!--[if mso]>
+    <style type="text/css">
+        body, table, td {font-family: Arial, Helvetica, sans-serif !important;}
+    </style>
+    <![endif]-->
+    <style>
+        /* Reset styles */
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table {background-color: white !important;}
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        body { margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; }
+
+        /* Base styles */
+        body { background-color: #e5e7eb; font-family: Arial, Helvetica, sans-serif; color: #0f172a; }
+        .email-container { max-width: 600px; margin: 0 auto; border: 2px solid #e5e7eb; }
+        .content-wrapper { background: #ffffff; }
+
+        /* Header */
+        .header { background-color: #2563eb; padding: 32px 20px; text-align: center; }
+        .check-icon { width: 64px; height: 64px; margin: 0 auto 16px; background: rgba(255,255,255,0.2); border: 3px solid #ffffff; border-radius: 50%; line-height: 58px; font-size: 32px; color: #ffffff; font-weight: bold; }
+        .header-title { font-size: 24px; font-weight: bold; color: #ffffff; margin: 0 0 8px; line-height: 1.3; }
+        .header-subtitle { font-size: 14px; color: #ffffff; margin: 0; opacity: 0.95; line-height: 1.4; }
+
+        /* Section */
+        .section { padding: 24px 20px; border-bottom: 1px solid #e5e7eb;  }
+        .section-last { border-bottom: none; }
+        .section-title { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px; line-height: 1.3; }
+        .text { font-size: 15px; color: #334155; margin: 0 0 12px; line-height: 1.6; }
+        .text:last-child { margin-bottom: 0; }
+
+        /* Info table */
+        .info-table { width: 100%; border-collapse: collapse; }
+        .info-row td { padding: 10px 0; vertical-align: top; font-size: 15px; line-height: 1.5; }
+        .info-label { color: #64748b; padding-right: 16px; width: 45%; }
+        .info-value { color: #0f172a; font-weight: 600; word-break: break-word; }
+
+        /* Product table */
+        .product-table { width: 100%; border-collapse: collapse; }
+        .product-row { border-bottom: 1px solid #e5e7eb; }
+        .product-row:last-child { border-bottom: none; }
+        .product-row:only-child { border-bottom: none; }
+        .product-row td { padding: 16px 0; vertical-align: top; }
+        .product-info { font-size: 15px; line-height: 1.5; }
+        .product-name { font-weight: 600; color: #111827; margin: 0 0 6px; }
+        .product-qty { font-size: 13px; color: #6b7280; margin: 0; }
+        .product-price { font-size: 15px; color: #0f172a; font-weight: 600; text-align: right; white-space: nowrap; padding-left: 16px; }
+
+        /* Totals card */
+        .totals-card { background-color: #f8fafc; border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px 18px; margin-top: 4px; }
+        .totals-table { width: 100%; border-collapse: collapse; background-color: #f8fafc; }
+        .totals-table td { padding: 10px 0; font-size: 15px; line-height: 1.4; background-color: #f8fafc; }
+        .totals-label { color: #64748b; }
+        .totals-value { color: #0f172a; font-weight: 600; text-align: right; white-space: nowrap; }
+        .totals-divider { border-top: 2px solid #e5e7eb; padding: 0 !important; height: 1px; line-height: 1px; }
+        .totals-total td { padding-top: 12px; }
+        .totals-total .totals-label { color: #0f172a; font-weight: 700; font-size: 16px; }
+        .totals-total .totals-value { color: #2563eb; font-weight: 700; font-size: 20px; }
+
+        /* Button */
+        .button-wrapper { text-align: center; margin: 24px 0; }
+        .button { display: block; background-color: #2563eb; color: #ffffff !important; text-decoration: none; font-weight: 700; font-size: 15px; padding: 16px 40px; border-radius: 8px; line-height: 1.4; }
+
+        /* Note box */
+        .note-box { background-color: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid #2563eb; border-radius: 8px; padding: 16px 18px; margin-top: 20px; }
+        .note-box strong { color: #1e40af; }
+        .note-text { font-size: 14px; color: #1e40af; line-height: 1.6; margin: 0; }
+
+        /* Footer */
+        .footer { background-color: #f9fafb; border-top: 1px solid #e2e8f0; padding: 28px 20px; text-align: center; }
+        .footer-brand { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+        .footer-contact { font-size: 14px; color: #64748b; margin-bottom: 16px; line-height: 1.5; }
+        .footer-divider { width: 60px; height: 2px; background-color: #e2e8f0; margin: 20px auto; }
+        .footer-copyright { font-size: 13px; color: #94a3b8; }
+
+        /* Responsive */
+        @media only screen and (max-width: 600px) {
+            .email-container { width: 100% !important; }
+            .content-wrapper { border-radius: 0 !important; }
+
+            .header { padding: 28px 16px !important; }
+            .check-icon { width: 56px !important; height: 56px !important; line-height: 50px !important; font-size: 28px !important; margin-bottom: 12px !important; }
+            .header-title { font-size: 20px !important; }
+            .header-subtitle { font-size: 13px !important; }
+
+            .section { padding: 20px 16px !important; }
+            .section-title { font-size: 16px !important; margin-bottom: 14px !important; }
+            .text { font-size: 14px !important; }
+
+            .info-row td { padding: 8px 0 !important; font-size: 14px !important; }
+            .info-label { display: block; padding-bottom: 4px !important; padding-right: 0 !important; width: 100% !important; }
+            .info-value { display: block; width: 100% !important; }
+
+            .product-row td { padding: 12px 0 !important; }
+            .product-info { font-size: 14px !important; }
+            .product-name { font-size: 14px !important; }
+            .product-qty { font-size: 12px !important; }
+            .product-price { font-size: 14px !important; padding-left: 12px !important; }
+
+            .totals-card { padding: 14px 16px !important; }
+            .totals-table td { padding: 8px 0 !important; font-size: 14px !important; }
+            .totals-total .totals-label { font-size: 15px !important; }
+            .totals-total .totals-value { font-size: 18px !important; }
+
+            .button-wrapper { margin: 20px 0 !important; }
+            .button { padding: 14px 32px !important; font-size: 14px !important; display: block !important; }
+
+            .note-box { padding: 14px 16px !important; margin-top: 16px !important; }
+            .note-text { font-size: 13px !important; }
+
+            .footer { padding: 24px 16px !important; }
+            .footer-brand { font-size: 16px !important; }
+            .footer-contact { font-size: 13px !important; }
+            .footer-copyright { font-size: 12px !important; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #e5e7eb;">
+<!-- Wrapper table for Outlook -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0; padding: 0; background-color: #e5e7eb;">
+    <tr>
+        <td align="center" style="padding: 20px 10px;">
+            <!-- Main container -->
+            <table class="email-container" role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.12);">
+                <!-- Header -->
+                <tr>
+                    <td class="header" style="background-color: #2563eb; padding: 32px 20px; text-align: center; border-radius: 12px 12px 0 0;">
+                        <div class="check-icon" style="width: 64px; height: 64px; margin: 0 auto 16px; background: rgba(255,255,255,0.2); border: 3px solid #ffffff; border-radius: 50%; line-height: 58px; font-size: 32px; color: #ffffff; font-weight: bold;">✓</div>
+                        <h1 class="header-title" style="font-size: 24px; font-weight: bold; color: #ffffff; margin: 0 0 8px; line-height: 1.3;">Đặt hàng thành công</h1>
+                        <p class="header-subtitle" style="font-size: 14px; color: #ffffff; margin: 0; opacity: 0.95; line-height: 1.4;">Cảm ơn bạn đã đặt hàng</p>
+                    </td>
+                </tr>
+
+                <!-- Greeting -->
+                <tr>
+                    <td class="section" style="padding: 24px 20px; border-bottom: 1px solid #e5e7eb;">
+                        <p class="text" style="font-size: 15px; color: #334155; margin: 0 0 12px; line-height: 1.6;">Xin chào <strong th:text="${order.receiverName}">Nguyễn Văn A</strong>,</p>
+                        <p class="text" style="font-size: 15px; color: #334155; margin: 0; line-height: 1.6;">Chúng tôi đã nhận được đơn hàng của bạn và đang xử lý. Đơn hàng sẽ được giao đến tay bạn sớm nhất có thể.</p>
+                    </td>
+                </tr>
+
+                <!-- Order Info -->
+                <tr>
+                    <td class="section" style="padding: 24px 20px; border-bottom: 1px solid #e5e7eb;">
+                        <h2 class="section-title" style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px; line-height: 1.3;">Thông tin đơn hàng</h2>
+                        <table class="info-table" role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                            <tr class="info-row">
+                                <td class="info-label" style="color: #64748b; padding: 10px 16px 10px 0; font-size: 15px; vertical-align: top;">Mã đơn hàng</td>
+                                <td class="info-value" style="color: #0f172a; font-weight: 600; padding: 10px 0; font-size: 15px; word-break: break-word;" th:text="${order.orderCode}">DH123456</td>
+                            </tr>
+                            <tr class="info-row">
+                                <td class="info-label" style="color: #64748b; padding: 10px 16px 10px 0; font-size: 15px; vertical-align: top;">Ngày đặt</td>
+                                <td class="info-value" style="color: #0f172a; font-weight: 600; padding: 10px 0; font-size: 15px;" th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy')}">28/11/2024</td>
+                            </tr>
+                            <tr class="info-row">
+                                <td class="info-label" style="color: #64748b; padding: 10px 16px 10px 0; font-size: 15px; vertical-align: top;">Phương thức thanh toán</td>
+                                <td class="info-value" style="color: #0f172a; font-weight: 600; padding: 10px 0; font-size: 15px;" th:text="${order.paymentMethod}">COD</td>
+                            </tr>
+                            <tr class="info-row">
+                                <td class="info-label" style="color: #64748b; padding: 10px 16px 10px 0; font-size: 15px; vertical-align: top;">Trạng thái</td>
+                                <td class="info-value" style="color: #0f172a; font-weight: 600; padding: 10px 0; font-size: 15px;" th:text="${order.status}">Đang xử lý</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Products -->
+                <tr>
+                    <td class="section" style="padding: 24px 20px; border-bottom: 1px solid #e5e7eb;">
+                        <h2 class="section-title" style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px; line-height: 1.3;">Sản phẩm</h2>
+                        <table class="product-table" role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                            <tr class="product-row" th:each="item, iterStat : ${order.orderItems}" th:style="${iterStat.last} ? 'border-bottom: none;' : 'border-bottom: 1px solid #e5e7eb;'">
+                                <td class="product-info" style="padding: 16px 0; font-size: 15px; vertical-align: top;">
+                                    <p class="product-name" style="font-weight: 600; color: #111827; margin: 0 0 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;" th:text="${item.book.title}">Sách Lập trình Java cơ bản đến nâng cao dành cho người mới bắt đầu học lập trình</p>
+                                    <p class="product-qty" style="font-size: 13px; color: #6b7280; margin: 0;">Số lượng: <span th:text="${item.quantity}">2</span></p>
+                                </td>
+                                <td class="product-price" style="padding: 16px 0 16px 16px; font-size: 15px; color: #0f172a; font-weight: 600; text-align: right; white-space: nowrap; vertical-align: top;" th:text="${#numbers.formatInteger(item.price, 0, 'POINT')} + ' đ'">4.470.000đ</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Shipping Address -->
+                <tr>
+                    <td class="section" style="padding: 24px 20px; border-bottom: 1px solid #e5e7eb;">
+                        <h2 class="section-title" style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px; line-height: 1.3;">Địa chỉ giao hàng</h2>
+                        <table class="info-table" role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                            <tr class="info-row">
+                                <td class="info-label" style="color: #64748b; padding: 10px 16px 10px 0; font-size: 15px; vertical-align: top;">Người nhận</td>
+                                <td class="info-value" style="color: #0f172a; font-weight: 600; padding: 10px 0; font-size: 15px; word-break: break-word;" th:text="${order.receiverName}">Nguyễn Văn A</td>
+                            </tr>
+                            <tr class="info-row">
+                                <td class="info-label" style="color: #64748b; padding: 10px 16px 10px 0; font-size: 15px; vertical-align: top;">Số điện thoại</td>
+                                <td class="info-value" style="color: #0f172a; font-weight: 600; padding: 10px 0; font-size: 15px;" th:text="${order.receiverPhone}">0912345678</td>
+                            </tr>
+                            <tr class="info-row">
+                                <td class="info-label" style="color: #64748b; padding: 10px 16px 10px 0; font-size: 15px; vertical-align: top;">Địa chỉ</td>
+                                <td class="info-value" style="color: #0f172a; font-weight: 600; padding: 10px 0; font-size: 15px; word-break: break-word;" th:text="${order.receiverAddress}">123 Nguyễn Huệ, Q1, TP.HCM</td>
+                            </tr>
+                            <tr class="info-row">
+                                <td class="info-label" style="color: #64748b; padding: 10px 16px 10px 0; font-size: 15px; vertical-align: top;">Email</td>
+                                <td class="info-value" style="color: #0f172a; font-weight: 600; padding: 10px 0; font-size: 15px; word-break: break-word;" th:text="${order.receiverEmail}">email@example.com</td>
+                            </tr>
+                            <tr class="info-row" th:if="${order.note != null and order.note != ''}">
+                                <td class="info-label" style="color: #64748b; padding: 10px 16px 10px 0; font-size: 15px; vertical-align: top;">Ghi chú</td>
+                                <td class="info-value" style="color: #0f172a; font-weight: 600; padding: 10px 0; font-size: 15px; word-break: break-word;" th:text="${order.note}">Giao hàng giờ hành chính</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Totals -->
+                <tr>
+                    <td class="section section-last" style="padding: 24px 20px;">
+                        <div class="totals-card" style="background-color: #f8fafc; border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px 18px; margin-top: 4px;">
+                            <table class="totals-table" role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                <tr>
+                                    <td class="totals-label" style="color: #64748b; padding: 10px 0; font-size: 15px;">Tạm tính</td>
+                                    <td class="totals-value" style="color: #0f172a; font-weight: 600; text-align: right; padding: 10px 0; font-size: 15px;" th:text="${#numbers.formatInteger(subtotal, 0, 'POINT')} + ' đ'">4.470.000đ</td>
+                                </tr>
+                                <tr>
+                                    <td class="totals-label" style="color: #64748b; padding: 10px 0; font-size: 15px;">Giảm giá</td>
+                                    <td class="totals-value" style="color: #0f172a; font-weight: 600; text-align: right; padding: 10px 0; font-size: 15px;" th:text="'-' + ${#numbers.formatInteger(discount, 0, 'POINT')} + ' đ'">-50.000đ</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="totals-divider" style="border-top: 2px solid #e5e7eb; padding: 0; height: 1px;"></td>
+                                </tr>
+                                <tr class="totals-total">
+                                    <td class="totals-label" style="color: #0f172a; font-weight: 700; font-size: 16px; padding: 12px 0 10px;">Tổng cộng</td>
+                                    <td class="totals-value" style="color: #2563eb; font-weight: 700; font-size: 20px; text-align: right; padding: 12px 0 10px;" th:text="${#numbers.formatInteger(order.totalPrice, 0, 'POINT')} + ' đ'">4.420.000đ</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- CTA Button -->
+                        <div class="button-wrapper" style="text-align: center; margin: 24px 0;">
+                            <a href="#" th:href="@{${trackingUrl}}" class="button" style="display: block; background-color: #2563eb; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 15px; padding: 16px 40px; border-radius: 8px; line-height: 1.4;">THEO DÕI ĐƠN HÀNG</a>
+                        </div>
+
+                        <!-- Note -->
+                        <div class="note-box" style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid #2563eb; border-radius: 8px; padding: 16px 18px; margin-top: 20px;">
+                            <p class="note-text" style="font-size: 14px; color: #1e40af; line-height: 1.6; margin: 0;"><strong>Lưu ý:</strong> Vui lòng kiểm tra kỹ sản phẩm khi nhận hàng. Liên hệ ngay với chúng tôi nếu có bất kỳ vấn đề nào.</p>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td class="footer" style="background-color: #f9fafb; border-top: 1px solid #e2e8f0; padding: 28px 20px; text-align: center; border-radius: 0 0 12px 12px;">
+                        <div class="footer-brand" style="font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">BookStore</div>
+                        <div class="footer-contact" style="font-size: 14px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">support@bookstore.com • 1900-xxxx</div>
+                        <div class="footer-divider" style="width: 60px; height: 2px; background-color: #e2e8f0; margin: 20px auto;"></div>
+                        <div class="footer-copyright" style="font-size: 13px; color: #94a3b8;">© 2024 BookStore. All rights reserved.</div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

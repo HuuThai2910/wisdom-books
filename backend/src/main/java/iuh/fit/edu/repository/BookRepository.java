@@ -3,15 +3,31 @@ package iuh.fit.edu.repository;
 import iuh.fit.edu.entity.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-/**
- * @author Nguyen Tan Nghi
- * @created 11/24/2025 2:35 PM
- * @version 1.0
- */
+   
+@Repository
 public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificationExecutor<Book> {
-    boolean existsByIsbn(String isbn);
-    Optional<Book> findByIsbn(String isbn);
+     boolean existsByIsbn(String isbn);
+     Optional<Book> findByIsbn(String isbn);
+
+    // 1. ATOMIC REDUCE (Trừ số lượng an toàn)
+    // Logic: Chỉ trừ khi stock >= qty.
+    // Return: số dòng update thành công (1 nếu thành công, 0 nếu thất bại/hết hàng)
+    @Modifying
+    @Query("update Book b set b.quantity = b.quantity - :quantity " +
+            "where b.id = :id and b.quantity >= :quantity")
+    int reduceQuantity(@Param("id") Long id, @Param("quantity") int quantity);
+
+    // 2. ATOMIC RESTORE (Hoàn số lượng khi hủy đơn)
+    @Modifying
+    @Query("update Book b set b.quantity = b.quantity + :quantity " +
+            "where b.id = :id")
+    int restoreStock(@Param("id") Long id, @Param("quantity") int quantity);
+
 }

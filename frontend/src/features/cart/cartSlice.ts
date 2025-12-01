@@ -60,14 +60,14 @@ export const updateItem = createAsyncThunk<
 
 // Xóa item
 export const removeItem = createAsyncThunk<
-    number,
-    number,
+    number[],
+    number[],
     { rejectValue: string }
->("cart/removeFromCart", async (itemId, thunkAPI) => {
+>("cart/removeFromCart", async (ids, thunkAPI) => {
     try {
         console.log("test");
-        await cartAPI.removeItem(itemId);
-        return itemId;
+        await cartAPI.removeItem(ids);
+        return ids;
     } catch (err: any) {
         return thunkAPI.rejectWithValue(
             err.response?.data?.message || err.message
@@ -211,8 +211,8 @@ const cartSlice = createSlice({
             // REMOVE ITEM
             .addCase(removeItem.fulfilled, (state, action) => {
                 state.status = "succeeded";
-                state.cartItems = state.cartItems.filter(
-                    (i) => i.id !== action.payload
+                state.cartItems = state.cartItems.filter((item) =>
+                    !action.payload.includes(item.id)
                 );
             })
 

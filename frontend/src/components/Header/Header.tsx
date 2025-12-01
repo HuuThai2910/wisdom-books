@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../app/store";
+import { fetchCart } from "../../features/cart/cartSlice";
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL as string;
+import { formatCurrency } from "../../util/formatting";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
     FaSearch,
@@ -14,18 +18,6 @@ import {
 import Carousel from "./Carousel";
 import logoImg from "../../assets/img/logo.png";
 import wisbook from "../../assets/img/wisbook.png";
-
-// Mock data cho giỏ hàng
-const cartItems = [
-    {
-        id: 1,
-        name: "AirPods Pro 2",
-        price: 249.0,
-        quantity: 1,
-        image: "https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7?w=100&h=100&fit=crop",
-    },
-];
-
 export default function Header() {
     const [opacity, setOpacity] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -38,6 +30,28 @@ export default function Header() {
     const location = useLocation();
     const navigate = useNavigate();
     const isHomePage = location.pathname === "/";
+    const { cartItems } = useAppSelector((state) => state.cart);
+    const dispatch = useAppDispatch();
+
+    // Lấy dữ liệu từ cart để truyền vào cart mini
+    useEffect(() => {
+        dispatch(fetchCart());
+    }, [dispatch]);
+
+    // Size
+    const size = useMemo(() => cartItems.length, [cartItems]);
+    // Tổng giá tiền
+    const totalPrice = useMemo(() => {
+        return cartItems.reduce(
+            (sum, item) => sum + (item.book?.price || 0) * item.quantity,
+            0
+        );
+    }, [cartItems]);
+
+    // Tổng sản phẩm
+    const totalQuantity = useMemo(() => {
+        return cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    }, [cartItems]);
 
     // Danh sách thể loại sách cố định
     const bookCategories = [
@@ -59,16 +73,6 @@ export default function Header() {
         { id: 16, name: "Nông nghiệp – Thú y" },
         { id: 17, name: "Kỹ thuật – Công nghiệp" },
     ];
-
-    // Tính tổng giỏ hàng
-    const cartTotal = cartItems.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-    );
-    const cartItemCount = cartItems.reduce(
-        (sum, item) => sum + item.quantity,
-        0
-    );
 
     useEffect(() => {
         const timer = setTimeout(() => setLoading(false), 10);
@@ -129,7 +133,7 @@ export default function Header() {
                             : "none",
                 }}
             >
-                <div className="container mx-auto flex items-center justify-between px-6 py-6 text-gray-800">
+                <div className="container mx-auto flex items-center justify-between px-6 py-2 text-gray-800">
                     {/* Logo */}
                     <Link
                         to="/"
@@ -158,7 +162,7 @@ export default function Header() {
                             to="/"
                             className="relative group transition-colors"
                         >
-                            <span className="text-white font-bold text-2xl">
+                            <span className="text-white font-bold text-xl">
                                 Trang chủ
                             </span>
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
@@ -167,7 +171,7 @@ export default function Header() {
                             to="/books"
                             className="relative group transition-colors"
                         >
-                            <span className="text-white font-bold text-2xl">
+                            <span className="text-white font-bold text-xl">
                                 Sản phẩm
                             </span>
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
@@ -188,7 +192,7 @@ export default function Header() {
                             }}
                         >
                             <button className="relative group transition-colors flex items-center gap-1">
-                                <span className="text-white font-bold text-2xl">
+                                <span className="text-white font-bold text-xl">
                                     Thể loại
                                 </span>
                                 <svg
@@ -233,7 +237,7 @@ export default function Header() {
 
                             {/* Category Dropdown */}
                             {showCategoryMenu && (
-                                <div className="absolute top-full left-0 pt-4 w-[900px] z-50">
+                                <div className="absolute top-full left-0 pt-4 w-[700px] z-50">
                                     <div
                                         className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200"
                                         style={{
@@ -256,10 +260,10 @@ export default function Header() {
                                                                     category.name
                                                                 )
                                                             }
-                                                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-purple-50 transition-all duration-300 group border border-transparent hover:border-purple-200 text-left w-full"
+                                                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 transition-all duration-300 group border border-transparent hover:border-blue-200 text-left w-full"
                                                         >
                                                             <div className="flex-1">
-                                                                <h4 className="font-semibold text-gray-800 group-hover:text-purple-600 transition-colors text-sm">
+                                                                <h4 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors text-sm">
                                                                     {
                                                                         category.name
                                                                     }
@@ -314,7 +318,7 @@ export default function Header() {
                             to="/about"
                             className="relative group transition-colors"
                         >
-                            <span className="text-white font-bold text-2xl">
+                            <span className="text-white font-bold text-xl">
                                 Tin tức
                             </span>
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
@@ -323,7 +327,7 @@ export default function Header() {
                             to="/contact"
                             className="relative group transition-colors"
                         >
-                            <span className="text-white font-bold text-2xl">
+                            <span className="text-white font-bold text-xl">
                                 Liên hệ
                             </span>
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
@@ -362,11 +366,12 @@ export default function Header() {
                                     setIsCartClosing(false);
                                     setShowCartMenu(true);
                                 }}
+                                onClick={() => navigate("/cart")}
                             >
                                 <FaShoppingCart className="text-3xl text-white" />
-                                {cartItemCount > 0 && (
+                                {size > 0 && (
                                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                                        {cartItemCount}
+                                        {size}
                                     </span>
                                 )}
                             </button>
@@ -395,60 +400,91 @@ export default function Header() {
                                                 : "slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards",
                                         }}
                                     >
-                                        {/* Cart Items */}
-                                        <div className="max-h-[300px] overflow-y-auto">
-                                            {cartItems
-                                                .slice(0, 1)
-                                                .map((item) => (
-                                                    <div
-                                                        key={item.id}
-                                                        className="flex items-center gap-3 p-4 border-b border-gray-100"
-                                                    >
-                                                        <img
-                                                            src={item.image}
-                                                            alt={item.name}
-                                                            className="w-16 h-16 object-cover rounded"
-                                                        />
-                                                        <div className="flex-1 flex flex-col justify-center">
-                                                            <h4 className="text-sm text-gray-800 mb-1">
-                                                                {item.name}
-                                                            </h4>
-                                                            <p className="text-xs text-gray-500">
-                                                                Số lượng:{" "}
-                                                                {item.quantity}
-                                                            </p>
-                                                        </div>
-                                                        <button className="text-gray-400 hover:text-gray-600 p-1">
-                                                            <FaTimes className="text-sm" />
+                                        {cartItems.length === 0 ? (
+                                            <p className="p-20 text-center text-gray-500 font-bold">
+                                                Giỏ hàng trống
+                                            </p>
+                                        ) : (
+                                            <>
+                                                {/* Cart Items */}
+                                                <div className="max-h-[300px] overflow-y-auto">
+                                                    {cartItems
+                                                        .slice(0, 5)
+                                                        .map((item) => (
+                                                            <div
+                                                                key={item.id}
+                                                                className="flex items-center gap-3 p-4 border-b border-gray-100"
+                                                            >
+                                                                <img
+                                                                    src={
+                                                                        `${IMAGE_BASE_URL}${item.book.image}` ||
+                                                                        "/default-image.png"
+                                                                    }
+                                                                    alt={
+                                                                        item
+                                                                            .book
+                                                                            ?.title ||
+                                                                        "Book"
+                                                                    }
+                                                                    className="w-16 h-16 object-cover rounded"
+                                                                />
+                                                                <div className="flex-1 flex flex-col justify-center">
+                                                                    <h4 className="text-sm text-gray-800 mb-1 line-clamp-1">
+                                                                        {item
+                                                                            .book
+                                                                            ?.title ||
+                                                                            "Không có tiêu đề"}
+                                                                    </h4>
+                                                                    <p className="text-xs text-gray-500">
+                                                                        Số
+                                                                        lượng:{" "}
+                                                                        {
+                                                                            item.quantity
+                                                                        }
+                                                                    </p>
+                                                                </div>
+                                                                <button className="text-gray-400 hover:text-gray-600 p-1">
+                                                                    <FaTimes className="text-sm" />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                </div>
+
+                                                {/* Footer */}
+                                                <div className="p-4 bg-white border-t border-gray-100">
+                                                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
+                                                        <span className="text-sm text-gray-600">
+                                                            Tổng sản phẩm
+                                                        </span>
+                                                        <span className="text-sm font-semibold text-gray-800">
+                                                            {totalQuantity}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <span className="text-sm text-gray-600">
+                                                            Tổng tiền
+                                                        </span>
+                                                        <span className="text-lg font-bold text-red-600">
+                                                            {formatCurrency(
+                                                                totalPrice
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            className="flex-1 border border-gray-300 text-gray-700 text-sm font-medium py-2.5 rounded-full hover:bg-gray-50 transition"
+                                                            onClick={() =>
+                                                                navigate(
+                                                                    "/cart"
+                                                                )
+                                                            }
+                                                        >
+                                                            Xem giỏ hàng
                                                         </button>
                                                     </div>
-                                                ))}
-                                        </div>
-
-                                        {/* Footer */}
-                                        <div className="p-4 bg-white border-t border-gray-100">
-                                            <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
-                                                <span className="text-sm text-gray-600">
-                                                    Tổng sản phẩm
-                                                </span>
-                                                <span className="text-sm font-semibold text-gray-800">
-                                                    {cartItemCount}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center justify-between mb-4">
-                                                <span className="text-sm text-gray-600">
-                                                    Tổng tiền
-                                                </span>
-                                                <span className="text-lg font-bold text-red-600">
-                                                    {cartTotal.toFixed(3)} đ
-                                                </span>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <button className="flex-1 border border-gray-300 text-gray-700 text-sm font-medium py-2.5 rounded-full hover:bg-gray-50 transition">
-                                                    Xem giỏ hàng
-                                                </button>
-                                            </div>
-                                        </div>
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -459,7 +495,7 @@ export default function Header() {
                                 onClick={() =>
                                     setShowAccountMenu(!showAccountMenu)
                                 }
-                                 className="text-white relative flex items-center p-2 rounded-full transition-all duration-500 "
+                                className="text-white relative flex items-center p-2 rounded-full transition-all duration-500 "
                             >
                                 <FaUser className="text-3xl text-white" />
                             </button>

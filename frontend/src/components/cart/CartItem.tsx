@@ -3,8 +3,8 @@ import { formatCurrency } from "../../util/formatting";
 import { X } from "lucide-react";
 import { useAppDispatch } from "../../app/store";
 import { removeItem } from "../../features/cart/cartSlice";
-import { useCartItemQuantity } from "../../hooks/useCartItemQuantity";
-import { useCartItemSelection } from "../../hooks/useCartItemSelection";
+import { useCartItemQuantity } from "../../hooks/cart/useCartItemQuantity";
+import { useCartItemSelection } from "../../hooks/cart/useCartItemSelection";
 import CartItemQuantityControl from "./CartItemQuantityControl";
 import { CartItemProps } from "../../types";
 
@@ -25,8 +25,8 @@ export default function CartItem({ item }: CartItemProps) {
 
     const { handleToggleSelect } = useCartItemSelection(item);
 
-    const handleRemoveItem = (id: number) => {
-        dispatch(removeItem(id));
+    const handleRemoveItem = (ids: number[]) => {
+        dispatch(removeItem(ids));
     };
 
     return (
@@ -96,7 +96,7 @@ export default function CartItem({ item }: CartItemProps) {
             {/* Remove Button */}
             <div className="col-span-1 flex justify-center relative z-50">
                 <button
-                    onClick={() => handleRemoveItem(item.id)}
+                    onClick={() => handleRemoveItem([item.id])}
                     className="text-gray-400 hover:text-red-500 transition-colors cursor-pointer relative z-50"
                 >
                     <X className="w-5 h-5 pointer-events-none" />

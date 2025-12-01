@@ -54,13 +54,19 @@ export interface Book {
     originalPrice?: number;
     categories?: string[];
 }
-
+export interface BookSummary {
+    id: number;
+    title: string;
+    price: number;
+    image: string;
+    quantity: number;
+}
 export interface CartItem {
     id: number;
     bookId: number;
     quantity: number;
     selected: boolean;
-    book: Book;
+    book: BookSummary;
 }
 
 export interface Address {
@@ -91,10 +97,59 @@ export interface Voucher {
     isActive?: boolean;
 }
 
+export interface OrderItem {
+    id: number;
+    quantity: number;
+    price: number;
+    book: BookSummary;
+}
+
+export interface Order {
+    id: number;
+    userId: number;
+    userName: string;
+    orderCode: string;
+    orderDate: string;
+    expiredAt: string;
+    status: "PENDING" | "PROCESSING" | "SHIPPING" | "DELIVERED" | "CANCELLED";
+    totalPrice: number;
+    orderItems: OrderItem[];
+    receiverName: string;
+    receiverPhone: string;
+    receiverEmail: string;
+    receiverAddress: string;
+    paymentMethod: "COD" | "VNPAY";
+    paymentStatus: "UNPAID" | "PAID";
+    note?: string;
+    updateBy: string;
+    updateAt: string;
+}
+
+export interface UpdatedOrderResponse {
+    id: number;
+    status: "PENDING" | "PROCESSING" | "SHIPPING" | "DELIVERED" | "CANCELLED";
+}
+
+export interface Payment {
+    code: String;
+    message: String;
+    paymentUrl: String;
+    orderCode: String;
+}
+
+export interface PaymentReturnResponse {
+    code: string;
+    message: string;
+    orderCode: string;
+    totalPrice: number;
+    orderDate: string;
+    status: string;
+}
+
 export interface CheckoutItem {
     id: number;
     quantity: number;
-    book: Book;
+    book: BookSummary;
 }
 
 // Form Types
@@ -171,6 +226,7 @@ export interface DeliveryInformationProps {
     defaultAddress?: User;
     checkDefault: boolean;
     onCheckDefaultChange: (checked: boolean) => void;
+    triggerValidation?: () => boolean;
 }
 
 export interface VoucherSelectorProps {
@@ -232,7 +288,8 @@ export interface UseOrderSubmitReturn {
         formData: DeliveryFormData,
         paymentMethod: string,
         selectedVoucher: number | null,
-        total: number
+        total: number,
+        validateFormRef?: React.MutableRefObject<(() => boolean) | null>
     ) => void;
 }
 
@@ -259,7 +316,6 @@ export interface LoginFormData {
     password: string;
 }
 
-// Entry Form Types
 export interface EntryForm {
     id: number;
     totalQuantity: number;
@@ -291,4 +347,21 @@ export interface CreateEntryFormDTO {
     supplier: string;
     invoiceNumber: string;
     books: BookItemDTO[];
+}
+export interface Address {
+    address: string;
+    ward: string;
+    province: string;
+}
+
+export interface UserData {
+    id: string;
+    fullName: string;
+    email: string;
+    phone: string;
+    role: string;
+    gender?: string;
+    address?: Address;
+    userStatus: string;
+    avatarURL?: string;
 }

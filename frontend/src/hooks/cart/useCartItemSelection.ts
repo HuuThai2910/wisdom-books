@@ -1,11 +1,11 @@
 // src/hooks/useCartItemSelection.js
 import { useRef, useEffect } from "react";
-import { useAppDispatch } from "../app/store";
+import { useAppDispatch } from "../../app/store";
 import {
     updateSelections,
     optimisticUpdateSelection,
-} from "../features/cart/cartSlice";
-import { CartItem } from "../types";
+} from "../../features/cart/cartSlice";
+import { CartItem } from "../../types";
 
 export function useCartItemSelection(item: CartItem) {
     const dispatch = useAppDispatch();

@@ -1,12 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import cartReducer from "../features/cart/cartSlice";
 import checkoutReducer from "../features/checkout/checkoutSlice";
+import orderReducer from "../features/order/orderSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 export const store = configureStore({
     reducer: {
         cart: cartReducer,
         checkout: checkoutReducer,
+        order: orderReducer,
     },
 });
 

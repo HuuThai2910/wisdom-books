@@ -1,6 +1,8 @@
 import "./App.css";
 import CartPage from "./pages/client/CartPage";
 import CheckOutPage from "./pages/client/CheckoutPage";
+import OrdersPage from "./pages/client/OrdersPage";
+import PaymentSuccessPage from "./pages/client/PaymentSuccessPage";
 import { Toaster } from "react-hot-toast";
 import { Route, Routes, useLocation } from "react-router-dom";
 import Home from "./pages/client/Home";
@@ -22,7 +24,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import ClientLayout from "./components/common/ClientLayout";
 
 import Dashboard from "./pages/admin/Dashboard";
-import EmployeesPage from "./pages/admin/EmployeesPage";
+import ManageUserPage from "./pages/admin/ManageUserPage";
 import CustomersPage from "./pages/admin/CustomersPage";
 import OrderManagement from "./pages/admin/OrderManagement";
 import WarehousePage from "./pages/admin/WarehousePage";
@@ -179,7 +181,7 @@ function App() {
           <Route path="/admin/books/edit" element={<ViewUpsertBook />} />
           <Route path="/admin/books/view" element={<ViewBookDetail />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
-          <Route path="/admin/employees" element={<EmployeesPage />} />
+          <Route path="/admin/manage-users" element={<ManageUserPage />} />
           <Route path="/admin/customers" element={<CustomersPage />} />
           <Route path="/admin/orders" element={<OrderManagement />} />
           <Route path="/admin/warehouse" element={<WarehousePage />} />

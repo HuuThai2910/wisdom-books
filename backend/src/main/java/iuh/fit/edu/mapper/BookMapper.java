@@ -20,7 +20,6 @@ import java.util.List;
 public interface BookMapper {
     @Mapping(target = "image", source = "image", qualifiedByName = "firstImage")
     @Mapping(target = "price", source = "sellingPrice")
-    @Mapping(target = "quantity", source = "inventory.quantity")
     BookSummaryResponse toBookSummaryResponse(Book book);
 
     @Named("firstImage")
