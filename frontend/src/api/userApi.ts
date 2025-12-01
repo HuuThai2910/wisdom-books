@@ -20,6 +20,7 @@ export interface UserParams{
     password:string;
     confirmPassword:string;
     avatarURL?:string;
+    avatarFile?: File;
 }
 
 export interface UpdateUserParams{
@@ -55,8 +56,24 @@ export interface UsersResponse {
     users: UserData[];
 }
 
-export const fetchUsers=()=>{
-    return axiosClient.get<ApiResponse<UsersResponse>>("/users");
+export interface UserQueryParams {
+    keyword?: string;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc';
+    role?: string;
+    status?: string;
+}
+
+export const fetchUsers=(params?: UserQueryParams)=>{
+    const queryParams = new URLSearchParams();
+    if (params?.keyword) queryParams.append('keyword', params.keyword);
+    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+    if (params?.sortDirection) queryParams.append('sortDirection', params.sortDirection);
+    if (params?.role) queryParams.append('role', params.role);
+    if (params?.status) queryParams.append('status', params.status);
+    
+    const queryString = queryParams.toString();
+    return axiosClient.get<ApiResponse<UsersResponse>>(`/users${queryString ? '?' + queryString : ''}`);
 }
 
 export const createUser=(data:UserParams)=>{
@@ -73,4 +90,18 @@ export const getUserById=(id:string)=>{
 
 export const deleteUser=(id:string)=>{
     return axiosClient.delete<ApiResponse<string>>(`/users/delete/${id}`);
+}
+
+export const uploadAvatar=(file: File)=>{
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return axiosClient.post<ApiResponse<string>>('/users/avatar/upload', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+}
+
+export const getAvatarUrl=(filename: string)=>{
+    return axiosClient.get<ApiResponse<string>>(`/users/avatar/${filename}`);
 }

@@ -13,4 +13,7 @@ public interface UserService {
     void deleteUser(Long id);
     UserResponseById findUserById(Long id);
     UsersResponse findAll();
+    UsersResponse findAll(String keyword, String sortBy, String sortDirection, String role, String status);
+    String getAvatarUrl(String filename);
+    String uploadAvatar(org.springframework.web.multipart.MultipartFile avatar);
 }
