@@ -4,7 +4,9 @@ import iuh.fit.edu.dto.request.order.OrderItemRequest;
 import iuh.fit.edu.dto.request.order.OrderRequest;
 import iuh.fit.edu.dto.request.order.UpdateOrderRequest;
 import iuh.fit.edu.dto.response.PaymentResponse;
+import iuh.fit.edu.dto.response.ResultPaginationDTO;
 import iuh.fit.edu.dto.response.order.OrderResponse;
+import iuh.fit.edu.dto.response.order.UpdateOrderStatusResponse;
 import iuh.fit.edu.entity.*;
 import iuh.fit.edu.entity.constant.OrderStatus;
 import iuh.fit.edu.entity.constant.PaymentMethod;
@@ -17,6 +19,9 @@ import iuh.fit.edu.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -177,6 +182,26 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public ResultPaginationDTO getAllOrder(Specification<Order> specification, Pageable pageable){
+        Page<Order> orderPage = this.orderRepository.findAll(specification, pageable);
+        ResultPaginationDTO rs = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+        mt.setPages(orderPage.getTotalPages());
+        mt.setTotal(orderPage.getTotalElements());
+        rs.setMeta(mt);
+        rs.setResult(
+                orderPage.getContent()
+                        .stream()
+                        .map(this.orderMapper::toOrderResponse)
+                        .toList()
+        );
+        return rs;
+
+    }
+
+    @Override
     public OrderResponse getOrderById(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
@@ -197,11 +222,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     @Override
-    public OrderResponse updateOrderStatus(UpdateOrderRequest request){
+    public UpdateOrderStatusResponse updateOrderStatus(UpdateOrderRequest request){
         Order order = this.orderRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
         order.setStatus(OrderStatus.valueOf(request.getStatus()));
-        return this.orderMapper.toOrderResponse(this.orderRepository.save(order));
+        return this.orderMapper.toUpdateOrderStatusResponse(this.orderRepository.save(order));
     }
 
     private String generateOrderCode() {

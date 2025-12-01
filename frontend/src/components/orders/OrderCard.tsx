@@ -1,4 +1,4 @@
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, XCircle } from "lucide-react";
 import { Order } from "../../types";
 import { formatCurrency } from "../../util/formatting";
 import OrderStatusBadge from "./OrderStatusBadge";
@@ -10,6 +10,8 @@ interface OrderCardProps {
     isExpanded: boolean;
     onToggleDetail: (orderId: number) => void;
     onRetryPayment: (orderCode: string, expiredAt: string) => void;
+    // Callback hủy đơn hàng (chỉ cho PENDING)
+    onCancelOrder?: (order: Order) => void;
     children?: React.ReactNode;
 }
 
@@ -18,6 +20,7 @@ const OrderCard = ({
     isExpanded,
     onToggleDetail,
     onRetryPayment,
+    onCancelOrder,
     children,
 }: OrderCardProps) => {
     const showPaymentButton =
@@ -26,6 +29,9 @@ const OrderCard = ({
         order.status === "PENDING";
 
     const showPaymentNotice = showPaymentButton && order.expiredAt;
+
+    // Chỉ hiển thị nút hủy khi đơn hàng ở trạng thái PENDING
+    const showCancelButton = order.status === "PENDING";
 
     return (
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 border-2 border-transparent">
@@ -62,11 +68,14 @@ const OrderCard = ({
 
                 {/* Status Badges */}
                 <div className="flex items-center gap-3">
-                    <PaymentStatusBadge
-                        paymentStatus={order.paymentStatus}
-                        paymentMethod={order.paymentMethod}
-                        orderStatus={order.status}
-                    />
+                    {order.paymentMethod === "VNPAY" &&
+                        order.status === "PENDING" && (
+                            <PaymentStatusBadge
+                                paymentStatus={order.paymentStatus}
+                                paymentMethod={order.paymentMethod}
+                                orderStatus={order.status}
+                            />
+                        )}
                     <OrderStatusBadge status={order.status} />
                 </div>
             </div>
@@ -88,6 +97,7 @@ const OrderCard = ({
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3">
+                    {/* Nút thanh toán lại (chỉ VNPAY UNPAID PENDING) */}
                     {showPaymentButton && (
                         <button
                             onClick={() =>
@@ -112,9 +122,21 @@ const OrderCard = ({
                         </button>
                     )}
 
+                    {/* Nút hủy đơn (chỉ PENDING) */}
+                    {showCancelButton && onCancelOrder && (
+                        <button
+                            onClick={() => onCancelOrder(order)}
+                            className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-sm font-medium shadow-md hover:shadow-lg"
+                        >
+                            <XCircle className="w-4 h-4" />
+                            Hủy đơn hàng
+                        </button>
+                    )}
+
+                    {/* Nút xem chi tiết */}
                     <button
                         onClick={() => onToggleDetail(order.id)}
-                        className="flex items-center gap-2 px-6 py-3 bg-blue-600     text-white rounded-lg hover:bg-blue-700 transition-all text-sm font-medium shadow-md hover:shadow-lg"
+                        className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-sm font-medium shadow-md hover:shadow-lg"
                     >
                         {isExpanded ? (
                             <>

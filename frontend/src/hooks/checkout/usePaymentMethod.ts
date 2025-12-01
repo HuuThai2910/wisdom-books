@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { UsePaymentMethodReturn } from "../types";
+import { UsePaymentMethodReturn } from "../../types";
 
 export const usePaymentMethod = (
     initialMethod: string = "COD"

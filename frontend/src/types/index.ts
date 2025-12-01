@@ -106,6 +106,8 @@ export interface OrderItem {
 
 export interface Order {
     id: number;
+    userId: number;
+    userName: string;
     orderCode: string;
     orderDate: string;
     expiredAt: string;
@@ -119,6 +121,13 @@ export interface Order {
     paymentMethod: "COD" | "VNPAY";
     paymentStatus: "UNPAID" | "PAID";
     note?: string;
+    updateBy: string;
+    updateAt: string;
+}
+
+export interface UpdatedOrderResponse {
+    id: number;
+    status: "PENDING" | "PROCESSING" | "SHIPPING" | "DELIVERED" | "CANCELLED";
 }
 
 export interface Payment {
@@ -312,7 +321,7 @@ export interface Address {
     province: string;
 }
 
-export interface UserData{
+export interface UserData {
     id: string;
     fullName: string;
     email: string;
