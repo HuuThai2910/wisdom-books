@@ -1,38 +1,12 @@
 import axiosClient from "./axiosClient";
-import { ApiResponse, PaginatedResponse } from "../types";
-
-export interface EntryForm {
-    id: number;
-    totalQuantity: number;
-    totalPrice: number;
-    createdAt: string;
-    createdBy: string;
-}
-
-export interface EntryFormDetail {
-    id: number;
-    isbn: string;
-    title: string;
-    yearOfPublication: number;
-    quantity: number;
-    unitPrice: number;
-    amount: number;
-}
-
-export interface BookItemDTO {
-    isbn: string;
-    title: string;
-    yearOfPublication: number;
-    importPrice: number;
-    quantity: number;
-    amount: number;
-}
-
-export interface CreateEntryFormDTO {
-    supplier: string;
-    invoiceNumber: string;
-    books: BookItemDTO[];
-}
+import {
+    ApiResponse,
+    PaginatedResponse,
+    EntryForm,
+    EntryFormDetail,
+    BookItemDTO,
+    CreateEntryFormDTO
+} from "../types";
 
 interface GetAllEntryFormsParams {
     page?: number;

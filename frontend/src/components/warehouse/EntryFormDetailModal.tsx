@@ -1,9 +1,8 @@
-import { X } from "lucide-react";
-import { EntryFormDetail } from "../../api/entryFormApi";
-import { EntryForm } from "../../api/entryFormApi";
+import { X, RefreshCw } from "lucide-react";
+import { EntryFormDetail, EntryForm } from "../../types";
 import { format } from "date-fns";
-import { RefreshCw } from "lucide-react";
 import toast from "react-hot-toast";
+import { downloadEntryFormPDF } from "../../util/pdfGenerator";
 
 interface EntryFormDetailModalProps {
   isOpen: boolean;
@@ -282,13 +281,10 @@ export default function EntryFormDetailModal({
               Đóng
             </button>
             <button
-              onClick={async () => {
+              onClick={() => {
                 if (!entryForm) return;
                 try {
-                  const { downloadEntryFormPDF } = await import(
-                    "../../util/pdfGenerator"
-                  );
-                  await downloadEntryFormPDF(entryForm, details);
+                  downloadEntryFormPDF(entryForm, details);
                   toast.success("Đã tải xuống phiếu nhập kho");
                 } catch (error) {
                   console.error("Error printing invoice:", error);

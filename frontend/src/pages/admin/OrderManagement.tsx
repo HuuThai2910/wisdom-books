@@ -1,4 +1,4 @@
-import AdminLayout from "../admin/AdminLayout";
+import AdminLayout from "./AdminLayout";
 
 export default function OrdersPage() {
   return (

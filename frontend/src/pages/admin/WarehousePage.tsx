@@ -17,10 +17,8 @@
 import { useMemo, useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
 import bookApi from "../../api/bookApi";
-import entryFormApi, {
-  EntryForm,
-  EntryFormDetail,
-} from "../../api/entryFormApi";
+import entryFormApi from "../../api/entryFormApi";
+import { EntryForm, EntryFormDetail } from "../../types";
 import { Book as ApiBook } from "../../types";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
@@ -327,7 +325,7 @@ export default function WarehousePage() {
         const { downloadEntryFormPDF } = await import(
           "../../util/pdfGenerator"
         );
-        await downloadEntryFormPDF(importItem, response.data);
+        downloadEntryFormPDF(importItem, response.data);
         toast.success("Đã tải xuống phiếu nhập kho", { id: loadingToast });
       } else {
         toast.error("Không có dữ liệu chi tiết", { id: loadingToast });

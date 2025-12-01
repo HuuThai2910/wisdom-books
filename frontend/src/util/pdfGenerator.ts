@@ -1,5 +1,8 @@
-import { EntryForm, EntryFormDetail } from "../api/entryFormApi";
 import { format } from "date-fns";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { EntryForm, EntryFormDetail } from "../types";
+import { addVietnameseFont } from "./vietnameseFront";
 
 // Hàm chuyển số thành chữ tiếng Việt
 function numberToVietnameseWords(num: number): string {
@@ -94,46 +97,55 @@ function numberToVietnameseWords(num: number): string {
     }
 
     const words = convert(num);
-    return words.charAt(0).toUpperCase() + words.slice(1) + " đồng chẵn";
+    return words.charAt(0).toUpperCase() + words.slice(1) + " đồng chẵn.";
 }
 
 export async function generateEntryFormPDF(
     entryForm: EntryForm,
     details: EntryFormDetail[]
 ): Promise<Blob> {
-    // Import dynamically to reduce initial bundle size
-    const jsPDFModule = await import("jspdf");
-    const jsPDF = jsPDFModule.default;
+    console.log("Generating PDF for entry form:", entryForm);
+    console.log("Entry form details:", details);
 
-    // Import autoTable - this extends jsPDF prototype
-    await import("jspdf-autotable");
+    if (!entryForm || !entryForm.id) {
+        throw new Error("Thông tin phiếu nhập kho không hợp lệ");
+    }
+
+    if (!details || details.length === 0) {
+        throw new Error("Không có chi tiết phiếu nhập");
+    }
 
     // Create new PDF document
     const doc = new jsPDF({
         orientation: "portrait",
         unit: "mm",
         format: "a4",
+        putOnlyUsedFonts: true,
+        compress: true,
     }) as any;
 
-    // Load Vietnamese font (you may need to host this file)
-    // For now, we'll use default font
-    doc.setFont("helvetica");
+    // Load Vietnamese font
+    await addVietnameseFont(doc);
 
     // Header
     doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
+    doc.setFont("Roboto", "normal");
     doc.text("PHIẾU NHẬP KHO", 105, 20, { align: "center" });
 
     // Date and ID
     doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
+    doc.setFont("Roboto", "normal");
     const dateStr = format(new Date(entryForm.createdAt), "dd/MM/yyyy HH:mm");
     doc.text(`Ngày: ${dateStr}`, 20, 35);
     doc.text(`Mã phiếu: ${entryForm.id}`, 150, 35);
 
     // Info section
     doc.setFontSize(10);
-    doc.text("Người giao: CÔNG TY TNHH THIẾT BỊ TÂN AN PHÁT", 20, 45);
+    doc.text(
+        "Người giao: CÔNG TY TNHH THIẾT BỊ TÂN AN PHÁT",
+        20,
+        45
+    );
     doc.text("Hóa đơn số: 1379 - ngày 14/07/2022", 20, 52);
     doc.text(`Người tạo: ${entryForm.createdBy}`, 20, 59);
 
@@ -159,16 +171,20 @@ export async function generateEntryFormPDF(
         entryForm.totalPrice.toLocaleString() + "₫",
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
         startY: 65,
         head: [["STT", "ISBN", "Tên sách", "Năm XB", "Giá nhập", "SL", "Thành tiền"]],
         body: tableData,
         theme: "grid",
+        styles: {
+            font: "Roboto",
+            fontStyle: "normal",
+        },
         headStyles: {
             fillColor: [59, 130, 246],
             textColor: 255,
             fontSize: 9,
-            fontStyle: "bold",
+            fontStyle: "normal",
             halign: "center",
         },
         bodyStyles: {
@@ -186,17 +202,18 @@ export async function generateEntryFormPDF(
         },
         didParseCell: (data: any) => {
             if (data.row.index === tableData.length - 1) {
-                data.cell.styles.fontStyle = "bold";
                 data.cell.styles.fillColor = [239, 246, 255];
             }
         },
     });
 
     // Total in words
-    const finalY = doc.lastAutoTable.finalY || 150;
+    const finalY = (doc as any).lastAutoTable.finalY || 150;
     doc.setFontSize(10);
+    doc.setFont("Roboto", "normal");
+    const totalInWords = numberToVietnameseWords(entryForm.totalPrice);
     doc.text(
-        `- Tổng số tiền (Viết bằng chữ): ${numberToVietnameseWords(entryForm.totalPrice)}`,
+        `- Tổng số tiền (Viết bằng chữ): ${totalInWords}`,
         20,
         finalY + 10
     );
@@ -204,18 +221,20 @@ export async function generateEntryFormPDF(
     // Signature section
     const sigY = finalY + 25;
     doc.setFontSize(9);
-    doc.setFont("helvetica", "bold");
+    doc.setFont("Roboto", "normal");
     doc.text("Người lập phiếu", 30, sigY, { align: "center" });
     doc.text("Người giao hàng", 75, sigY, { align: "center" });
     doc.text("Thủ kho", 120, sigY, { align: "center" });
-    doc.text("Kế toán trưởng", 170, sigY, { align: "center" });
+    doc.text("Quản lý", 170, sigY, { align: "center" });
 
-    doc.setFont("helvetica", "italic");
+    doc.setFont("Roboto", "normal");
     doc.setFontSize(8);
     doc.text("(Ký, họ tên)", 30, sigY + 5, { align: "center" });
     doc.text("(Ký, họ tên)", 75, sigY + 5, { align: "center" });
     doc.text("(Ký, họ tên)", 120, sigY + 5, { align: "center" });
-    doc.text("(Hoặc bộ phận có nhu cầu nhập)", 170, sigY + 5, { align: "center" });
+    doc.text("(Hoặc bộ phận có nhu cầu nhập)", 170, sigY + 5, {
+        align: "center",
+    });
 
     // Return as blob
     return doc.output("blob");
@@ -225,16 +244,28 @@ export async function downloadEntryFormPDF(
     entryForm: EntryForm,
     details: EntryFormDetail[]
 ): Promise<void> {
-    const blob = await generateEntryFormPDF(entryForm, details);
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `PhieuNhapKho_${entryForm.id}_${format(
-        new Date(entryForm.createdAt),
-        "ddMMyyyy_HHmmss"
-    )}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    try {
+        console.log("Starting PDF download for entry form:", entryForm.id);
+        const blob = await generateEntryFormPDF(entryForm, details);
+        console.log("PDF blob created:", blob.size, "bytes");
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `PhieuNhapKho_${entryForm.id}_${format(
+            new Date(entryForm.createdAt),
+            "ddMMyyyy_HHmmss"
+        )}.pdf`;
+
+        console.log("Download filename:", link.download);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        console.log("PDF download triggered successfully");
+    } catch (error) {
+        console.error("Error in downloadEntryFormPDF:", error);
+        throw error;
+    }
 }

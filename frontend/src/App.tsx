@@ -24,7 +24,7 @@ import ClientLayout from "./components/common/ClientLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import EmployeesPage from "./pages/admin/EmployeesPage";
 import CustomersPage from "./pages/admin/CustomersPage";
-import OrdersPage from "./pages/admin/OrdersPage";
+import OrderManagement from "./pages/admin/OrderManagement";
 import WarehousePage from "./pages/admin/WarehousePage";
 import StatisticsPage from "./pages/admin/StatisticsPage";
 import PermissionsPage from "./pages/admin/PermissionsPage";
@@ -181,7 +181,7 @@ function App() {
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/employees" element={<EmployeesPage />} />
           <Route path="/admin/customers" element={<CustomersPage />} />
-          <Route path="/admin/orders" element={<OrdersPage />} />
+          <Route path="/admin/orders" element={<OrderManagement />} />
           <Route path="/admin/warehouse" element={<WarehousePage />} />
           <Route path="/admin/statistics" element={<StatisticsPage />} />
           <Route path="/admin/permissions" element={<PermissionsPage />} />
