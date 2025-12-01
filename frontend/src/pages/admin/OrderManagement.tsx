@@ -11,6 +11,7 @@ import OrderDetailModal from "../../components/admin/OrderDetailModal";
 import OrderStatusUpdateModal from "../../components/admin/OrderStatusUpdateModal";
 import { Order } from "../../types";
 import toast from "react-hot-toast";
+import AdminLayout from "./AdminLayout";
 
 export default function OrderManagement() {
   const { orders, meta, loading, fetch, updateStatus } = useOrdersAdmin(); // SRP: component chỉ điều phối UI
@@ -143,7 +144,7 @@ export default function OrderManagement() {
   };
 
   return (
-    <div className="container mx-auto px-6">
+    <AdminLayout>
       {/* Header Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -304,6 +305,6 @@ export default function OrderManagement() {
         }}
         onConfirm={handleConfirmUpdateStatus}
       />
-    </div>
+    </AdminLayout>
   );
 }
