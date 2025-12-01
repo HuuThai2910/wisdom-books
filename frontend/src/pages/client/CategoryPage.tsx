@@ -12,7 +12,8 @@ import banner_kinhdoanh from "../../assets/img/book/banner/banner_kinhdoanh.png"
 import banner_nghethuat from "../../assets/img/book/banner/banner_nghethuat.png";
 import banner_thethao from "../../assets/img/book/banner/banner_thethao.png";
 import banner_thieunhi from "../../assets/img/book/banner/banner_thieunhi.png";
-
+import left from "../../assets/img/book/banner/left.png";
+import right from "../../assets/img/book/banner/right.png";
 const categoryBanners: { [key: string]: string } = {
     "Ẩm thực – Nấu ăn": banner_amthuc,
     "Công nghệ thông tin": banner_cntt,
@@ -116,6 +117,32 @@ export default function CategoryPage() {
             {/* FULL-BLEED WRAPPER */}
             <div className="relative mt-20 left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen py-10 bg-transparent overflow-hidden">
                 {/* CENTERED BANNER WITH ROUNDED CORNERS */}
+                  {/* LEFT + RIGHT DECORATION */}
+                <motion.img
+                    src={left}
+                    alt="left"
+                    initial={{ scale: 0.9, opacity: 0.9 }}
+                    animate={{ scale: [0.9, 1.1, 0.9] }}
+                    transition={{
+                        duration: 4,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                    }}
+                    className="absolute left-[7%] top-1/2 -translate-y-1/2 w-[180px] rounded-sm pointer-events-none select-none opacity-90"
+                />
+
+                <motion.img
+                    src={right}
+                    alt="right"
+                    initial={{ scale: 0.9, opacity: 0.9 }}
+                    animate={{ scale: [0.9, 1.1, 0.9] }}
+                    transition={{
+                        duration: 4,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                    }}
+                    className="absolute right-[7%] top-1/2 -translate-y-1/2 w-[180px] rounded-sm pointer-events-none select-none opacity-90"
+                />
                 <motion.div
                     initial={{ opacity: 0, y: 50, scale: 0.95 }}
                     animate={{
