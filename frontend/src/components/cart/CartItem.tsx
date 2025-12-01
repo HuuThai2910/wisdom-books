@@ -3,8 +3,8 @@ import { formatCurrency } from "../../util/formatting";
 import { X } from "lucide-react";
 import { useAppDispatch } from "../../app/store";
 import { removeItem } from "../../features/cart/cartSlice";
-import { useCartItemQuantity } from "../../hooks/useCartItemQuantity";
-import { useCartItemSelection } from "../../hooks/useCartItemSelection";
+import { useCartItemQuantity } from "../../hooks/cart/useCartItemQuantity";
+import { useCartItemSelection } from "../../hooks/cart/useCartItemSelection";
 import CartItemQuantityControl from "./CartItemQuantityControl";
 import { CartItemProps } from "../../types";
 

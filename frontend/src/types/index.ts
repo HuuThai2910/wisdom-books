@@ -36,7 +36,7 @@ export interface Book {
     sellingPrice: number;
     importPrice: number;
     image?: string[];
-    status: "AVAILABLE" | "SALE" | "OUT_OF_STOCK";
+    status: "SALE" | "STOP_SALE" | "OUT_STOCK";
     createdAt?: string;
     updatedAt?: string;
     createdBy?: string;
@@ -106,6 +106,8 @@ export interface OrderItem {
 
 export interface Order {
     id: number;
+    userId: number;
+    userName: string;
     orderCode: string;
     orderDate: string;
     expiredAt: string;
@@ -119,6 +121,13 @@ export interface Order {
     paymentMethod: "COD" | "VNPAY";
     paymentStatus: "UNPAID" | "PAID";
     note?: string;
+    updateBy: string;
+    updateAt: string;
+}
+
+export interface UpdatedOrderResponse {
+    id: number;
+    status: "PENDING" | "PROCESSING" | "SHIPPING" | "DELIVERED" | "CANCELLED";
 }
 
 export interface Payment {
@@ -312,7 +321,7 @@ export interface Address {
     province: string;
 }
 
-export interface UserData{
+export interface UserData {
     id: string;
     fullName: string;
     email: string;
@@ -322,5 +331,4 @@ export interface UserData{
     address?: Address;
     userStatus: string;
     avatarURL?: string;
-    avatar?: string; // Filename from backend
 }

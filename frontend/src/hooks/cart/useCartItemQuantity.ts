@@ -1,12 +1,12 @@
 // src/hooks/useCartItemQuantity.js
 import { useState, useEffect, useRef } from "react";
-import { useAppDispatch } from "../app/store";
+import { useAppDispatch } from "../../app/store";
 import {
     updateItem,
     optimisticUpdateQuantity,
-} from "../features/cart/cartSlice";
+} from "../../features/cart/cartSlice";
 import toast from "react-hot-toast";
-import { CartItem } from "../types";
+import { CartItem } from "../../types";
 
 export function useCartItemQuantity(item: CartItem) {
     const dispatch = useAppDispatch();

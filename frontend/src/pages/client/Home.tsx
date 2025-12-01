@@ -4,8 +4,18 @@ import ProductBanner from "../../components/Product/ProductBanner";
 import SuggestProduct from "../../components/Product/SuggestProduct";
 import ProductOffers from "../../components/ProductOffers/ProductOffers";
 import { useBooks } from "../../contexts/BookContext";
+import { useEffect } from "react";
+
 export default function Home() {
-    const { books, loading } = useBooks();
+    const { books, loading, fetchBooks } = useBooks();
+
+    // Fetch books when Home page mounts to ensure we have data
+    useEffect(() => {
+        // Only fetch if we don't have enough books
+        if (books.length < 20) {
+            fetchBooks(0, 30); // Fetch 30 books for home page
+        }
+    }, []);
 
     return (
         <>

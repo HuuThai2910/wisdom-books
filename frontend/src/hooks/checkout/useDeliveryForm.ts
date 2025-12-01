@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { UseDeliveryFormReturn, DeliveryFormData, User } from "../types";
+import { UseDeliveryFormReturn, DeliveryFormData, User } from "../../types";
 
 export const useDeliveryForm = (
     defaultAddress?: User

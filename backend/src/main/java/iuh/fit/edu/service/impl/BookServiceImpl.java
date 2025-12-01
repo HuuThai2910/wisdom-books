@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,9 +45,9 @@ public class BookServiceImpl implements BookService {
     private final BookMapper bookMapper;
 
     public BookServiceImpl(BookRepository bookRepository, InventoryRepository inventoryRepository,
-                          SupplierRepository supplierRepository, CategoryRepository categoryRepository,
-                          EntryFormRepository entryFormRepository, EntryFormDetailRepository entryFormDetailRepository,
-                          UserRepository userRepository, BookMapper bookMapper) {
+                           SupplierRepository supplierRepository, CategoryRepository categoryRepository,
+                           EntryFormRepository entryFormRepository, EntryFormDetailRepository entryFormDetailRepository,
+                           UserRepository userRepository, BookMapper bookMapper) {
         this.bookRepository = bookRepository;
         this.inventoryRepository = inventoryRepository;
         this.supplierRepository = supplierRepository;
@@ -58,6 +59,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional
     public Book createBook(Book book) {
         // Xử lý Supplier nếu có
         if (book.getSupplier() != null && book.getSupplier().getId() != null) {
@@ -93,6 +95,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional
     public Book updateBook(Book book) {
         try {
             System.out.println("=== SERVICE: UPDATE BOOK ===");
@@ -136,18 +139,28 @@ public class BookServiceImpl implements BookService {
                     updatedBook.setImportPrice(book.getImportPrice());
                 }
                 if (book.getStatus() != null) {
+                    System.out.println("Updating status from " + updatedBook.getStatus() + " to " + book.getStatus());
                     updatedBook.setStatus(book.getStatus());
                 }
 
-                // LƯU Ý: KHÔNG cập nhật quantity ở đây, sẽ xử lý riêng để tạo EntryForm
-                // if (book.getQuantity() >= 0) {
-                //     updatedBook.setQuantity(book.getQuantity());
-                // }
+                // Lưu số lượng CŨ trước khi cập nhật
+                int oldQuantity = updatedBook.getQuantity();
+
+                // Cập nhật quantity
+                if (book.getQuantity() >= 0) {
+                    updatedBook.setQuantity(book.getQuantity());
+                }
 
                 // Cập nhật danh sách hình ảnh
-                if (book.getImage() != null && !book.getImage().isEmpty()) {
+                if (book.getImage() != null) {
                     System.out.println("Updating images: " + book.getImage().size());
-                    updatedBook.setImage(book.getImage());
+                    // Clear existing images and add new ones for ElementCollection
+                    if (updatedBook.getImage() != null) {
+                        updatedBook.getImage().clear();
+                        updatedBook.getImage().addAll(book.getImage());
+                    } else {
+                        updatedBook.setImage(book.getImage());
+                    }
                 }
 
                 // Cập nhật Supplier
@@ -158,17 +171,18 @@ public class BookServiceImpl implements BookService {
                 }
 
                 // Cập nhật Categories (ManyToMany)
-                if (book.getCategories() != null && !book.getCategories().isEmpty()) {
+                if (book.getCategories() != null) {
                     System.out.println("Updating categories: " + book.getCategories().size());
                     List<Category> validCategories = book.getCategories().stream()
                             .filter(cat -> cat.getId() != null)
                             .map(cat -> this.categoryRepository.findById(cat.getId()).orElse(null))
                             .filter(Objects::nonNull)
                             .toList();
-                    if (!validCategories.isEmpty()) {
-                        System.out.println("Valid categories found: " + validCategories.size());
-                        updatedBook.setCategories(validCategories);
-                    }
+
+                    System.out.println("Valid categories found: " + validCategories.size());
+                    // Clear existing categories and add new ones
+                    updatedBook.getCategories().clear();
+                    updatedBook.getCategories().addAll(validCategories);
                 }
 
                 // Cập nhật Inventory
@@ -178,25 +192,30 @@ public class BookServiceImpl implements BookService {
                     updatedBook.setInventory(optionalInventory.orElse(updatedBook.getInventory()));
                 }
 
-                // Xử lý số lượng - Lấy số lượng CŨ TRƯỚC KHI cập nhật
-                int oldQuantity = updatedBook.getQuantity();
-                int newQuantity = book.getQuantity() >= 0 ? book.getQuantity() : oldQuantity;
+                // Tính toán chênh lệch số lượng
+                int newQuantity = updatedBook.getQuantity();
                 int quantityDiff = newQuantity - oldQuantity;
-
-                System.out.println("Old Quantity: " + oldQuantity);
-                System.out.println("New Quantity: " + newQuantity);
-                System.out.println("Quantity Diff: " + quantityDiff);
-
-                // Cập nhật số lượng mới
-                updatedBook.setQuantity(newQuantity);
 
                 // Cập nhật thông tin audit
                 updatedBook.setUpdatedAt(LocalDateTime.now());
                 updatedBook.setUpdatedBy("tan nghi");
 
+                System.out.println("=== BEFORE SAVE ===");
+                System.out.println("Book ID: " + updatedBook.getId());
+                System.out.println("Title: " + updatedBook.getTitle());
+                System.out.println("Author: " + updatedBook.getAuthor());
+                System.out.println("Quantity: " + updatedBook.getQuantity());
+                System.out.println("Selling Price: " + updatedBook.getSellingPrice());
+                System.out.println("Categories count: " + (updatedBook.getCategories() != null ? updatedBook.getCategories().size() : 0));
+
                 System.out.println("Saving book to database...");
                 Book savedBook = this.bookRepository.save(updatedBook);
                 System.out.println("Book saved successfully!");
+
+                System.out.println("=== AFTER SAVE ===");
+                System.out.println("Saved Book ID: " + savedBook.getId());
+                System.out.println("Saved Title: " + savedBook.getTitle());
+                System.out.println("Saved Quantity: " + savedBook.getQuantity());
 
                 // Nếu số lượng tăng, tạo EntryForm
                 if (quantityDiff > 0) {
@@ -206,8 +225,6 @@ public class BookServiceImpl implements BookService {
 
                 return savedBook;
             }
-
-            System.err.println("Book not found with ID: " + book.getId());
             return null;
         } catch (Exception e) {
             System.err.println("=== ERROR IN UPDATE BOOK SERVICE ===");
@@ -218,6 +235,7 @@ public class BookServiceImpl implements BookService {
 
 
     @Override
+    @Transactional
     public void deleteBook(Long id) {
         Optional<Book> optionalBook = this.bookRepository.findById(id);
         if (optionalBook.isPresent()) {
@@ -235,6 +253,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional
     public Book createBookFromDTO(ReqCreateBookDTO reqCreateBookDTO) {
         Book book = new Book();
         book.setIsbn(reqCreateBookDTO.getIsbn());
@@ -279,6 +298,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional
     public Book updateBookFromDTO(ReqUpdateBookDTO reqUpdateBookDTO) {
         Book book = this.findBookById(reqUpdateBookDTO.getId());
         if (book == null) {

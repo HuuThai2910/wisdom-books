@@ -72,10 +72,8 @@ export const BookProvider = ({ children }: { children: ReactNode }) => {
         await fetchBooks(lastFetchParams.page, lastFetchParams.size);
     };
 
-    // Initial fetch when app loads - get only 20 books for fast initial load
-    useEffect(() => {
-        fetchBooks(0, 20);
-    }, []);
+    // NOTE: Removed initial fetch to prevent duplicate loading
+    // Each page will fetch its own data when needed
 
     return (
         <BookContext.Provider
