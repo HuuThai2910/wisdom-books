@@ -3,6 +3,7 @@ package iuh.fit.edu.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import iuh.fit.edu.entity.constant.BookStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -16,17 +17,35 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "ISBN không được để trống")
+    @Pattern(regexp = "^[0-9-]{10,17}$", 
+             message = "ISBN không hợp lệ (phải là 10-13 chữ số, có thể có dấu gạch ngang)")
     private String isbn;
+    
+    @NotBlank(message = "Tên sách không được để trống")
+    @Size(min = 1, max = 500, message = "Tên sách phải từ 1-500 ký tự")
     private String title;
+    
+    @NotBlank(message = "Tên tác giả không được để trống")
+    @Size(min = 1, max = 200, message = "Tên tác giả phải từ 1-200 ký tự")
     private String author;
+    
+    @Min(value = 1900, message = "Năm xuất bản phải từ 1900 trở lên")
+    @Max(value = 2100, message = "Năm xuất bản không hợp lệ")
     private int yearOfPublication;
 
+    @Size(max = 1000, message = "Mô tả ngắn không quá 1000 ký tự")
     private String shortDes;
 
     @Column(columnDefinition = "MEDIUMTEXT")
     private String description;
 
+    @Min(value = 0, message = "Giá bán phải lớn hơn hoặc bằng 0")
+    @NotNull(message = "Giá bán không được để trống")
     private double sellingPrice;
+    
+    @Min(value = 0, message = "Giá nhập phải lớn hơn hoặc bằng 0")
+    @NotNull(message = "Giá nhập không được để trống")
     private double importPrice;
     
     @ElementCollection(fetch = FetchType.EAGER)
@@ -35,6 +54,7 @@ public class Book {
     private List<String> image;
 
     @Enumerated(EnumType.STRING)
+    @NotNull(message = "Trạng thái sách không được để trống")
     private BookStatus status;
 
 
@@ -42,6 +62,8 @@ public class Book {
     private LocalDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
+    
+    @Min(value = 0, message = "Số lượng phải lớn hơn hoặc bằng 0")
     private int quantity;
 
     @OneToMany(mappedBy = "book")

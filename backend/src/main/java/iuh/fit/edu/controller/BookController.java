@@ -9,6 +9,7 @@ import iuh.fit.edu.entity.Book;
 import iuh.fit.edu.exception.IdInvalidException;
 import iuh.fit.edu.service.BookService;
 import iuh.fit.edu.util.anotation.ApiMessage;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -40,7 +41,19 @@ public class BookController {
 
     @PostMapping
     @ApiMessage("Tạo sách mới")
-    public ResponseEntity<ResCreateBookDTO> createNewBook(@RequestBody Book book) throws IdInvalidException {
+    public ResponseEntity<ResCreateBookDTO> createNewBook(@Valid @RequestBody Book book) throws IdInvalidException {
+        System.out.println("=== CREATE BOOK - Received data ===");
+        System.out.println("ISBN: " + book.getIsbn());
+        System.out.println("Title: " + book.getTitle());
+        System.out.println("Author: " + book.getAuthor());
+        System.out.println("Year: " + book.getYearOfPublication());
+        System.out.println("Selling Price: " + book.getSellingPrice());
+        System.out.println("Import Price: " + book.getImportPrice());
+        System.out.println("Status: " + book.getStatus());
+        System.out.println("Quantity: " + book.getQuantity());
+        System.out.println("Categories: " + (book.getCategories() != null ? book.getCategories().size() : "null"));
+        System.out.println("Images: " + (book.getImage() != null ? book.getImage().size() : "null"));
+        
         if (this.bookService.existsByIsbn(book.getIsbn())) {
             throw new IdInvalidException("ISBN: " + book.getIsbn() + " đã tồn tại!");
         }
@@ -71,8 +84,9 @@ public class BookController {
 
     @PutMapping
     @ApiMessage("Cập nhật book")
-    public ResponseEntity<ResUpdateBookDTO> updateBook(@RequestBody Book book) throws IdInvalidException {
+    public ResponseEntity<ResUpdateBookDTO> updateBook(@Valid @RequestBody Book book) throws IdInvalidException {
         try {
+            System.out.println("=== UPDATE BOOK - Received ISBN: " + book.getIsbn());
 
             if (book.getId() == null) {
                 throw new IdInvalidException("ID sách không được để trống");
