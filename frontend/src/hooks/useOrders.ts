@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { Order } from "../../types";
-import orderApi from "../../api/orderApi";
-import paymentApi from "../../api/paymentApi";
+import { Order } from "../types";
+import orderApi from "../api/orderApi";
+import paymentApi from "../api/paymentApi";
 import toast from "react-hot-toast";
 
 type OrderStatus = "ALL" | Order["status"];
@@ -20,15 +20,11 @@ export const useOrders = () => {
         [key: number]: boolean;
     }>({});
     const [showExpiredModal, setShowExpiredModal] = useState(false);
-    // State quản lý modal hủy đơn hàng
-    const [showCancelModal, setShowCancelModal] = useState(false);
-    const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
-    const [isCancelling, setIsCancelling] = useState(false);
 
     const fetchOrders = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await orderApi.fetchOrdersByUser();
+            const response = await orderApi.fetchOrders();
             setOrders(response.data.data);
         } catch (error: any) {
             toast.error("Không thể tải danh sách đơn hàng");
@@ -187,40 +183,6 @@ export const useOrders = () => {
         setShowExpiredModal(false);
     }, []);
 
-    // Xử lý mở modal hủy đơn hàng (chỉ cho đơn PENDING)
-    const handleOpenCancelModal = useCallback((order: Order) => {
-        setOrderToCancel(order);
-        setShowCancelModal(true);
-    }, []);
-
-    // Xử lý đóng modal hủy
-    const handleCloseCancelModal = useCallback(() => {
-        setShowCancelModal(false);
-        setOrderToCancel(null);
-    }, []);
-
-    // Xử lý xác nhận hủy đơn hàng (gọi API)
-    const handleConfirmCancel = useCallback(
-        async (orderId: number) => {
-            try {
-                setIsCancelling(true);
-                await orderApi.cancelOrder(orderId);
-                toast.success("Đã hủy đơn hàng thành công");
-                // Refresh danh sách đơn hàng
-                await fetchOrders();
-                handleCloseCancelModal();
-            } catch (error: any) {
-                toast.error(
-                    error.response?.data?.message ||
-                        "Không thể hủy đơn hàng. Vui lòng thử lại!"
-                );
-            } finally {
-                setIsCancelling(false);
-            }
-        },
-        [fetchOrders, handleCloseCancelModal]
-    );
-
     const getTabCount = useCallback(
         (status: OrderStatus) => {
             if (status === "ALL") return orders.length;
@@ -247,19 +209,12 @@ export const useOrders = () => {
         orderDetails,
         loadingDetails,
         showExpiredModal,
-        // States và handlers cho cancel order
-        showCancelModal,
-        orderToCancel,
-        isCancelling,
         setActiveTab,
         setSearchQuery,
         handleToggleDetail,
         handleRetryPayment,
         handleConfirmExpired,
         handleCancelExpired,
-        handleOpenCancelModal,
-        handleCloseCancelModal,
-        handleConfirmCancel,
         getTabCount,
         clearSearch: () => setSearchQuery(""),
     };

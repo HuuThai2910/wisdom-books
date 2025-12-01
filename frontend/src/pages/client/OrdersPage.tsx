@@ -4,6 +4,7 @@ import Breadcrumb from "../../components/common/Breadcrumb";
 import OrderCard from "../../components/orders/OrderCard";
 import OrderDetailAccordion from "../../components/orders/OrderDetailAccordion";
 import ExpiredOrderModal from "../../components/orders/ExpiredOrderModal";
+import CancelOrderModal from "../../components/orders/CancelOrderModal";
 import { useOrders } from "../../hooks/order/useOrders";
 import OrdersSearchBar from "../../components/orders/OrdersSearchBar";
 
@@ -48,12 +49,18 @@ const OrdersPage = () => {
         orderDetails,
         loadingDetails,
         showExpiredModal,
+        showCancelModal,
+        orderToCancel,
+        isCancelling,
         setActiveTab,
         setSearchQuery,
         handleToggleDetail,
         handleRetryPayment,
         handleConfirmExpired,
         handleCancelExpired,
+        handleOpenCancelModal,
+        handleCloseCancelModal,
+        handleConfirmCancel,
         getTabCount,
         clearSearch,
     } = useOrders();
@@ -230,6 +237,7 @@ const OrdersPage = () => {
                                     isExpanded={expandedOrderId === order.id}
                                     onToggleDetail={handleToggleDetail}
                                     onRetryPayment={handleRetryPayment}
+                                    onCancelOrder={handleOpenCancelModal}
                                 >
                                     {orderDetails[order.id] && (
                                         <OrderDetailAccordion
@@ -250,6 +258,15 @@ const OrdersPage = () => {
                     isOpen={showExpiredModal}
                     onClose={handleCancelExpired}
                     onConfirm={handleConfirmExpired}
+                />
+
+                {/* Modal xác nhận hủy đơn hàng */}
+                <CancelOrderModal
+                    isOpen={showCancelModal}
+                    order={orderToCancel}
+                    isLoading={isCancelling}
+                    onClose={handleCloseCancelModal}
+                    onConfirm={handleConfirmCancel}
                 />
             </div>
         </>

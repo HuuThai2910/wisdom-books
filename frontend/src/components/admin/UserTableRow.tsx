@@ -1,4 +1,5 @@
 import { UserData } from '@/types';
+import { getS3Url } from '../../config/s3';
 
 interface UserTableRowProps {
   user: UserData;
@@ -6,17 +7,12 @@ interface UserTableRowProps {
   onView: (user: UserData) => void;
   onEdit: (user: UserData) => void;
   onDelete: (user: UserData) => void;
+  isSelected: boolean;
+  onSelectChange: (userId: number, checked: boolean) => void;
 }
 
-const UserTableRow = ({ user, index, onView, onEdit, onDelete }: UserTableRowProps) => {
-  const getGenderText = (gender?: string): string => {
-    if (!gender) return 'N/A';
-    const genderMap: { [key: string]: string } = {
-      'MALE': 'Nam',
-      'FEMALE': 'Nữ',
-    };
-    return genderMap[gender] || gender;
-  };
+const UserTableRow = ({ user, index, onView, onEdit, onDelete, isSelected, onSelectChange }: UserTableRowProps) => {
+  const avatarUrl = getS3Url(user.avatar);
 
   const getRoleText = (role: any): string => {
     if (!role) return 'N/A';
@@ -60,9 +56,31 @@ const UserTableRow = ({ user, index, onView, onEdit, onDelete }: UserTableRowPro
   return (
     <tr className="hover:bg-gray-50 transition-colors duration-150">
       <td className="px-4 py-4 border-b border-gray-100">
-        <input type="checkbox" className="w-[18px] h-[18px] cursor-pointer rounded" />
+        <input 
+          type="checkbox" 
+          className="w-[18px] h-[18px] cursor-pointer rounded" 
+          checked={isSelected}
+          onChange={(e) => onSelectChange(Number(user.id), e.target.checked)}
+        />
       </td>
       <td className="px-4 py-4 border-b border-gray-100 text-sm text-gray-900">{index + 1}</td>
+      <td className="px-4 py-4 border-b border-gray-100">
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+          {avatarUrl ? (
+            <img 
+              src={avatarUrl} 
+              alt="Avatar" 
+              className="w-full h-full object-cover" 
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement!.innerHTML = '<span class="text-xl">👤</span>';
+              }}
+            />
+          ) : (
+            <span className="text-xl">👤</span>
+          )}
+        </div>
+      </td>
       <td className="px-4 py-4 border-b border-gray-100">
         <strong className="text-sm text-gray-900">{user.fullName}</strong>
       </td>

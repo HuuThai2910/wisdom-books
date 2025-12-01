@@ -46,9 +46,9 @@ public class BookServiceImpl implements BookService {
     private final BookMapper bookMapper;
 
     public BookServiceImpl(BookRepository bookRepository, InventoryRepository inventoryRepository,
-                          SupplierRepository supplierRepository, CategoryRepository categoryRepository,
-                          EntryFormRepository entryFormRepository, EntryFormDetailRepository entryFormDetailRepository,
-                          UserRepository userRepository, BookMapper bookMapper) {
+                           SupplierRepository supplierRepository, CategoryRepository categoryRepository,
+                           EntryFormRepository entryFormRepository, EntryFormDetailRepository entryFormDetailRepository,
+                           UserRepository userRepository, BookMapper bookMapper) {
         this.bookRepository = bookRepository;
         this.inventoryRepository = inventoryRepository;
         this.supplierRepository = supplierRepository;
@@ -186,7 +186,6 @@ public class BookServiceImpl implements BookService {
                             .map(cat -> this.categoryRepository.findById(cat.getId()).orElse(null))
                             .filter(Objects::nonNull)
                             .toList();
-                    
                     System.out.println("Valid categories found: " + validCategories.size());
                     // Clear existing categories and add new ones
                     updatedBook.getCategories().clear();
@@ -204,14 +203,6 @@ public class BookServiceImpl implements BookService {
                 int newQuantity = updatedBook.getQuantity();
                 int quantityDiff = newQuantity - oldQuantity;
 
-                // Cập nhật inventory quantity nếu có thay đổi số lượng
-                if (quantityDiff != 0 && updatedBook.getInventory() != null) {
-                    Inventory inventory = updatedBook.getInventory();
-                    inventory.setQuantity(inventory.getQuantity() + quantityDiff);
-                    this.inventoryRepository.save(inventory);
-                    System.out.println("Updated inventory quantity by: " + quantityDiff);
-                }
-
                 // Cập nhật thông tin audit
                 updatedBook.setUpdatedAt(LocalDateTime.now());
                 updatedBook.setUpdatedBy("tan nghi");
@@ -228,6 +219,11 @@ public class BookServiceImpl implements BookService {
                 Book savedBook = this.bookRepository.save(updatedBook);
                 System.out.println("Book saved successfully!");
                 
+                System.out.println("=== AFTER SAVE ===");
+                System.out.println("Saved Book ID: " + savedBook.getId());
+                System.out.println("Saved Title: " + savedBook.getTitle());
+                System.out.println("Saved Quantity: " + savedBook.getQuantity());
+
                 System.out.println("=== AFTER SAVE ===");
                 System.out.println("Saved Book ID: " + savedBook.getId());
                 System.out.println("Saved Title: " + savedBook.getTitle());

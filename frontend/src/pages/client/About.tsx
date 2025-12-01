@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaBookOpen } from "react-icons/fa";
 import {
     storyImages,
     stats,
@@ -120,13 +120,30 @@ const StoryImageCarousel = () => {
                 {/* Navigation Buttons */}
                 <button
                     onClick={prevImage}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white wisbook-gradient-text w-12 h-12 rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+                    className="
+        absolute left-4 top-1/2 -translate-y-1/2
+        bg-white/90 
+        group-hover:bg-white
+        hover:bg-blue-500 hover:text-white
+        w-12 h-12 rounded-full flex items-center justify-center
+        shadow-lg opacity-0 group-hover:opacity-100
+        transition-all duration-300 hover:scale-110
+    "
                 >
-                    <FaChevronLeft />
+                    <FaChevronLeft className="text-xl" />
                 </button>
+
                 <button
                     onClick={nextImage}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white wisbook-gradient-text w-12 h-12 rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+                    className="
+        absolute right-4 top-1/2 -translate-y-1/2
+        bg-white/90 
+        group-hover:bg-white
+        hover:bg-blue-500 hover:text-white
+        w-12 h-12 rounded-full flex items-center justify-center
+        shadow-lg opacity-0 group-hover:opacity-100
+        transition-all duration-300 hover:scale-110
+    "
                 >
                     <FaChevronRight className="text-xl" />
                 </button>
@@ -152,12 +169,15 @@ const StoryImageCarousel = () => {
 
 export default function About() {
     return (
-        <div className="min-h-screen wisbook-gradient-overlay pt-20">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 pt-20">
             {/* Hero Section */}
-            <section className="relative py-20 overflow-hidden">
+            <section className="relative py-24 overflow-hidden">
                 <div className="absolute inset-0 overflow-hidden">
-                    <div className="absolute top-20 left-10 w-72 h-72 bg-purple-300/20 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-300/15 rounded-full blur-3xl"></div>
+                    <div className="absolute top-20 left-10 w-96 h-96 bg-blue-200/30 rounded-full blur-3xl animate-pulse"></div>
+                    <div
+                        className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-blue-300/20 rounded-full blur-3xl animate-pulse"
+                        style={{ animationDelay: "1s" }}
+                    ></div>
                 </div>
 
                 <div className="container mx-auto px-6 relative">
@@ -167,11 +187,28 @@ export default function About() {
                         transition={{ duration: 0.8 }}
                         className="text-center max-w-4xl mx-auto"
                     >
-                        <h1 className="text-5xl md:text-6xl font-bold mb-6 wisbook-gradient-text">
+                        <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            className="inline-block mb-6"
+                        >
+                            <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl flex items-center justify-center shadow-2xl transform rotate-6 hover:rotate-12 transition-transform">
+                                <FaBookOpen className="text-5xl text-white -rotate-6" />
+                            </div>
+                        </motion.div>
+                        <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 bg-clip-text text-transparent">
                             Về Wisdom Books
                         </h1>
-                        <p className="text-xl text-gray-600 leading-relaxed">
-                            Nơi khơi nguồn tri thức, lan tỏa tình yêu sách
+                        <p className="text-2xl text-gray-700 leading-relaxed font-medium">
+                            Nơi{" "}
+                            <span className="text-blue-600 font-bold">
+                                khơi nguồn tri thức
+                            </span>
+                            , lan tỏa{" "}
+                            <span className="text-blue-600 font-bold">
+                                tình yêu sách
+                            </span>
                         </p>
                     </motion.div>
                 </div>
@@ -189,8 +226,16 @@ export default function About() {
                             transition={{ duration: 0.8 }}
                             viewport={{ once: true }}
                         >
-                            <h2 className="text-4xl font-bold mb-6 text-gray-800">
-                                Câu chuyện của chúng tôi
+                            <div className="inline-block mb-4">
+                                <span className="bg-blue-100 text-blue-600 px-4 py-2 rounded-full text-sm font-semibold">
+                                    📖 Câu chuyện của chúng tôi
+                                </span>
+                            </div>
+                            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
+                                Hành trình{" "}
+                                <span className="text-blue-600">
+                                    lan tỏa tri thức
+                                </span>
                             </h2>
                             <p className="text-gray-600 leading-relaxed mb-4">
                                 Wisdom Books được thành lập với sứ mệnh mang đến
@@ -217,8 +262,12 @@ export default function About() {
             </section>
 
             {/* Stats Section */}
-            <section className="py-16 wisbook-btn-gradient">
-                <div className="container mx-auto px-6">
+            <section className="py-20 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-600 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+                </div>
+                <div className="container mx-auto px-6 relative">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                         {stats.map((stat, index) => (
                             <motion.div
@@ -230,9 +279,10 @@ export default function About() {
                                     delay: index * 0.1,
                                 }}
                                 viewport={{ once: true }}
-                                className="text-center text-white"
+                                whileHover={{ scale: 1.05, y: -5 }}
+                                className="text-center text-white bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all"
                             >
-                                <stat.icon className="text-5xl mx-auto mb-4 opacity-90" />
+                                <stat.icon className="text-6xl mx-auto mb-4" />
                                 <AnimatedCounter
                                     target={stat.number}
                                     suffix={stat.suffix}
@@ -250,7 +300,7 @@ export default function About() {
             </section>
 
             {/* Timeline Section */}
-            <section className="py-20 bg-white">
+            <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
                 <div className="container mx-auto px-6 max-w-6xl">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -259,8 +309,14 @@ export default function About() {
                         viewport={{ once: true }}
                         className="text-center mb-16"
                     >
-                        <h2 className="text-4xl font-bold mb-4 text-gray-800">
-                            Hành trình phát triển
+                        <div className="inline-block mb-4">
+                            <span className="bg-blue-100 text-blue-600 px-4 py-2 rounded-full text-sm font-semibold">
+                                ⏳ Timeline
+                            </span>
+                        </div>
+                        <h2 className="text-5xl font-bold mb-4 text-gray-900">
+                            Hành trình{" "}
+                            <span className="text-blue-600">phát triển</span>
                         </h2>
                         <p className="text-xl text-gray-600">
                             15 năm không ngừng nỗ lực và phát triển
@@ -268,7 +324,7 @@ export default function About() {
                     </motion.div>
 
                     <div className="relative">
-                        <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-blue-200"></div>
+                        <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600"></div>
                         {milestones.map((milestone, index) => (
                             <motion.div
                                 key={index}

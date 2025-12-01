@@ -114,7 +114,7 @@ export default function CategoryBook({
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm relative container mb-12 px-35">
+        <div className="bg-white rounded-xl shadow-sm relative container mx-auto mb-12 px-35">
             {/* Header */}
             <div
                 className="flex items-center gap-3 bg-blue-500 px-4 py-3 rounded-full mb-6 animate-headerPulse"
