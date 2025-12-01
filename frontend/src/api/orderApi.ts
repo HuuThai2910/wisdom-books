@@ -26,13 +26,16 @@ const orderApi = {
     getOrderDetail: (orderId: number) =>
         axiosClient.get<ApiResponse<Order>>(`/orders/${orderId}`),
 
-    // Hủy đơn hàng
+    // Hủy đơn hàng (gửi request với id và status CANCELLED)
     cancelOrder: (orderId: number) =>
-        axiosClient.put<ApiResponse<Order>>(`/orders/${orderId}/cancel`),
+        axiosClient.put<ApiResponse<UpdatedOrderResponse>>("/orders/cancel", {
+            id: orderId,
+            status: "CANCELLED",
+        }),
 
     // Cập nhật trạng thái đơn hàng (chỉ admin có quyền)
     updateOrderStatus: (data: { id: number; status: Order["status"] }) =>
-        axiosClient.post<ApiResponse<UpdatedOrderResponse>>("/orders", data),
+        axiosClient.put<ApiResponse<UpdatedOrderResponse>>("/orders", data),
 };
 
 export default orderApi;

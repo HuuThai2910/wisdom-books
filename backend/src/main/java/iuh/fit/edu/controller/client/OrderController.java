@@ -57,13 +57,19 @@ public class OrderController {
         return ResponseEntity.ok(orderResponse);
     }
 
-    @PostMapping
+    @PutMapping
     @ApiMessage("Update order status")
     public ResponseEntity<UpdateOrderStatusResponse> updateOrderStatus(@RequestBody UpdateOrderRequest request){
         log.info("Request " + request);
         UpdateOrderStatusResponse orderResponse = this.orderService.updateOrderStatus(request);
         log.info("Response: " + orderResponse);
         return ResponseEntity.ok(orderResponse);
+    }
+
+    @PutMapping("/cancel")
+    @ApiMessage("Cancel order")
+    public ResponseEntity<UpdateOrderStatusResponse> cancelOrder(@RequestBody UpdateOrderRequest request){
+        return ResponseEntity.ok(this.orderService.updateOrderStatus(request));
     }
 
 }
