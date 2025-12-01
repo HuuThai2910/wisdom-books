@@ -5,7 +5,11 @@ import {
     FaBookOpen,
     FaHeadset,
     FaMapMarkerAlt,
+    FaSpinner,
+    FaCheckCircle,
 } from "react-icons/fa";
+import toast from "react-hot-toast";
+import emailjs from "@emailjs/browser";
 
 import {
     contactInfo,
@@ -23,6 +27,7 @@ export default function ContactPage() {
         subject: "",
         message: "",
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -30,22 +35,80 @@ export default function ContactPage() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Form submitted:", formData);
+        setIsSubmitting(true);
+
+        try {
+            // Cấu hình EmailJS - QUAN TRỌNG: Thay đổi các giá trị này
+            const serviceId = "service_xvx17bh"; // Thay bằng Service ID của bạn
+            const templateId = "template_290k67w"; // Thay bằng Template ID của bạn
+            const publicKey = "6HQ6fxuSA9nwlH26t"; // Thay bằng Public Key của bạn
+
+            // Template parameters - Tên phải khớp với template EmailJS
+            const templateParams = {
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                subject: formData.subject,
+                message: formData.message,
+            };
+
+            // Gửi email qua EmailJS
+            await emailjs.send(
+                serviceId,
+                templateId,
+                templateParams,
+                publicKey
+            );
+
+            // Hiển thị thông báo thành công
+            toast.success(
+                "Gửi tin nhắn thành công! Chúng tôi sẽ phản hồi sớm nhất.",
+                {
+                    duration: 5000,
+                    icon: "✅",
+                }
+            );
+
+            // Reset form
+            setFormData({
+                name: "",
+                email: "",
+                phone: "",
+                subject: "",
+                message: "",
+            });
+        } catch (error) {
+            console.error("Error sending email:", error);
+            toast.error(
+                "Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại hoặc liên hệ trực tiếp qua email!",
+                {
+                    duration: 5000,
+                }
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
-        <div className="min-h-screen wisbook-gradient-overlay pt-20 relative overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 pt-20 relative overflow-hidden">
             {/* Background Decoration */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 left-0 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-300/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
-                <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-200/10 rounded-full blur-3xl"></div>
+                <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-200/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
+                <div
+                    className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-300/25 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse"
+                    style={{ animationDelay: "1s" }}
+                ></div>
+                <div
+                    className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-blue-100/20 rounded-full blur-3xl animate-pulse"
+                    style={{ animationDelay: "2s" }}
+                ></div>
             </div>
 
             {/* Hero Section */}
-            <section className="relative py-20 overflow-hidden">
+            <section className="relative py-24 overflow-hidden">
                 <div className="container mx-auto px-6 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -54,25 +117,31 @@ export default function ContactPage() {
                         className="text-center max-w-4xl mx-auto"
                     >
                         <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
-                            className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6 shadow-2xl"
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{
+                                duration: 0.6,
+                                delay: 0.2,
+                                type: "spring",
+                            }}
+                            className="inline-block mb-6"
                         >
-                            <FaHeadset className="text-4xl text-white" />
+                            <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl flex items-center justify-center shadow-2xl transform hover:rotate-12 transition-transform">
+                                <FaHeadset className="text-5xl text-white" />
+                            </div>
                         </motion.div>
 
-                        <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 bg-clip-text text-transparent">
                             Liên Hệ Với WisBook
                         </h1>
 
-                        <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
+                        <p className="text-2xl text-gray-700 leading-relaxed font-medium">
                             Chúng tôi luôn sẵn sàng{" "}
-                            <span className="text-blue-600 font-semibold">
+                            <span className="text-blue-600 font-bold">
                                 lắng nghe
                             </span>{" "}
                             và{" "}
-                            <span className="text-purple-600 font-semibold">
+                            <span className="text-blue-600 font-bold">
                                 hỗ trợ
                             </span>{" "}
                             bạn
@@ -140,16 +209,19 @@ export default function ContactPage() {
                             viewport={{ once: true }}
                             className="lg:col-span-3 relative"
                         >
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-3xl blur-2xl"></div>
+                            <div className="absolute inset-0 bg-blue-200/20 rounded-3xl blur-2xl"></div>
 
-                            <div className="relative bg-white rounded-3xl shadow-2xl p-8 md:p-10 border border-gray-100">
+                            <div className="relative bg-white rounded-3xl shadow-2xl p-8 md:p-10 border-2 border-blue-100">
                                 <div className="flex items-center gap-3 mb-8">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                                        <FaPaperPlane className="text-white text-xl" />
+                                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <FaPaperPlane className="text-white text-2xl" />
                                     </div>
 
-                                    <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                        Gửi Tin Nhắn
+                                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                                        Gửi{" "}
+                                        <span className="text-blue-600">
+                                            Tin Nhắn
+                                        </span>
                                     </h2>
                                 </div>
 
@@ -242,13 +314,34 @@ export default function ContactPage() {
                                     </div>
 
                                     <motion.button
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
+                                        whileHover={{
+                                            scale: isSubmitting ? 1 : 1.02,
+                                            boxShadow: isSubmitting
+                                                ? undefined
+                                                : "0 20px 40px rgba(59, 130, 246, 0.3)",
+                                        }}
+                                        whileTap={{
+                                            scale: isSubmitting ? 1 : 0.98,
+                                        }}
                                         type="submit"
-                                        className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white py-4 rounded-xl font-semibold text-lg shadow-lg flex items-center justify-center gap-3"
+                                        disabled={isSubmitting}
+                                        className={`w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-3 transition-all ${
+                                            isSubmitting
+                                                ? "opacity-70 cursor-not-allowed"
+                                                : ""
+                                        }`}
                                     >
-                                        <FaPaperPlane />
-                                        Gửi Tin Nhắn
+                                        {isSubmitting ? (
+                                            <>
+                                                <FaSpinner className="text-xl animate-spin" />
+                                                Đang gửi...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <FaPaperPlane className="text-xl" />
+                                                Gửi Tin Nhắn
+                                            </>
+                                        )}
                                     </motion.button>
                                 </form>
                             </div>
@@ -286,12 +379,16 @@ export default function ContactPage() {
                             </div>
 
                             {/* Social Media */}
-                            <div className="relative bg-white rounded-3xl shadow-xl p-6 border border-gray-100">
-                                <h3 className="text-xl font-bold text-gray-800 mb-4">
-                                    Kết Nối Với Chúng Tôi
+                            <div className="relative bg-white rounded-3xl shadow-xl p-6 border-2 border-blue-100">
+                                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                                    Kết Nối Với{" "}
+                                    <span className="text-blue-600">
+                                        Chúng Tôi
+                                    </span>
                                 </h3>
                                 <p className="text-gray-600 text-sm mb-6">
                                     Theo dõi để cập nhật sách mới & khuyến mãi
+                                    hấp dẫn
                                 </p>
 
                                 <div className="grid grid-cols-4 gap-3">
@@ -315,10 +412,12 @@ export default function ContactPage() {
                             </div>
 
                             {/* Map */}
-                            <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-                                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4">
-                                    <h3 className="text-white font-bold text-lg flex items-center gap-2">
-                                        <FaMapMarkerAlt />
+                            <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden border-2 border-blue-100">
+                                <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-5">
+                                    <h3 className="text-white font-bold text-xl flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                                            <FaMapMarkerAlt className="text-xl" />
+                                        </div>
                                         Vị Trí Cửa Hàng
                                     </h3>
                                 </div>
@@ -348,8 +447,14 @@ export default function ContactPage() {
                         viewport={{ once: true }}
                         className="text-center mb-12"
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                            Câu Hỏi Thường Gặp
+                        <div className="inline-block mb-4">
+                            <span className="bg-blue-100 text-blue-600 px-4 py-2 rounded-full text-sm font-semibold">
+                                ❓ FAQ
+                            </span>
+                        </div>
+                        <h2 className="text-5xl md:text-6xl font-bold mb-4 text-gray-900">
+                            Câu Hỏi{" "}
+                            <span className="text-blue-600">Thường Gặp</span>
                         </h2>
                         <p className="text-xl text-gray-600">
                             Những thắc mắc phổ biến từ khách hàng

@@ -373,7 +373,7 @@ export default function BookManagement() {
             // Update status to OUT_OF_STOCK instead of deleting
             await bookApi.updateBook(bookToDelete.id, {
                 ...bookToDelete,
-                status: "OUT_OF_STOCK",
+                status: "STOP_SALE",
             });
             toast.success("Đã ngừng bán sách này!");
             closeDeleteConfirm();

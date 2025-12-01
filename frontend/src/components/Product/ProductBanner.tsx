@@ -79,7 +79,7 @@ export default function ProductBanner() {
     };
 
     return (
-        <section className="py-5 bg-white overflow-hidden">
+        <section className="py-5 px-35 bg-white overflow-hidden">
             <style>{`
                 .crosshair-container {
                     cursor: none;
@@ -165,7 +165,7 @@ export default function ProductBanner() {
                     <motion.img
                         src={image1}
                         alt="Sách mới"
-                        className="w-full h-[420px] object-cover transform-gpu"
+                        className="w-full h-[380px] object-cover transform-gpu"
                         style={{ y: y1 }}
                         whileHover={{ scale: 1.08 }}
                         transition={{ duration: 0.6 }}
@@ -247,7 +247,7 @@ export default function ProductBanner() {
                     <motion.img
                         src={image2}
                         alt="Sale Sách"
-                        className="w-full h-[420px] object-cover transform-gpu"
+                        className="w-full h-[380px] object-cover transform-gpu"
                         style={{ y: y2 }}
                         whileHover={{ scale: 1.1 }}
                         transition={{ duration: 0.6 }}
@@ -289,7 +289,7 @@ export default function ProductBanner() {
                             onClick={() => navigate("/books")}
                             whileHover={{ scale: 1.08 }}
                             transition={{ type: "spring", stiffness: 300 }}
-                            className={`mt-5 w-fit bg-orange-600 text-white rounded-full px-6 py-2 hover:scale-110 transition target-button ${
+                            className={`mt-5 w-fit bg-red-600 text-white rounded-full px-6 py-2 hover:scale-110 transition target-button ${
                                 isTargetHit2 ? "hit" : ""
                             }`}
                             style={{ pointerEvents: "auto" }}

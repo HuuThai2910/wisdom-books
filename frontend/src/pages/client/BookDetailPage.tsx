@@ -203,40 +203,20 @@ export default function BookDetailPage() {
     const reviewCount = book.review?.length || 0;
 
     return (
-        <div className="min-h-screen wisbook-gradient-overlay pt-20">
+        <div className="min-h-screen wisbook-gradient-overlay pt-15 px-35">
             <div className="container mx-auto px-6 py-8">
-                {/* Breadcrumb */}
-                <nav className="flex items-center gap-2 text-sm text-gray-600 mb-8">
-                    <Link
-                        to="/"
-                        className="hover:text-purple-600 transition-colors"
-                    >
-                        Trang chủ
-                    </Link>
-                    <span>/</span>
-                    <Link
-                        to="/books"
-                        className="hover:text-purple-600 transition-colors"
-                    >
-                        Sách
-                    </Link>
-                    <span>/</span>
-                    <span className="text-gray-900 font-semibold">
-                        {book.title}
-                    </span>
-                </nav>
-
-                <div className="grid lg:grid-cols-2 gap-12 mb-16">
+                <div className="grid lg:grid-cols-12 gap-8 mb-16">
                     {/* Image Gallery */}
                     <motion.div
                         initial={{ opacity: 0, x: -50 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.6 }}
+                        className="lg:col-span-5"
                     >
                         {/* Main Image */}
-                        <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden mb-4 group">
+                        <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden mb-4 group border-2 border-blue-100">
                             <div
-                                className="w-full h-[600px] flex items-center justify-center p-10 rounded-xl border border-gray-200 shadow-sm overflow-hidden cursor-grab active:cursor-grabbing"
+                                className="w-full h-[500px] flex items-center justify-center p-8 rounded-xl border border-blue-200 shadow-sm overflow-hidden cursor-grab active:cursor-grabbing"
                                 onMouseMove={handleMouseMove}
                                 onMouseEnter={handleMouseEnter}
                                 onMouseLeave={handleMouseLeave}
@@ -266,22 +246,22 @@ export default function BookDetailPage() {
                                 <>
                                     <button
                                         onClick={prevImage}
-                                        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300"
+                                        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-gray-600/90 hover:bg-blue-600 hover:text-white flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300"
                                     >
-                                        <FaChevronLeft className="text-purple-600" />
+                                        <FaChevronLeft className="text-blue-600 group-hover:text-white" />
                                     </button>
                                     <button
                                         onClick={nextImage}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-gray-600/90 hover:bg-blue-600 hover:text-white flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300"
                                     >
-                                        <FaChevronRight className="text-purple-600" />
+                                        <FaChevronRight className="text-blue-600 group-hover:text-white" />
                                     </button>
                                 </>
                             )}
 
                             {/* Badge */}
                             {book.status === "SALE" && (
-                                <div className="absolute top-4 right-4 bg-orange-500 text-white px-4 py-2 rounded-full font-semibold">
+                                <div className="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-full font-semibold shadow-lg">
                                     Hot
                                 </div>
                             )}
@@ -289,15 +269,15 @@ export default function BookDetailPage() {
 
                         {/* Thumbnail Images */}
                         {images.length > 1 && (
-                            <div className="grid grid-cols-5 gap-3">
+                            <div className="grid grid-cols-5 gap-2">
                                 {images.map((img, index) => (
                                     <button
                                         key={index}
                                         onClick={() => handleImageChange(index)}
-                                        className={`relative rounded-lg overflow-hidden border-2 transition-all ${
+                                        className={`relative rounded-lg overflow-hidden border-2 transition-all duration-300 ${
                                             selectedImage === index
-                                                ? "border-purple-600 shadow-lg"
-                                                : "border-gray-200 hover:border-purple-300"
+                                                ? "border-blue-600 shadow-lg scale-105"
+                                                : "border-gray-200 hover:border-blue-400"
                                         }`}
                                     >
                                         <img
@@ -316,18 +296,18 @@ export default function BookDetailPage() {
                         initial={{ opacity: 0, x: 50 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.6 }}
-                        className="bg-white rounded-2xl shadow-xl p-8 w-5/6"
+                        className="lg:col-span-7 bg-white rounded-2xl shadow-xl p-8 border-2 border-blue-100"
                     >
-                        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">
                             {book.title}
                         </h1>
 
-                        <div className="flex items-center gap-4 mb-6">
+                        <div className="flex items-center gap-4 mb-5">
                             <div className="flex items-center gap-1">
                                 {[...Array(5)].map((_, i) => (
                                     <FaStar
                                         key={i}
-                                        className={`text-lg ${
+                                        className={`text-base ${
                                             i < Math.floor(averageRating)
                                                 ? "text-yellow-400"
                                                 : "text-gray-300"
@@ -335,7 +315,7 @@ export default function BookDetailPage() {
                                     />
                                 ))}
                             </div>
-                            <span className="text-gray-600">
+                            <span className="text-sm text-gray-600">
                                 {averageRating > 0
                                     ? `${averageRating.toFixed(
                                           1
@@ -344,15 +324,15 @@ export default function BookDetailPage() {
                             </span>
                         </div>
 
-                        <div className="mb-6">
+                        <div className="mb-5">
                             <div className="flex items-baseline gap-3 mb-2">
-                                <span className="text-4xl font-bold wisbook-gradient-text">
+                                <span className="text-3xl font-bold text-blue-600">
                                     {book.sellingPrice?.toLocaleString("vi-VN")}
                                     ₫
                                 </span>
                                 {book.importPrice &&
                                     book.importPrice > book.sellingPrice && (
-                                        <span className="text-xl text-gray-400 line-through">
+                                        <span className="text-lg text-gray-400 line-through">
                                             {book.importPrice.toLocaleString(
                                                 "vi-VN"
                                             )}
@@ -361,7 +341,7 @@ export default function BookDetailPage() {
                                     )}
                             </div>
 
-                            <div className="text-lg font-semibold">
+                            <div className="text-base font-semibold">
                                 {book.quantity === 0 ? (
                                     <span className="text-red-600">
                                         Hết hàng
@@ -379,51 +359,51 @@ export default function BookDetailPage() {
                         </div>
 
                         {/* Book Info */}
-                        <div className="space-y-3 mb-6 pb-6 border-b border-gray-200">
+                        <div className="space-y-2.5 mb-5 pb-5 border-b border-gray-200">
                             <div className="flex gap-3">
-                                <span className="font-semibold text-gray-700 w-32">
+                                <span className="font-semibold text-gray-700 text-sm w-28">
                                     Tác giả:
                                 </span>
-                                <span className="text-gray-900">
+                                <span className="text-gray-900 text-sm">
                                     {book.author}
                                 </span>
                             </div>
                             <div className="flex gap-3">
-                                <span className="font-semibold text-gray-700 w-32">
+                                <span className="font-semibold text-gray-700 text-sm w-28">
                                     ISBN:
                                 </span>
-                                <span className="text-gray-900">
+                                <span className="text-gray-900 text-sm">
                                     {book.isbn}
                                 </span>
                             </div>
                             <div className="flex gap-3">
-                                <span className="font-semibold text-gray-700 w-32">
+                                <span className="font-semibold text-gray-700 text-sm w-28">
                                     Năm xuất bản:
                                 </span>
-                                <span className="text-gray-900">
+                                <span className="text-gray-900 text-sm">
                                     {book.yearOfPublication || "Đang cập nhật"}
                                 </span>
                             </div>
                             {book.supplier && (
                                 <div className="flex gap-3">
-                                    <span className="font-semibold text-gray-700 w-32">
+                                    <span className="font-semibold text-gray-700 text-sm w-28">
                                         Nhà cung cấp:
                                     </span>
-                                    <span className="text-gray-900">
+                                    <span className="text-gray-900 text-sm">
                                         {book.supplier.companyName}
                                     </span>
                                 </div>
                             )}
                             {book.category && book.category.length > 0 && (
                                 <div className="flex gap-3">
-                                    <span className="font-semibold text-gray-700 w-32">
+                                    <span className="font-semibold text-gray-700 text-sm w-28">
                                         Thể loại:
                                     </span>
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="flex flex-wrap gap-1.5">
                                         {book.category.map((cat) => (
                                             <span
                                                 key={cat.id}
-                                                className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium"
+                                                className="px-2.5 py-0.5 bg-blue-600 text-white rounded-full text-xs font-medium shadow-sm"
                                             >
                                                 {cat.name}
                                             </span>
@@ -434,20 +414,20 @@ export default function BookDetailPage() {
                         </div>
 
                         {/* Quantity */}
-                        <div className="mb-6">
-                            <div className="flex items-center gap-6">
-                                <label className="font-semibold text-gray-700">
+                        <div className="mb-5">
+                            <div className="flex items-center gap-4">
+                                <label className="font-semibold text-gray-700 text-sm">
                                     Số lượng:
                                 </label>
                                 {/* Input số lượng */}
-                                <div className="flex items-center bg-white border border-gray-300 rounded-full shadow-sm px-3 py-1.5 gap-2">
+                                <div className="flex items-center bg-white border-2 border-blue-200 rounded-full shadow-sm px-2.5 py-1 gap-2">
                                     {/* Nút - */}
                                     <button
                                         onClick={() => handleQuantityChange(-1)}
                                         disabled={quantity <= 1}
-                                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 disabled:opacity-50 transition"
+                                        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-blue-100 disabled:opacity-50 transition-all duration-300"
                                     >
-                                        <FaMinus className="text-gray-600 text-sm" />
+                                        <FaMinus className="text-blue-600 text-xs" />
                                     </button>
 
                                     {/* INPUT số */}
@@ -479,7 +459,7 @@ export default function BookDetailPage() {
                                                 setQuantity(prevQuantity);
                                             }
                                         }}
-                                        className="w-14 text-center font-semibold text-lg text-gray-900 outline-none bg-transparent rounded-full"
+                                        className="w-12 text-center font-semibold text-base text-gray-900 outline-none bg-transparent rounded-full"
                                     />
 
                                     {/* Nút + */}
@@ -488,21 +468,21 @@ export default function BookDetailPage() {
                                         disabled={
                                             quantity >= (book.quantity || 1)
                                         }
-                                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 disabled:opacity-50 transition"
+                                        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-blue-100 disabled:opacity-50 transition-all duration-300"
                                     >
-                                        <FaPlus className="text-gray-600 text-sm" />
+                                        <FaPlus className="text-blue-600 text-xs" />
                                     </button>
                                 </div>
 
                                 {/* Block trạng thái tồn kho (đẹp – căn giữa) */}
-                                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-50 border border-green-200 shadow">
-                                    <span className="text-green-700 font-semibold">
+                                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border-2 border-blue-200 shadow-sm">
+                                    <span className="text-blue-700 font-semibold text-sm">
                                         Còn
                                     </span>
-                                    <span className="text-green-900 font-bold">
+                                    <span className="text-blue-900 font-bold text-sm">
                                         {book.quantity}
                                     </span>
-                                    <span className="text-green-700">
+                                    <span className="text-blue-700 text-sm">
                                         sản phẩm
                                     </span>
                                 </div>
@@ -510,7 +490,7 @@ export default function BookDetailPage() {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex gap-4 mb-6 w-full">
+                        <div className="flex gap-3 mb-5 w-full">
                             {/* Nút MUA NGAY */}
                             <button
                                 onClick={handleBuyNow}
@@ -519,18 +499,21 @@ export default function BookDetailPage() {
             flex-1 
             bg-white 
             text-blue-600 
-            border border-blue-600
+            border-2 border-blue-600
             font-semibold 
-            py-3 px-6 
+            text-sm
+            py-2.5 px-5 
             rounded-full 
             flex items-center justify-center gap-2 
-            transition-all duration-300
-            shadow-sm
-            hover:shadow-lg hover:shadow-blue-300/40
+            transition-all duration-500
+            shadow-md
+            hover:bg-blue-600 hover:text-white
+            hover:shadow-lg hover:shadow-blue-300/50
+            hover:scale-105
             disabled:opacity-50 disabled:cursor-not-allowed
         "
                             >
-                                <FaShoppingCart className="text-lg transition-all" />
+                                <FaShoppingCart className="text-base transition-all" />
                                 Mua ngay
                             </button>
 
@@ -542,36 +525,39 @@ export default function BookDetailPage() {
         flex-1 
         bg-blue-600 
         text-white 
-        border border-blue-600
+        border-2 border-blue-600
         font-semibold 
-        py-3 px-6 
+        text-sm
+        py-2.5 px-5 
         rounded-full 
         flex items-center justify-center gap-2 
-        transition-all duration-300
+        transition-all duration-500
         shadow-md
-        hover:shadow-lg hover:shadow-blue-300/40
+        hover:bg-blue-700
+        hover:shadow-lg hover:shadow-blue-400/50
+        hover:scale-105
         disabled:opacity-50 disabled:cursor-not-allowed
     "
                             >
-                                <FaShoppingCart className="text-lg transition-all" />
+                                <FaShoppingCart className="text-base transition-all" />
                                 Thêm vào giỏ hàng
                             </button>
                         </div>
 
                         {/* Social Share */}
                         <div>
-                            <p className="font-semibold text-gray-700 mb-3">
+                            <p className="font-semibold text-gray-700 text-sm mb-2">
                                 Chia sẻ:
                             </p>
-                            <div className="flex gap-3">
-                                <button className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors">
-                                    <FaFacebookF />
+                            <div className="flex gap-2">
+                                <button className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 hover:scale-110 transition-all duration-300 shadow-md">
+                                    <FaFacebookF className="text-sm" />
                                 </button>
-                                <button className="w-10 h-10 rounded-full bg-sky-500 text-white flex items-center justify-center hover:bg-sky-600 transition-colors">
-                                    <FaTwitter />
+                                <button className="w-9 h-9 rounded-full bg-sky-500 text-white flex items-center justify-center hover:bg-sky-600 hover:scale-110 transition-all duration-300 shadow-md">
+                                    <FaTwitter className="text-sm" />
                                 </button>
-                                <button className="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 transition-colors">
-                                    <FaPinterest />
+                                <button className="w-9 h-9 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 hover:scale-110 transition-all duration-300 shadow-md">
+                                    <FaPinterest className="text-sm" />
                                 </button>
                             </div>
                         </div>
@@ -583,49 +569,82 @@ export default function BookDetailPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
-                    className="bg-white rounded-2xl shadow-xl overflow-hidden"
+                    className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-blue-100"
                 >
                     {/* Tab Headers */}
-                    <div className="flex border-b border-gray-200">
+                    <div className="flex border-b-2 border-blue-100 bg-blue-50/30">
                         {/* TAB 1 */}
                         <button
                             onClick={() => setActiveTab("description")}
-                            className={`flex-1 py-4 px-6 font-semibold flex items-center justify-center gap-2 transition-all
+                            className={`flex-1 py-4 px-6 font-semibold flex items-center justify-center gap-2 transition-all duration-500 relative
             ${
                 activeTab === "description"
-                    ? "wisbook-gradient-text border-b-2 border-purple-600"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "text-blue-600 bg-white"
+                    : "text-gray-600 hover:text-blue-600 hover:bg-blue-50/50"
             }`}
                         >
-                            <BookOpen className="w-5 h-5 text-amber-600" />
+                            {activeTab === "description" && (
+                                <motion.div
+                                    layoutId="activeTab"
+                                    className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600"
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 500,
+                                        damping: 30,
+                                    }}
+                                />
+                            )}
+                            <BookOpen className="w-5 h-5" />
                             <span>Mô tả sản phẩm</span>
                         </button>
 
                         {/* TAB 2 */}
                         <button
                             onClick={() => setActiveTab("specs")}
-                            className={`flex-1 py-4 px-6 font-semibold flex items-center justify-center gap-2 transition-all
+                            className={`flex-1 py-4 px-6 font-semibold flex items-center justify-center gap-2 transition-all duration-500 relative
             ${
                 activeTab === "specs"
-                    ? "wisbook-gradient-text border-b-2 border-purple-600"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "text-blue-600 bg-white"
+                    : "text-gray-600 hover:text-blue-600 hover:bg-blue-50/50"
             }`}
                         >
-                            <Info className="w-5 h-5 text-amber-600" />
+                            {activeTab === "specs" && (
+                                <motion.div
+                                    layoutId="activeTab"
+                                    className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600"
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 500,
+                                        damping: 30,
+                                    }}
+                                />
+                            )}
+                            <Info className="w-5 h-5" />
                             <span>Thông tin sách</span>
                         </button>
 
                         {/* TAB 3 */}
                         <button
                             onClick={() => setActiveTab("reviews")}
-                            className={`flex-1 py-4 px-6 font-semibold flex items-center justify-center gap-2 transition-all
+                            className={`flex-1 py-4 px-6 font-semibold flex items-center justify-center gap-2 transition-all duration-500 relative
             ${
                 activeTab === "reviews"
-                    ? "wisbook-gradient-text border-b-2 border-purple-600"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "text-blue-600 bg-white"
+                    : "text-gray-600 hover:text-blue-600 hover:bg-blue-50/50"
             }`}
                         >
-                            <MessageSquare className="w-5 h-5 text-amber-600" />
+                            {activeTab === "reviews" && (
+                                <motion.div
+                                    layoutId="activeTab"
+                                    className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600"
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 500,
+                                        damping: 30,
+                                    }}
+                                />
+                            )}
+                            <MessageSquare className="w-5 h-5" />
                             <span>
                                 Đánh giá{" "}
                                 {reviewCount > 0 ? `(${reviewCount})` : ""}
@@ -636,9 +655,14 @@ export default function BookDetailPage() {
                     {/* Tab Content */}
                     <div className="p-8">
                         {activeTab === "description" && (
-                            <div className="prose max-w-none">
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="prose max-w-none"
+                            >
                                 {book.shortDes && (
-                                    <div className="mb-4 p-4 bg-purple-50 rounded-lg">
+                                    <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                                         <p className="text-gray-800 font-medium">
                                             {book.shortDes}
                                         </p>
@@ -648,11 +672,16 @@ export default function BookDetailPage() {
                                     {book.description ||
                                         "Đang cập nhật mô tả sản phẩm..."}
                                 </div>
-                            </div>
+                            </motion.div>
                         )}
 
                         {activeTab === "specs" && (
-                            <div className="grid md:grid-cols-2 gap-4">
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="grid md:grid-cols-2 gap-4"
+                            >
                                 <div className="flex py-3 border-b border-gray-200">
                                     <span className="font-semibold text-gray-700 w-48">
                                         Tác giả:
@@ -714,16 +743,20 @@ export default function BookDetailPage() {
                                         {book.quantity} cuốn
                                     </span>
                                 </div>
-                            </div>
+                            </motion.div>
                         )}
 
                         {activeTab === "reviews" && (
-                            <div>
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5 }}
+                            >
                                 {book.review && book.review.length > 0 ? (
                                     <div className="space-y-6">
-                                        <div className="flex items-center gap-4 pb-6 border-b">
+                                        <div className="flex items-center gap-4 pb-6 border-b border-blue-200">
                                             <div className="text-center">
-                                                <div className="text-5xl font-bold wisbook-gradient-text mb-2">
+                                                <div className="text-5xl font-bold text-blue-600 mb-2">
                                                     {averageRating.toFixed(1)}
                                                 </div>
                                                 <div className="flex items-center gap-1 mb-1">
@@ -790,12 +823,12 @@ export default function BookDetailPage() {
                                             Chưa có đánh giá nào cho sản phẩm
                                             này.
                                         </p>
-                                        <button className="mt-4 wisbook-btn-gradient text-white font-semibold py-2 px-6 rounded-lg">
+                                        <button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-105">
                                             Viết đánh giá đầu tiên
                                         </button>
                                     </div>
                                 )}
-                            </div>
+                            </motion.div>
                         )}
                     </div>
                 </motion.div>

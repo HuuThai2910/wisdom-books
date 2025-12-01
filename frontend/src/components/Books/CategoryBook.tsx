@@ -114,7 +114,7 @@ export default function CategoryBook({
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm p-6 relative container mx-auto mb-12">
+        <div className="bg-white rounded-xl shadow-sm relative container mx-auto mb-12 px-35">
             {/* Header */}
             <div
                 className="flex items-center gap-3 bg-blue-500 px-4 py-3 rounded-lg mb-6 animate-headerPulse"
@@ -133,7 +133,7 @@ export default function CategoryBook({
 
                 {/* TITLE */}
                 <h2
-                    className="text-4xl font-bold relative overflow-hidden animate-titleFade"
+                    className="text-3xl font-bold relative overflow-hidden animate-titleFade"
                     style={{
                         fontFamily: "Playfair Display, serif",
                         fontStyle: "italic",
@@ -179,7 +179,7 @@ export default function CategoryBook({
                         </Atropos>
 
                         <p
-                            className="relative text-center mt-2 font-semibold text-gray-800 text-3xl transition-all duration-500 ease-out opacity-80 hover:text-blue-600 hover:opacity-100 hover:scale-[1.05] hover:tracking-wide hover:-translate-y-1 cursor-pointer"
+                            className="relative text-center mt-2 font-semibold text-gray-800 text-xl transition-all duration-500 ease-out opacity-80 hover:text-blue-600 hover:opacity-100 hover:scale-[1.05] hover:tracking-wide hover:-translate-y-1 cursor-pointer"
                             style={{ fontFamily: "Playfair Display, serif" }}
                         >
                             {/* Text */}

@@ -68,6 +68,7 @@ function App() {
                     <Route path="/cart" element={<CartPage />} />
                     <Route path="/checkout" element={<CheckOutPage />} />
                     <Route path="/about" element={<About />} />
+
                     <Route path="/shipping" element={<ShippingPage />} />
                     <Route
                         path="/return-policy"
@@ -86,6 +87,7 @@ function App() {
                         path="/book-collection"
                         element={<BookCollectionPage />}
                     />
+                    
                     <Route path="/contact" element={<ContactPage />} />
                     <Route path="/admin/books" element={<BookManagement />} />
                     <Route

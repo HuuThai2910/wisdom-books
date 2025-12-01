@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ant-design/pro-components": "^2.8.10",
+    "@emailjs/browser": "^4.4.1",
     "@reduxjs/toolkit": "^2.10.1",
     "@tailwindcss/vite": "^4.1.17",
     "animate.css": "^4.1.1",

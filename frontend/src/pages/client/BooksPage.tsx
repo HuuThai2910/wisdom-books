@@ -1,135 +1,173 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaFilter } from "react-icons/fa";
 import { useSearchParams } from "react-router-dom";
 import FilterModal, { FilterOptions } from "../../components/Books/FilterModal";
-import { useBooks } from "../../contexts/BookContext";
 import BookCard from "../../components/common/BookCard";
+import bookApi from "../../api/bookApi";
+import { Book } from "../../types";
 
 export default function BooksPage() {
-    const {
-        books: contextBooks,
-        loading,
-        fetchBooks,
-        totalPages: contextTotalPages,
-        totalBooks: contextTotalBooks,
-    } = useBooks();
+    // Local state - không dùng BookContext để tránh conflict với Home
+    const [books, setBooks] = useState<Book[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [totalPages, setTotalPages] = useState(1);
     const [currentPage, setCurrentPage] = useState(0);
+    const [isFilterOpen, setIsFilterOpen] = useState(true);
     const [searchParams] = useSearchParams();
     const categoryParam = searchParams.get("category");
     const searchQuery = searchParams.get("search");
-    const [searchValue, setSearchValue] = useState(searchQuery || "");
-    const [filters, setFilters] = useState<FilterOptions>({
+
+    // Use useMemo to stabilize filter object reference
+    const currentYear = useMemo(() => new Date().getFullYear(), []);
+    const [filters, setFilters] = useState<FilterOptions>(() => ({
         categories: [],
-        priceRange: [0, 1000000],
-        yearRange: [1900, new Date().getFullYear()],
+        priceRange: [0, 5000000],
+        yearRange: [1900, currentYear],
         status: [],
         sortBy: "createdAt,desc",
-    });
+    }));
     const pageSize = 12;
 
-    // Local state to prevent showing stale data on F5
-    const [books, setBooks] = useState(contextBooks);
-    const [totalPages, setTotalPages] = useState(1);
-    const [totalBooks, setTotalBooks] = useState(0);
+    // Track if component has fetched data
+    const hasFetched = useRef(false);
 
-    // Reset when filters change
-    useEffect(() => {
-        setCurrentPage(0);
-        setBooks([]);
-        setTotalPages(1);
-        setTotalBooks(0);
-    }, [categoryParam, searchQuery, searchValue, filters]);
+    // Build filter query function
+    const buildFilterQuery = useMemo(() => {
+        return (): string => {
+            const filterParts: string[] = [];
 
-    // Sync from context only when not loading
-    useEffect(() => {
-        if (!loading) {
-            setBooks(contextBooks);
-            setTotalPages(contextTotalPages);
-            setTotalBooks(contextTotalBooks);
+            // Filter by search query
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                filterParts.push(
+                    `(title~'*${query}*' or author~'*${query}*' or categories.name~'*${query}*')`
+                );
+            }
+
+            // Filter by category from URL
+            if (categoryParam) {
+                filterParts.push(`categories.name~'${categoryParam}'`);
+            }
+            // Filter by categories from filter panel
+            else if (filters.categories.length > 0) {
+                const categoryFilters = filters.categories
+                    .map((name) => `categories.name~'${name}'`)
+                    .join(" or ");
+                filterParts.push(`(${categoryFilters})`);
+            }
+
+            // Filter by status
+            if (filters.status.length > 0) {
+                const statusFilter = filters.status
+                    .map((s) => `status:'${s}'`)
+                    .join(" or ");
+                filterParts.push(`(${statusFilter})`);
+            }
+
+            // Filter by price range
+            if (filters.priceRange[0] > 0 || filters.priceRange[1] < 5000000) {
+                filterParts.push(
+                    `sellingPrice>=${filters.priceRange[0]} and sellingPrice<=${filters.priceRange[1]}`
+                );
+            }
+
+            // Filter by year range
+            if (
+                filters.yearRange[0] > 1900 ||
+                filters.yearRange[1] < new Date().getFullYear()
+            ) {
+                filterParts.push(
+                    `yearOfPublication>=${filters.yearRange[0]} and yearOfPublication<=${filters.yearRange[1]}`
+                );
+            }
+
+            return filterParts.join(" and ");
+        };
+    }, [searchQuery, categoryParam, filters]);
+
+    // Fetch books function - local for BooksPage only
+    const fetchBooks = async (
+        page: number,
+        size: number,
+        sort: string,
+        filter?: string
+    ) => {
+        try {
+            setLoading(true);
+            const response = await bookApi.getAllBooks({
+                page,
+                size,
+                sort,
+                filter,
+            });
+            if (response.data?.result) {
+                setBooks(response.data.result);
+                setTotalPages(response.data.meta?.pages || 1);
+            }
+        } catch (err: any) {
+            console.error("Error fetching books:", err);
+            setBooks([]);
+        } finally {
+            setLoading(false);
         }
-    }, [contextBooks, contextTotalPages, contextTotalBooks, loading]);
-
-    useEffect(() => {
-        fetchBooksWithFilters();
-    }, [currentPage, filters, searchValue, categoryParam, searchQuery]);
-
-    const buildFilterQuery = (): string => {
-        const filterParts: string[] = [];
-
-        // Filter by search query - tìm trong title, author, hoặc categories
-        if (searchValue.trim() || searchQuery) {
-            const query = (searchValue || searchQuery || "").toLowerCase();
-            filterParts.push(
-                `(title~'*${query}*' or author~'*${query}*' or categories.name~'*${query}*')`
-            );
-        }
-
-        // Filter by category from URL (ManyToMany relationship)
-        if (categoryParam) {
-            filterParts.push(`categories.name~'${categoryParam}'`);
-        }
-        // Filter by categories from filter panel
-        else if (filters.categories.length > 0) {
-            const categoryFilters = filters.categories
-                .map((name) => `categories.name~'${name}'`)
-                .join(" or ");
-            filterParts.push(`(${categoryFilters})`);
-        }
-
-        // Filter by status
-        if (filters.status.length > 0) {
-            const statusFilter = filters.status
-                .map((s) => `status:'${s}'`)
-                .join(" or ");
-            filterParts.push(`(${statusFilter})`);
-        }
-
-        // Filter by price range
-        if (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000000) {
-            filterParts.push(
-                `sellingPrice>${filters.priceRange[0]} and sellingPrice<${filters.priceRange[1]}`
-            );
-        }
-
-        // Filter by year range
-        if (
-            filters.yearRange[0] > 1900 ||
-            filters.yearRange[1] < new Date().getFullYear()
-        ) {
-            filterParts.push(
-                `yearOfPublication>${filters.yearRange[0]} and yearOfPublication<${filters.yearRange[1]}`
-            );
-        }
-
-        return filterParts.join(" and ");
     };
 
-    const fetchBooksWithFilters = async () => {
+    // Memoize filter dependencies to prevent unnecessary re-renders
+    const filterDeps = useMemo(
+        () => ({
+            categories: filters.categories.join(","),
+            status: filters.status.join(","),
+            priceMin: filters.priceRange[0],
+            priceMax: filters.priceRange[1],
+            yearMin: filters.yearRange[0],
+            yearMax: filters.yearRange[1],
+        }),
+        [
+            filters.categories,
+            filters.status,
+            filters.priceRange[0],
+            filters.priceRange[1],
+            filters.yearRange[0],
+            filters.yearRange[1],
+        ]
+    );
+
+    // Single fetch effect
+    useEffect(() => {
         const filterQuery = buildFilterQuery();
 
         console.log("=== FETCH BOOKS ===");
-        console.log("categoryParam:", categoryParam);
-        console.log("Filter Query:", filterQuery);
         console.log("Page:", currentPage);
-        console.log("Sort:", filters.sortBy);
+        console.log("Category:", categoryParam);
+        console.log("Search:", searchQuery);
+        console.log("Filter Query:", filterQuery);
+        console.log("Has Fetched:", hasFetched.current);
 
-        await fetchBooks(
+        hasFetched.current = true;
+        fetchBooks(
             currentPage,
             pageSize,
             filters.sortBy,
             filterQuery || undefined
         );
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        currentPage,
+        categoryParam,
+        searchQuery,
+        filters.sortBy,
+        filterDeps.categories,
+        filterDeps.status,
+        filterDeps.priceMin,
+        filterDeps.priceMax,
+        filterDeps.yearMin,
+        filterDeps.yearMax,
+    ]);
 
     const handleApplyFilter = (newFilters: FilterOptions) => {
+        setCurrentPage(0);
         setFilters(newFilters);
-        setCurrentPage(0);
-    };
-
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        setCurrentPage(0);
     };
 
     const handlePageChange = (page: number) => {
@@ -157,10 +195,10 @@ export default function BooksPage() {
                 <button
                     key={i}
                     onClick={() => handlePageChange(i)}
-                    className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                    className={`min-w-[40px] h-10 px-3 rounded-full font-semibold transition-all duration-300 ${
                         currentPage === i
-                            ? "wisbook-btn-gradient text-white"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            ? "bg-blue-600 text-white shadow-lg scale-110"
+                            : "bg-blue-50 text-blue-600 hover:bg-blue-100 hover:scale-105"
                     }`}
                 >
                     {i + 1}
@@ -172,45 +210,86 @@ export default function BooksPage() {
     };
 
     return (
-        <div className="min-h-screen wisbook-gradient-overlay pt-20">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 pt-15">
             <div className="container mx-auto px-6 py-8">
-                {/* Header */}
-                {/* <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className="mb-8"
-                >
-                    <h1 className="text-4xl font-bold wisbook-gradient-text mb-2">
-                        Tất Cả Sách
-                    </h1>
-                    <p className="text-gray-600">
-                        Khám phá bộ sưu tập {totalBooks.toLocaleString()} đầu
-                        sách của chúng tôi
-                    </p>
-                </motion.div> */}
+                {/* Page Header */}
 
                 {/* Main Content - Flex Layout */}
-                <div className="flex gap-6">
+                <div className="flex gap-6 relative">
+                    {/* Floating Toggle Button - Shows when filter is closed */}
+                    <motion.button
+                        initial={false}
+                        animate={{
+                            opacity: isFilterOpen ? 0 : 1,
+                            x: isFilterOpen ? -100 : 0,
+                            pointerEvents: isFilterOpen ? "none" : "auto",
+                        }}
+                        transition={{
+                            duration: 0.4,
+                            ease: [0.4, 0, 0.2, 1],
+                        }}
+                        onClick={() => setIsFilterOpen(true)}
+                        className="fixed left-6 top-32 z-50 w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-full shadow-2xl hover:shadow-blue-500/50 hover:scale-110 transition-all duration-300 flex items-center justify-center group"
+                        title="Mở bộ lọc"
+                    >
+                        <FaFilter className="text-xl group-hover:rotate-12 transition-transform duration-300" />
+                        <span className="absolute -right-2 -top-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold animate-pulse">
+                            {filters.categories.length +
+                                filters.status.length || ""}
+                        </span>
+                    </motion.button>
+
                     {/* Left Sidebar - Filter */}
-                    <FilterModal
-                        onApplyFilter={handleApplyFilter}
-                        currentFilters={filters}
-                    />
+                    <motion.div
+                        initial={false}
+                        animate={{
+                            width: isFilterOpen ? 320 : 0,
+                            opacity: isFilterOpen ? 1 : 0,
+                            marginRight: isFilterOpen ? 24 : 0,
+                        }}
+                        transition={{
+                            duration: 0.4,
+                            ease: [0.4, 0, 0.2, 1],
+                        }}
+                        className="overflow-hidden shrink-0"
+                    >
+                        <FilterModal
+                            onApplyFilter={handleApplyFilter}
+                            currentFilters={filters}
+                            isOpen={isFilterOpen}
+                            onToggle={() => setIsFilterOpen(!isFilterOpen)}
+                        />
+                    </motion.div>
 
                     {/* Right Content - Books Grid */}
-                    <div className="flex-1">
+                    <motion.div
+                        layout
+                        transition={{
+                            duration: 0.4,
+                            ease: [0.4, 0, 0.2, 1],
+                        }}
+                        className="flex-1 min-w-0"
+                    >
                         {/* Books Grid */}
                         {loading ? (
                             <div className="flex items-center justify-center h-64">
-                                <div className="text-xl text-gray-600">
-                                    Đang tải sách...
+                                <div className="animate-pulse flex flex-col items-center gap-4">
+                                    <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="text-lg text-gray-600 font-semibold">
+                                        Đang tải sách...
+                                    </div>
                                 </div>
                             </div>
                         ) : books.length === 0 ? (
                             <div className="flex items-center justify-center h-64">
-                                <div className="text-xl text-gray-600">
-                                    Không tìm thấy sách nào
+                                <div className="text-center">
+                                    <div className="text-6xl mb-4">📚</div>
+                                    <div className="text-xl text-gray-600 font-semibold mb-2">
+                                        Không tìm thấy sách nào
+                                    </div>
+                                    <p className="text-gray-500 text-sm">
+                                        Thử điều chỉnh bộ lọc của bạn
+                                    </p>
                                 </div>
                             </div>
                         ) : (
@@ -218,7 +297,7 @@ export default function BooksPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6 }}
-                                className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
+                                className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12"
                             >
                                 {books.map((book, index) => (
                                     <BookCard
@@ -234,15 +313,20 @@ export default function BooksPage() {
 
                         {/* Pagination */}
                         {!loading && books.length > 0 && totalPages > 1 && (
-                            <div className="flex items-center justify-center gap-2 mt-8">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.2 }}
+                                className="flex items-center justify-center gap-2 mt-8 p-4 bg-white rounded-2xl shadow-lg border border-blue-100"
+                            >
                                 <button
                                     onClick={() =>
                                         handlePageChange(currentPage - 1)
                                     }
                                     disabled={currentPage === 0}
-                                    className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                    className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-50 hover:bg-blue-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-blue-600"
                                 >
-                                    <FaChevronLeft className="text-gray-700" />
+                                    <FaChevronLeft />
                                 </button>
 
                                 {renderPagination()}
@@ -252,13 +336,13 @@ export default function BooksPage() {
                                         handlePageChange(currentPage + 1)
                                     }
                                     disabled={currentPage === totalPages - 1}
-                                    className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                    className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-50 hover:bg-blue-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-blue-600"
                                 >
-                                    <FaChevronRight className="text-gray-700" />
+                                    <FaChevronRight />
                                 </button>
-                            </div>
+                            </motion.div>
                         )}
-                    </div>
+                    </motion.div>
                 </div>
             </div>
         </div>
