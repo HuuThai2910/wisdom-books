@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByEmail(String email);
-    User findUserBySub(String sub);
     
     @Query("SELECT COUNT(u) FROM User u WHERE u.role.name = 'CUSTOMER'")
     long countCustomers();
