@@ -65,7 +65,7 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
                   onClick={() => setDropdownOpen(false)}
                 >
                   <Home className="w-4 h-4" />
-                  Trang chủ
+                  Trang bán hàng
                 </Link>
                 <Link
                   to="/admin/profile"
