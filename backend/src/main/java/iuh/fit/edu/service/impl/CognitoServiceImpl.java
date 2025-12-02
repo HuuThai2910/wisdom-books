@@ -62,6 +62,7 @@ public class CognitoServiceImpl implements CognitoService {
 
     @Override
     public String loginUser(LoginRequest request) {
+        Map<String,String> authParams = new HashMap<>();
         authParams.put("USERNAME",request.getFullName());
         authParams.put("PASSWORD",request.getPassword());
         authParams.put("SECRET_HASH", calculateSecretHash(request.getFullName(), clientId, clientSecret));
