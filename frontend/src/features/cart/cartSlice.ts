@@ -7,6 +7,7 @@ import {
 } from "@reduxjs/toolkit";
 import cartAPI from "../../api/cartApi";
 import { CartItem } from "../../types";
+import toast from "react-hot-toast";
 
 // Lấy cart
 export const fetchCart = createAsyncThunk<
@@ -32,8 +33,25 @@ export const addItem = createAsyncThunk<
     { rejectValue: string }
 >("cart/addItem", async ({ bookId, quantity }, thunkAPI) => {
     try {
+        // Lấy state hiện tại để kiểm tra
+        const state = thunkAPI.getState() as { cart: CartSliceState };
+        const existingItem = state.cart.cartItems.find(
+            (item) => item.book.id === bookId
+        );
+
+        // Nếu item đã tồn tại trong giỏ, kiểm tra số lượng
+        if (existingItem) {
+            const newQuantity = existingItem.quantity + quantity;
+            if (newQuantity > existingItem.book.quantity) {
+                return thunkAPI.rejectWithValue(
+                    `Số lượng vượt quá tồn kho!\nChỉ còn ${existingItem.book.quantity} cuốn.`
+                );
+            }
+        }
+
         const res = await cartAPI.addItem({ bookId, quantity });
         const result = res.data;
+        toast.success("Sản phẩm đã được thêm vào giỏ hàng");
         return result.data;
     } catch (err: any) {
         return thunkAPI.rejectWithValue(
@@ -186,12 +204,16 @@ const cartSlice = createSlice({
             // ADD TO CART
             .addCase(addItem.fulfilled, (state, action) => {
                 state.status = "succeeded";
-                const existingItem = state.cartItems.find(
+                // Backend đã trả về item với quantity đã được cộng sẵn
+                // Chỉ cần cập nhật hoặc thêm mới, không cộng thêm
+                const existingItemIndex = state.cartItems.findIndex(
                     (item) => item.id === action.payload.id
                 );
-                if (existingItem) {
-                    existingItem.quantity += action.payload.quantity;
+                if (existingItemIndex !== -1) {
+                    // Cập nhật item đã tồn tại với dữ liệu mới từ backend
+                    state.cartItems[existingItemIndex] = action.payload;
                 } else {
+                    // Thêm item mới
                     state.cartItems.push(action.payload);
                 }
             })
@@ -211,8 +233,8 @@ const cartSlice = createSlice({
             // REMOVE ITEM
             .addCase(removeItem.fulfilled, (state, action) => {
                 state.status = "succeeded";
-                state.cartItems = state.cartItems.filter((item) =>
-                    !action.payload.includes(item.id)
+                state.cartItems = state.cartItems.filter(
+                    (item) => !action.payload.includes(item.id)
                 );
             })
 

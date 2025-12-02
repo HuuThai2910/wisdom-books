@@ -7,12 +7,14 @@ import { useCartItemQuantity } from "../../hooks/cart/useCartItemQuantity";
 import { useCartItemSelection } from "../../hooks/cart/useCartItemSelection";
 import CartItemQuantityControl from "./CartItemQuantityControl";
 import { CartItemProps } from "../../types";
+import { useNavigate } from "react-router-dom";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL as string;
 
 export default function CartItem({ item }: CartItemProps) {
     const dispatch = useAppDispatch();
     const isOutOfStock = item.book.quantity === 0;
+    const navigate = useNavigate();
 
     const {
         localQuantity,
@@ -40,13 +42,19 @@ export default function CartItem({ item }: CartItemProps) {
                 <input
                     type="checkbox"
                     checked={item.selected || false}
-                    onChange={handleToggleSelect}
+                    onChange={(e) => {
+                        e.stopPropagation();
+                        handleToggleSelect();
+                    }}
                     disabled={isOutOfStock}
                     className="w-5 h-5 rounded border-gray-300 text-black focus:ring-black shrink-0 disabled:cursor-not-allowed"
                 />
 
                 {/* Image */}
-                <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-3xl shrink-0 relative">
+                <div
+                    className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-3xl shrink-0 relative cursor-pointer"
+                    onClick={() => navigate(`/books/${item.book.id}`)}
+                >
                     <img
                         src={`${IMAGE_BASE_URL}${item.book.image}`}
                         alt=""
@@ -61,7 +69,10 @@ export default function CartItem({ item }: CartItemProps) {
                     )}
                 </div>
 
-                <h3 className="font-medium text-gray-900 line-clamp-2">
+                <h3
+                    className="font-medium text-gray-900 line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors"
+                    onClick={() => navigate(`/books/${item.book.id}`)}
+                >
                     {item.book.title}
                 </h3>
             </div>
@@ -74,10 +85,14 @@ export default function CartItem({ item }: CartItemProps) {
             </div>
 
             {/* Quantity Control */}
-            <div className="col-span-3 flex items-center justify-center gap-2">
+            <div
+                className="col-span-3 flex items-center justify-center gap-2"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <CartItemQuantityControl
                     localQuantity={localQuantity}
                     isOutOfStock={isOutOfStock}
+                    maxQuantity={item.book.quantity}
                     onIncrement={handleIncrement}
                     onDecrement={handleDecrement}
                     onChange={handleInputChange}
@@ -96,7 +111,10 @@ export default function CartItem({ item }: CartItemProps) {
             {/* Remove Button */}
             <div className="col-span-1 flex justify-center relative z-50">
                 <button
-                    onClick={() => handleRemoveItem([item.id])}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveItem([item.id]);
+                    }}
                     className="text-gray-400 hover:text-red-500 transition-colors cursor-pointer relative z-50"
                 >
                     <X className="w-5 h-5 pointer-events-none" />

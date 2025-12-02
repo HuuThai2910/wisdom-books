@@ -126,9 +126,12 @@ public class CartServiceImpl implements iuh.fit.edu.service.CartService {
     }
 
     @Override
-    public void removeItem(String emal, List<Long> ids) {
-
-        Cart cart = this.cartRepository.findByUser_Email(emal);
+    @Transactional
+    public void removeItem(String email, List<Long> ids) {
+        Cart cart = this.cartRepository.findByUser_Email(email);
+        if (cart == null) {
+            throw new RuntimeException("Cart not found for user: " + email);
+        }
         boolean check = cart.getCartItems().removeIf(cartItem -> ids.contains(cartItem.getId()));
         System.out.println(check);
         cart.setSum(cart.getSum() - ids.size());

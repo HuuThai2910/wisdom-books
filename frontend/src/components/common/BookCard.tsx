@@ -4,6 +4,7 @@ import { Book } from "../../types";
 import { Link } from "react-router-dom";
 import { useAppDispatch } from "../../app/store";
 import { addItem } from "../../features/cart/cartSlice";
+import toast from "react-hot-toast";
 
 interface BookCardProps {
   book: Book;
@@ -18,16 +19,29 @@ export default function BookCard({
   showAddToCart = true,
   variant = "default",
 }: BookCardProps) {
-  const dispatch = useAppDispatch();
-  // Hàm thêm sản phẩm vào cart
-  const handleAddToCart = (bookId: number) => {
-    dispatch(
-      addItem({
-        bookId,
-        quantity: 1,
-      })
-    );
-  };
+    const dispatch = useAppDispatch();
+    // Hàm thêm sản phẩm vào cart
+    const handleAddToCart = async (bookId: number) => {
+        // Kiểm tra số lượng trong kho trước khi thêm
+        if (!book.quantity || book.quantity <= 0) {
+            toast.error("Sản phẩm hiện đã hết hàng!");
+            return;
+        }
+
+        try {
+            await dispatch(
+                addItem({
+                    bookId,
+                    quantity: 1,
+                })
+            ).unwrap();
+        } catch (error: any) {
+            // Hiển thị lỗi nếu có
+            if (error) {
+                toast.error(error);
+            }
+        }
+    };
 
   const imageUrl =
     book.bookImage && book.bookImage.length > 0

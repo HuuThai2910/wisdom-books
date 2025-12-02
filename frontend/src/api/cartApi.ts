@@ -28,7 +28,7 @@ const cartAPI = {
         axiosClient.post<ApiResponse<CartItem>>("/cart", item),
 
     // Xóa sản phẩm khỏi giỏ hàng theo itemId
-    removeItem: (ids: number[]) =>
+        removeItem: (ids: number[]) =>
         axiosClient.delete<ApiResponse<void>>("/cart/items", { params: { ids } }),
 
     // Cập nhật số lượng sản phẩm giỏ hàng theo itemId

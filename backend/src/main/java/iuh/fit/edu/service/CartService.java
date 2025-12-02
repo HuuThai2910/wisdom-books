@@ -33,7 +33,8 @@ public interface CartService {
     @Transactional
     void updateSelectAll(String email, boolean selected);
 
-    void removeItem(String emal, List<Long> id);
+    @Transactional
+    void removeItem(String email, List<Long> id);
 
     void clearCart(String email);
 }
