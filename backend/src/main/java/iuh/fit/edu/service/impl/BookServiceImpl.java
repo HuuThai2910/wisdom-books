@@ -18,13 +18,16 @@ import iuh.fit.edu.repository.InventoryRepository;
 import iuh.fit.edu.repository.SupplierRepository;
 import iuh.fit.edu.repository.UserRepository;
 import iuh.fit.edu.service.BookService;
+import iuh.fit.edu.service.S3Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -44,11 +47,12 @@ public class BookServiceImpl implements BookService {
     private final EntryFormDetailRepository entryFormDetailRepository;
     private final UserRepository userRepository;
     private final BookMapper bookMapper;
+    private final S3Service s3Service;
 
     public BookServiceImpl(BookRepository bookRepository, InventoryRepository inventoryRepository,
                            SupplierRepository supplierRepository, CategoryRepository categoryRepository,
                            EntryFormRepository entryFormRepository, EntryFormDetailRepository entryFormDetailRepository,
-                           UserRepository userRepository, BookMapper bookMapper) {
+                           UserRepository userRepository, BookMapper bookMapper, S3Service s3Service) {
         this.bookRepository = bookRepository;
         this.inventoryRepository = inventoryRepository;
         this.supplierRepository = supplierRepository;
@@ -57,6 +61,7 @@ public class BookServiceImpl implements BookService {
         this.entryFormDetailRepository = entryFormDetailRepository;
         this.userRepository = userRepository;
         this.bookMapper = bookMapper;
+        this.s3Service = s3Service;
     }
 
     @Override
@@ -498,4 +503,44 @@ public Book updateBookQuantity(Long bookId, int quantity) throws IdInvalidExcept
     
     return this.bookRepository.save(book);
 }
+
+    @Override
+    public List<String> uploadBookImages(Long bookId, MultipartFile[] images) throws IdInvalidException {
+        // Kiểm tra sách có tồn tại không
+        Book book = this.findBookById(bookId);
+        if (book == null) {
+            throw new IdInvalidException("Book với id: " + bookId + " không tồn tại");
+        }
+
+        if (images == null || images.length == 0) {
+            throw new IdInvalidException("Phải upload ít nhất 1 ảnh");
+        }
+
+        List<String> uploadedPaths = new ArrayList<>();
+        
+        // Upload từng ảnh vào folder riêng của sách: books/{bookId}/
+        String bookFolder = "books/" + bookId;
+        
+        for (MultipartFile image : images) {
+            if (image != null && !image.isEmpty()) {
+                try {
+                    String s3Path = s3Service.uploadFile(image, bookFolder);
+                    uploadedPaths.add(s3Path);
+                } catch (Exception e) {
+                    throw new IdInvalidException("Lỗi khi upload ảnh: " + e.getMessage());
+                }
+            }
+        }
+
+        // Cập nhật danh sách ảnh vào database
+        if (book.getImage() == null) {
+            book.setImage(uploadedPaths);
+        } else {
+            book.getImage().addAll(uploadedPaths);
+        }
+        
+        this.bookRepository.save(book);
+        
+        return uploadedPaths;
+    }
 }

@@ -66,6 +66,28 @@ const bookApi = {
         );
         return response.data;
     },
+
+    // Upload images for book
+    uploadBookImages: async (
+        bookId: number | string,
+        images: File[]
+    ): Promise<ApiResponse<string[]>> => {
+        const formData = new FormData();
+        images.forEach((image) => {
+            formData.append("images", image);
+        });
+
+        const response = await axiosClient.post<ApiResponse<string[]>>(
+            `/books/${bookId}/images`,
+            formData,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            }
+        );
+        return response.data;
+    },
 };
 
 export default bookApi;

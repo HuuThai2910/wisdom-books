@@ -15,6 +15,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * @author Nguyen Tan Nghi
@@ -117,6 +120,16 @@ public class BookController {
     ) throws IdInvalidException {
         Book updatedBook = this.bookService.updateBookQuantity(id, quantity);
         return ResponseEntity.ok(this.bookService.convertToResUpdateBookDTO(updatedBook));
+    }
+
+    @PostMapping("/{id}/images")
+    @ApiMessage("Upload ảnh cho sách")
+    public ResponseEntity<List<String>> uploadBookImages(
+            @PathVariable Long id,
+            @RequestParam("images") MultipartFile[] images
+    ) throws IdInvalidException {
+        List<String> uploadedPaths = this.bookService.uploadBookImages(id, images);
+        return ResponseEntity.ok(uploadedPaths);
     }
 }
 

@@ -45,4 +45,6 @@ public interface BookService {
     boolean existsByIsbn(String isbn);
     
     Book updateBookQuantity(Long id, int quantity) throws IdInvalidException;
+    
+    java.util.List<String> uploadBookImages(Long bookId, org.springframework.web.multipart.MultipartFile[] images) throws IdInvalidException;
 }

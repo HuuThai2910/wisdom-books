@@ -18,7 +18,6 @@ import {
     FaRedo,
 } from "react-icons/fa";
 import bookApi from "../../api/bookApi";
-import fileApi from "../../api/fileApi";
 import { Book } from "../../types";
 import toast from "react-hot-toast";
 import AdminLayout from "./AdminLayout";
@@ -299,30 +298,6 @@ export default function BookManagement() {
 
         try {
             setIsUploading(true);
-            let imageFileNames: string[] = [];
-
-            // Upload files if there are any
-            if (uploadedFiles.length > 0) {
-                toast.loading("Đang tải ảnh lên...", { id: "upload" });
-                const uploadResponse = await fileApi.uploadFiles(
-                    uploadedFiles,
-                    "books"
-                );
-
-                if (uploadResponse.success && uploadResponse.data) {
-                    imageFileNames = uploadResponse.data.map(
-                        (file) => file.fileName
-                    );
-                    toast.success(
-                        `Đã tải lên ${imageFileNames.length} ảnh thành công!`,
-                        {
-                            id: "upload",
-                        }
-                    );
-                } else {
-                    throw new Error("Upload failed");
-                }
-            }
 
             // Prepare book data with proper structure for backend
             const bookData: any = {
@@ -336,10 +311,6 @@ export default function BookManagement() {
                 importPrice: formData.importPrice,
                 status: formData.status,
                 quantity: formData.quantity,
-                // Add image array from uploaded files
-                ...(imageFileNames.length > 0 && {
-                    image: imageFileNames,
-                }),
                 // Add categories (you can add UI for this later)
                 categories:
                     formData.category?.map((cat) => ({ id: cat.id })) || [],
@@ -356,6 +327,35 @@ export default function BookManagement() {
             if (modalMode === "create") {
                 const response = await bookApi.createBook(bookData);
                 console.log("Create response:", response);
+
+                // Upload images to S3 AFTER creating book (need bookId)
+                if (
+                    response.success &&
+                    response.data &&
+                    uploadedFiles.length > 0
+                ) {
+                    const newBookId = response.data.id;
+                    try {
+                        toast.loading("Đang tải ảnh lên S3...", {
+                            id: "upload",
+                        });
+                        await bookApi.uploadBookImages(
+                            newBookId,
+                            uploadedFiles
+                        );
+                        toast.success(
+                            `Đã tải lên ${uploadedFiles.length} ảnh thành công!`,
+                            { id: "upload" }
+                        );
+                    } catch (uploadError) {
+                        console.error("Upload error:", uploadError);
+                        toast.error(
+                            "Thêm sách thành công nhưng upload ảnh thất bại!",
+                            { id: "upload" }
+                        );
+                    }
+                }
+
                 toast.success("Thêm sách thành công!");
             } else if (modalMode === "edit" && selectedBook) {
                 const response = await bookApi.updateBook(
@@ -363,6 +363,30 @@ export default function BookManagement() {
                     bookData
                 );
                 console.log("Update response:", response);
+
+                // Upload images to S3 AFTER updating book
+                if (response.success && uploadedFiles.length > 0) {
+                    try {
+                        toast.loading("Đang tải ảnh lên S3...", {
+                            id: "upload",
+                        });
+                        await bookApi.uploadBookImages(
+                            selectedBook.id,
+                            uploadedFiles
+                        );
+                        toast.success(
+                            `Đã tải lên ${uploadedFiles.length} ảnh thành công!`,
+                            { id: "upload" }
+                        );
+                    } catch (uploadError) {
+                        console.error("Upload error:", uploadError);
+                        toast.error(
+                            "Cập nhật sách thành công nhưng upload ảnh thất bại!",
+                            { id: "upload" }
+                        );
+                    }
+                }
+
                 toast.success("Cập nhật sách thành công!");
             }
 

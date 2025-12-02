@@ -35,7 +35,6 @@ import {
 import type { UploadFile } from "antd/es/upload/interface";
 import RichTextEditor from "../../components/common/RichTextEditor";
 import bookApi from "../../api/bookApi";
-import fileApi from "../../api/fileApi";
 import { Book } from "../../types";
 import toast from "react-hot-toast";
 import { SUPPLIERS, CATEGORIES } from "../../data/bookData";
@@ -114,43 +113,18 @@ const ViewUpsertBook = () => {
     const onFinish = async (values: any) => {
         try {
             setIsUploading(true);
-            let imageFileNames: string[] = [];
 
-            // Upload new files if any
+            // Get new files to upload AFTER creating/updating book
             const newFiles = fileList.filter((file) => file.originFileObj);
-            if (newFiles.length > 0) {
-                try {
-                    const files = newFiles.map(
-                        (file) => file.originFileObj as File
-                    );
-                    const uploadResponse = await fileApi.uploadFiles(
-                        files,
-                        "books"
-                    );
-
-                    if (uploadResponse.success && uploadResponse.data) {
-                        imageFileNames = uploadResponse.data.map(
-                            (file) => file.fileName
-                        );
-                    }
-                } catch (uploadError: any) {
-                    console.error("Upload error:", uploadError);
-                    notification.error({
-                        message: "Lỗi upload ảnh",
-                        description:
-                            uploadError.response?.data?.message ||
-                            "Không thể upload ảnh. Vui lòng thử lại!",
-                    });
-                    setIsUploading(false);
-                    return;
-                }
-            }
+            const newFileObjects = newFiles.map(
+                (file) => file.originFileObj as File
+            );
 
             const existingImages = fileList
                 .filter((file) => !file.originFileObj && file.name)
                 .map((file) => file.name);
 
-            const allImages = [...existingImages, ...imageFileNames];
+            const allImages = [...existingImages];
 
             const bookData: any = {
                 isbn: values.isbn,
@@ -188,6 +162,25 @@ const ViewUpsertBook = () => {
                 console.log("Update response:", res);
 
                 if (res && res.success && res.data) {
+                    // Upload new images to S3 after update
+                    if (newFileObjects.length > 0) {
+                        try {
+                            await bookApi.uploadBookImages(
+                                dataUpdate.id,
+                                newFileObjects
+                            );
+                            console.log(
+                                `Uploaded ${newFileObjects.length} images to S3`
+                            );
+                        } catch (uploadError) {
+                            console.error("Upload error:", uploadError);
+                            notification.warning({
+                                message:
+                                    "Cập nhật sách thành công nhưng upload ảnh thất bại",
+                                description: "Vui lòng thử upload lại sau.",
+                            });
+                        }
+                    }
                     message.success("Cập nhật sách thành công!");
                     setTimeout(() => {
                         navigate("/admin/books");
@@ -205,6 +198,28 @@ const ViewUpsertBook = () => {
                 console.log("Create response:", res);
 
                 if (res && res.success && res.data) {
+                    const newBookId = res.data.id;
+
+                    // Upload new images to S3 after creating book
+                    if (newFileObjects.length > 0) {
+                        try {
+                            await bookApi.uploadBookImages(
+                                newBookId,
+                                newFileObjects
+                            );
+                            console.log(
+                                `Uploaded ${newFileObjects.length} images to S3 for book ${newBookId}`
+                            );
+                        } catch (uploadError) {
+                            console.error("Upload error:", uploadError);
+                            notification.warning({
+                                message:
+                                    "Tạo sách thành công nhưng upload ảnh thất bại",
+                                description: "Vui lòng thử upload lại sau.",
+                            });
+                        }
+                    }
+
                     message.success("Tạo mới sách thành công!");
                     setTimeout(() => {
                         navigate("/admin/books");
