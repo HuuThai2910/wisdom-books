@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, ChevronDown, Home, LogOut } from "lucide-react";
+import { Menu, ChevronDown, Home, User, LogOut } from "lucide-react";
 
 interface AdminHeaderProps {
   onMobileMenuToggle: () => void;
@@ -67,11 +67,18 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
                   <Home className="w-4 h-4" />
                   Trang chủ
                 </Link>
+                <Link
+                  to="/admin/profile"
+                  className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                  onClick={() => setDropdownOpen(false)}
+                >
+                  <User className="w-4 h-4" />
+                  Trang cá nhân
+                </Link>
                 <button
                   className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                   onClick={() => {
                     setDropdownOpen(false);
-                    // TODO: Implement logout
                   }}
                 >
                   <LogOut className="w-4 h-4" />

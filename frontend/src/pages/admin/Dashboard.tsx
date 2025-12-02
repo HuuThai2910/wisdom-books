@@ -362,7 +362,7 @@ export default function AdminDashboard() {
               <ShoppingCart className="w-6 h-6 text-rose-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Tỉ lệ hoàn đơn</p>
+              <p className="text-sm text-gray-600">Tỉ lệ hủy đơn</p>
               <p className="text-2xl font-bold text-rose-600">
                 {loading
                   ? "..."
