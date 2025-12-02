@@ -2,14 +2,21 @@ package iuh.fit.edu.controller.user;
 
 import iuh.fit.edu.dto.request.user.CreateUserRequest;
 import iuh.fit.edu.dto.request.user.UpdateUserRequest;
+import iuh.fit.edu.dto.response.ApiResponse;
+import iuh.fit.edu.dto.response.account.UserInfoResponse;
 import iuh.fit.edu.dto.response.user.UserResponseById;
 import iuh.fit.edu.dto.response.user.UsersResponse;
+import iuh.fit.edu.service.AccountService;
 import iuh.fit.edu.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -17,14 +24,30 @@ public class UserController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    AccountService accountService;
+
     @GetMapping("/users")
     public ResponseEntity<UsersResponse> getAllUser(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortDirection,
             @RequestParam(required = false) String role,
-            @RequestParam(required = false) String status
+            @RequestParam(required = false) String status,
+            HttpServletRequest request
     ){
+
+        String token = null;
+        if (request.getCookies() != null) {
+            for (Cookie c : request.getCookies()) {
+                if ("id_token".equals(c.getName())) {
+                    token = c.getValue();
+                    break;
+                }
+            }
+        }
+        UserInfoResponse response=accountService.getCurrentUserInfo(token);
+        System.out.println(response.getEmail());
         return ResponseEntity.ok(userService.findAll(keyword, sortBy, sortDirection, role, status));
     }
 
@@ -54,14 +77,14 @@ public class UserController {
     }
 
     @GetMapping("/users/avatar/{filename}")
-    public ResponseEntity<iuh.fit.edu.dto.response.ApiResponse<String>> getAvatarUrl(@PathVariable String filename){
+    public ResponseEntity<ApiResponse<String>> getAvatarUrl(@PathVariable String filename){
         String url = userService.getAvatarUrl(filename);
-        return ResponseEntity.ok(iuh.fit.edu.dto.response.ApiResponse.success(200, "Avatar URL retrieved", url));
+        return ResponseEntity.ok(ApiResponse.success(200, "Avatar URL retrieved", url));
     }
 
     @PostMapping(value = "/users/avatar/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<iuh.fit.edu.dto.response.ApiResponse<String>> uploadAvatar(@RequestParam("avatar") MultipartFile avatar){
+    public ResponseEntity<ApiResponse<String>> uploadAvatar(@RequestParam("avatar") MultipartFile avatar){
         String filename = userService.uploadAvatar(avatar);
-        return ResponseEntity.ok(iuh.fit.edu.dto.response.ApiResponse.success(200, "Avatar uploaded successfully", filename));
+        return ResponseEntity.ok(ApiResponse.success(200, "Avatar uploaded successfully", filename));
     }
 }

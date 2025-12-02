@@ -45,8 +45,17 @@ export const fetchtUser = (accessToken: string) => {
     });
 }
 
+interface VerifyOtpParams {
+    email: string;
+    otp: string;
+}
+
 export const sendOTP = (email: string) => {
     return axiosClient.post<ApiResponse<null>>("/auth/forgot-password", { email });
+}
+
+export const verifyOTP = (params: VerifyOtpParams) => {
+    return axiosClient.post<ApiResponse<{ success: boolean; message: string }>>("/auth/verify-otp", params);
 }
 
 export const resetPassword = (resetPasswordForm: ResetPasswordParams) => {

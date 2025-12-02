@@ -20,16 +20,16 @@ const LoginPage = () => {
   return (
     <div className="flex justify-center items-center min-h-screen p-5 relative overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, #E8E7F5 0%, #D1CFEA 15%, #B8B5E0 40%, #A8A4D8 65%, #8B86C7 85%, #6B66A3 100%)'
+        background: 'linear-gradient(135deg, #0f2027 0%, #203a43 25%, #2c5364 50%, #1e3c72 75%, #2a5298 100%)'
       }}>
       
       {/* Animated background */}
-      <div className="absolute w-full h-full bg-[radial-gradient(circle_at_20%_50%,rgba(209,207,234,0.3)_0%,transparent_50%),radial-gradient(circle_at_80%_80%,rgba(139,134,199,0.2)_0%,transparent_50%)]
+      <div className="absolute w-full h-full bg-[radial-gradient(circle_at_20%_50%,rgba(33,150,243,0.1)_0%,transparent_50%),radial-gradient(circle_at_80%_80%,rgba(138,43,226,0.1)_0%,transparent_50%)]
         animate-pulse-slow pointer-events-none" />
 
-      <div className={`relative overflow-hidden w-[768px] max-w-full min-h-[480px] rounded-[30px] 
-        bg-gradient-to-br from-white to-[#F5F4FB]
-        shadow-[0_15px_60px_rgba(139,134,199,0.4),0_5px_15px_rgba(0,0,0,0.1)]
+      <div className={`relative overflow-hidden w-[768px] max-w-full min-h-[600px] rounded-[30px] 
+        bg-gradient-to-br from-white to-[#f0f4ff]
+        shadow-[0_15px_60px_rgba(33,150,243,0.4),0_5px_15px_rgba(0,0,0,0.1)]
         ${isClosing ? 'animate-fade-out' : ''}`}>
         
         {/* Owl Animation */}
@@ -39,13 +39,13 @@ const LoginPage = () => {
         </div>
 
         {/* Sign Up Form */}
-        <div className={`absolute top-0 h-full left-0 w-1/2 transition-all duration-600 ease-in-out
+        <div className={`absolute top-0 h-full left-0 w-1/2 transition-all duration-600 ease-in-out overflow-y-auto
           ${mode === 'signup' ? 'translate-x-full opacity-100 z-[5]' : 'translate-x-0 opacity-0 z-[1]'}`}>
           <SignUpForm onSuccess={handleSuccess} />
         </div>
 
         {/* Sign In Form */}
-        <div className={`absolute top-0 h-full left-0 w-1/2 z-[2] transition-all duration-600 ease-in-out
+        <div className={`absolute top-0 h-full left-0 w-1/2 z-[2] transition-all duration-600 ease-in-out overflow-y-auto
           ${mode === 'signup' ? 'translate-x-full' : 'translate-x-0'}
           ${mode === 'forgot' ? 'opacity-0' : 'opacity-100'}`}>
           <SignInForm 
@@ -55,7 +55,7 @@ const LoginPage = () => {
         </div>
 
         {/* Forgot Password Form */}
-        <div className={`absolute top-0 h-full left-0 w-1/2 transition-opacity duration-600 ease-in-out
+        <div className={`absolute top-0 h-full left-0 w-1/2 transition-opacity duration-600 ease-in-out overflow-y-auto
           ${mode === 'forgot' ? 'opacity-100 z-[10]' : 'opacity-0 z-[1]'}`}>
           <ForgotPasswordForm onBackToLogin={() => setMode('signin')} />
         </div>
@@ -67,7 +67,7 @@ const LoginPage = () => {
             shadow-[inset_0_0_50px_rgba(0,0,0,0.1)]
             ${mode === 'signup' ? 'translate-x-1/2' : 'translate-x-0'}`}
             style={{
-              background: 'linear-gradient(135deg, #A8A4D8 0%, #8B86C7 30%, #6B66A3 70%, #544F87 100%)'
+              background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 30%, #0d47a1 70%, #1a237e 100%)'
             }}>
             
             {/* Rotating gradient overlay */}

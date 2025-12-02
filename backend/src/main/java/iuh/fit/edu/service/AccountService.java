@@ -20,6 +20,7 @@ public interface AccountService {
     LoginResponse loginUser(LoginRequest request);
     void logout(String accessToken);
     ForgotPasswordResponse forgotPassword(ForgotPasswordRequest request);
+    VerifyOtpResponse verifyOtp(VerifyOtpRequest request);
     ResetPasswordResponse resetPassword(ResetPasswordRequest request);
     UserInfoResponse getCurrentUserInfo(String accessToken);
     UsersResponse findByAllUser(String email);

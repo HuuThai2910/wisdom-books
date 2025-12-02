@@ -19,7 +19,9 @@ import BookDetailPage from "./pages/client/BookDetailPage";
 import CategoryPage from "./pages/client/CategoryPage";
 import ScrollToTop from "./components/ScrollToTop";
 import ManageUserPage from "./pages/admin/ManageUserPage";
+import UserFormPage from "./pages/admin/UserFormPage";
 import OrderManagement from "./pages/admin/OrderManagement";
+import LoginPage from "./pages/client/LoginPage";
 
 function App() {
     return (
@@ -102,6 +104,18 @@ function App() {
                     <Route
                         path="/admin/manage-users"
                         element={<ManageUserPage />}
+                    />
+                    <Route
+                        path="/admin/user-form"
+                        element={<UserFormPage />}
+                    />
+                    <Route
+                        path="/admin/user-form/:id"
+                        element={<UserFormPage />}
+                    />
+                    <Route
+                        path="/login"
+                        element={<LoginPage />}
                     />
                 </Routes>
             </div>
