@@ -19,6 +19,7 @@ import iuh.fit.edu.repository.SupplierRepository;
 import iuh.fit.edu.repository.UserRepository;
 import iuh.fit.edu.service.BookService;
 import iuh.fit.edu.service.S3Service;
+import iuh.fit.edu.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -49,6 +50,7 @@ public class BookServiceImpl implements BookService {
     private final BookMapper bookMapper;
     private final S3Service s3Service;
 
+
     public BookServiceImpl(BookRepository bookRepository, InventoryRepository inventoryRepository,
                            SupplierRepository supplierRepository, CategoryRepository categoryRepository,
                            EntryFormRepository entryFormRepository, EntryFormDetailRepository entryFormDetailRepository,
@@ -66,7 +68,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
-    public Book createBook(Book book) {
+    public Book createBook(Book book, String email) {
         // Xử lý Supplier nếu có
         if (book.getSupplier() != null && book.getSupplier().getId() != null) {
             Optional<Supplier> optionalSupplier = this.supplierRepository.findById(book.getSupplier().getId());
@@ -89,6 +91,8 @@ public class BookServiceImpl implements BookService {
             book.setInventory(optionalInventory.orElse(null));
         }
 
+        book.setCreatedBy(email);
+
         // Lưu sách vào database
         Book savedBook = this.bookRepository.save(book);
 
@@ -98,10 +102,14 @@ public class BookServiceImpl implements BookService {
             inventory.setQuantity(inventory.getQuantity() + savedBook.getQuantity());
             this.inventoryRepository.save(inventory);
         }
+        User user = this.userRepository.findByEmail(email);
+        if(user == null){
+            throw new RuntimeException("User not found");
+        }
 
         // Tạo EntryForm và EntryFormDetail khi thêm sách mới
         if (savedBook.getQuantity() > 0) {
-            createEntryFormForBook(savedBook, savedBook.getQuantity(), savedBook.getImportPrice());
+            createEntryFormForBook(savedBook, savedBook.getQuantity(), savedBook.getImportPrice(), user);
         }
 
         return savedBook;
@@ -109,7 +117,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
-    public Book updateBook(Book book) {
+    public Book updateBook(Book book, String email) {
         try {
             System.out.println("=== SERVICE: UPDATE BOOK ===");
             System.out.println("Finding book with ID: " + book.getId());
@@ -221,6 +229,7 @@ public class BookServiceImpl implements BookService {
                 System.out.println("Categories count: " + (updatedBook.getCategories() != null ? updatedBook.getCategories().size() : 0));
 
                 System.out.println("Saving book to database...");
+                updatedBook.setUpdatedBy(email);
                 Book savedBook = this.bookRepository.save(updatedBook);
                 System.out.println("Book saved successfully!");
                 
@@ -234,10 +243,15 @@ public class BookServiceImpl implements BookService {
                 System.out.println("Saved Title: " + savedBook.getTitle());
                 System.out.println("Saved Quantity: " + savedBook.getQuantity());
 
+                User user = this.userRepository.findByEmail(email);
+                if(user == null){
+                    throw new RuntimeException("User not found");
+                }
+
                 // Nếu số lượng tăng, tạo EntryForm
                 if (quantityDiff > 0) {
                     System.out.println("Quantity increased by: " + quantityDiff + ". Creating EntryForm...");
-                    createEntryFormForBook(savedBook, quantityDiff, book.getImportPrice() > 0 ? book.getImportPrice() : savedBook.getImportPrice());
+                    createEntryFormForBook(savedBook, quantityDiff, book.getImportPrice() > 0 ? book.getImportPrice() : savedBook.getImportPrice(), user);
                 }
 
                 return savedBook;
@@ -252,13 +266,13 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
-    public void deleteBook(Long id) {
+    public void deleteBook(Long id, String email) {
         Optional<Book> optionalBook = this.bookRepository.findById(id);
         if (optionalBook.isPresent()) {
             Book book = optionalBook.get();
             book.setStatus(BookStatus.STOP_SALE);
             book.setUpdatedAt(LocalDateTime.now());
-            book.setUpdatedBy("tan nghi");
+            book.setUpdatedBy(email);
             this.bookRepository.save(book);
         }
     }
@@ -268,122 +282,9 @@ public class BookServiceImpl implements BookService {
         return this.bookRepository.findById(id).orElse(null);
     }
 
-    @Override
-    @Transactional
-    public Book createBookFromDTO(ReqCreateBookDTO reqCreateBookDTO) {
-        Book book = new Book();
-        book.setIsbn(reqCreateBookDTO.getIsbn());
-        book.setTitle(reqCreateBookDTO.getTitle());
-        book.setAuthor(reqCreateBookDTO.getAuthor());
-        book.setYearOfPublication(reqCreateBookDTO.getYearOfPublication());
-        book.setShortDes(reqCreateBookDTO.getShortDes());
-        book.setDescription(reqCreateBookDTO.getDescription());
-        book.setSellingPrice(reqCreateBookDTO.getSellingPrice());
-        book.setImportPrice(reqCreateBookDTO.getImportPrice());
-        book.setStatus(reqCreateBookDTO.getStatus());
-        book.setQuantity(reqCreateBookDTO.getQuantity());
-        book.setImage(reqCreateBookDTO.getImage());
 
-        // Xử lý Supplier
-        if (reqCreateBookDTO.getSupplierId() != null) {
-            Supplier supplier = new Supplier();
-            supplier.setId(reqCreateBookDTO.getSupplierId());
-            book.setSupplier(supplier);
-        }
 
-        // Xử lý Categories
-        if (reqCreateBookDTO.getCategoryIds() != null && !reqCreateBookDTO.getCategoryIds().isEmpty()) {
-            List<Category> categories = reqCreateBookDTO.getCategoryIds().stream()
-                    .map(id -> {
-                        Category cat = new Category();
-                        cat.setId(id);
-                        return cat;
-                    })
-                    .toList();
-            book.setCategories(categories);
-        }
 
-        // Xử lý Inventory
-        if (reqCreateBookDTO.getInventoryId() != null) {
-            Inventory inventory = new Inventory();
-            inventory.setId(reqCreateBookDTO.getInventoryId());
-            book.setInventory(inventory);
-        }
-
-        return this.createBook(book);
-    }
-
-    @Override
-    @Transactional
-    public Book updateBookFromDTO(ReqUpdateBookDTO reqUpdateBookDTO) {
-        Book book = this.findBookById(reqUpdateBookDTO.getId());
-        if (book == null) {
-            return null;
-        }
-
-        // Cập nhật các trường nếu không null
-        if (reqUpdateBookDTO.getIsbn() != null) {
-            book.setIsbn(reqUpdateBookDTO.getIsbn());
-        }
-        if (reqUpdateBookDTO.getTitle() != null) {
-            book.setTitle(reqUpdateBookDTO.getTitle());
-        }
-        if (reqUpdateBookDTO.getAuthor() != null) {
-            book.setAuthor(reqUpdateBookDTO.getAuthor());
-        }
-        if (reqUpdateBookDTO.getYearOfPublication() != null) {
-            book.setYearOfPublication(reqUpdateBookDTO.getYearOfPublication());
-        }
-        if (reqUpdateBookDTO.getShortDes() != null) {
-            book.setShortDes(reqUpdateBookDTO.getShortDes());
-        }
-        if (reqUpdateBookDTO.getDescription() != null) {
-            book.setDescription(reqUpdateBookDTO.getDescription());
-        }
-        if (reqUpdateBookDTO.getSellingPrice() != null) {
-            book.setSellingPrice(reqUpdateBookDTO.getSellingPrice());
-        }
-        if (reqUpdateBookDTO.getImportPrice() != null) {
-            book.setImportPrice(reqUpdateBookDTO.getImportPrice());
-        }
-        if (reqUpdateBookDTO.getStatus() != null) {
-            book.setStatus(reqUpdateBookDTO.getStatus());
-        }
-        if (reqUpdateBookDTO.getQuantity() != null) {
-            book.setQuantity(reqUpdateBookDTO.getQuantity());
-        }
-        if (reqUpdateBookDTO.getImage() != null) {
-            book.setImage(reqUpdateBookDTO.getImage());
-        }
-
-        // Xử lý Supplier
-        if (reqUpdateBookDTO.getSupplierId() != null) {
-            Supplier supplier = new Supplier();
-            supplier.setId(reqUpdateBookDTO.getSupplierId());
-            book.setSupplier(supplier);
-        }
-
-        // Xử lý Categories
-        if (reqUpdateBookDTO.getCategoryIds() != null) {
-            List<Category> categories = reqUpdateBookDTO.getCategoryIds().stream()
-                    .map(id -> {
-                        Category cat = new Category();
-                        cat.setId(id);
-                        return cat;
-                    })
-                    .toList();
-            book.setCategories(categories);
-        }
-
-        // Xử lý Inventory
-        if (reqUpdateBookDTO.getInventoryId() != null) {
-            Inventory inventory = new Inventory();
-            inventory.setId(reqUpdateBookDTO.getInventoryId());
-            book.setInventory(inventory);
-        }
-
-        return this.updateBook(book);
-    }
 
     @Override
     public ResultPaginationDTO getAllBooks(Specification<Book> specification, Pageable pageable) {
@@ -444,22 +345,24 @@ public class BookServiceImpl implements BookService {
      * @param quantity Số lượng nhập
      * @param unitPrice Giá nhập đơn vị
      */
-    private void createEntryFormForBook(Book book, int quantity, double unitPrice) {
+    private void createEntryFormForBook(Book book, int quantity, double unitPrice,User user) {
         try {
             System.out.println("=== CREATING ENTRY FORM ===");
             System.out.println("Book: " + book.getTitle());
             System.out.println("Quantity: " + quantity);
             System.out.println("Unit Price: " + unitPrice);
 
+
+
             // Tạo EntryForm (Phiếu nhập)
             EntryForm entryForm = new EntryForm();
             entryForm.setTotalQuantity(quantity);
             entryForm.setTotalPrice(quantity * unitPrice);
             entryForm.setCreatedAt(LocalDateTime.now());
+            entryForm.setUser(user);
 
-            // Tìm user (có thể lấy từ SecurityContext, tạm thời dùng user đầu tiên)
-            Optional<User> optionalUser = this.userRepository.findById(1L);
-            optionalUser.ifPresent(entryForm::setUser);
+
+
 
             // Lưu EntryForm
             EntryForm savedEntryForm = this.entryFormRepository.save(entryForm);

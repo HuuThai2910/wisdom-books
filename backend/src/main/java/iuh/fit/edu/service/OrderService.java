@@ -33,6 +33,6 @@ public interface OrderService {
     Object createOrder(String email, OrderRequest request, HttpServletRequest httpServletRequest);
 
     @Transactional
-    UpdateOrderStatusResponse updateOrderStatus(UpdateOrderRequest request);
+    UpdateOrderStatusResponse updateOrderStatus(UpdateOrderRequest request, String email);
 }
 

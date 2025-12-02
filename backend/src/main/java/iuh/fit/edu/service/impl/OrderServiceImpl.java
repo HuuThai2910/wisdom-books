@@ -49,6 +49,9 @@ public class OrderServiceImpl implements OrderService {
         if (user == null) {
             throw new RuntimeException("User not found with email: " + email);
         }
+        if(user.getAddress() == null){
+            user.setAddress(parseAddress(request.getReceiverAddress()));
+        }
         Order order = new Order();
         order.setOrderCode(generateOrderCode());
         order.setUser(user);
@@ -102,6 +105,24 @@ public class OrderServiceImpl implements OrderService {
                     .paymentUrl(paymentUrl)
                     .build();
         }
+    }
+    private Address parseAddress(String fullAddress) {
+        // Tách theo dấu phẩy
+        String[] parts = fullAddress.split(",");
+
+        Address addr = new Address();
+
+        // Loại bỏ khoảng trắng thừa
+        for (int i = 0; i < parts.length; i++) {
+            parts[i] = parts[i].trim();
+        }
+
+        // Gán theo số lượng phần tử tách được
+        if (parts.length >= 1) addr.setAddress(parts[0]);   // 123 Đường ABC
+        if (parts.length >= 2) addr.setWard(parts[1]);      // Quận 1
+        if (parts.length >= 3) addr.setProvince(parts[2]);  // TP.HCM
+
+        return addr;
     }
     @Override
     public PaymentResponse retryPayment(String oderCode, HttpServletRequest request) {
@@ -221,10 +242,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     @Override
-    public UpdateOrderStatusResponse updateOrderStatus(UpdateOrderRequest request){
+    public UpdateOrderStatusResponse updateOrderStatus(UpdateOrderRequest request, String email){
         Order order = this.orderRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
         order.setStatus(OrderStatus.valueOf(request.getStatus()));
+        System.out.println(email);
+        order.setUpdateBy(email);
         if(Objects.equals(request.getStatus(), "CANCELLED")){
             // Hoàn kho sau khi hủy đơn hàng
             for (OrderItem item : order.getOrderItems()){

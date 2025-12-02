@@ -19,6 +19,6 @@ public interface EntryFormService {
     ResEntryFormDTO convertToResEntryFormDTO(EntryForm entryForm);
     Long getNextInvoiceNumber();
     Integer getTotalInventoryQuantity();
-    ResEntryFormDTO createEntryForm(CreateEntryFormDTO dto);
+    ResEntryFormDTO createEntryForm(CreateEntryFormDTO dto, String email);
     List<ResEntryFormDetailDTO> getEntryFormDetails(Long entryFormId);
 }

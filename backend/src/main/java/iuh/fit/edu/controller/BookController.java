@@ -2,13 +2,16 @@ package iuh.fit.edu.controller;
 
 import com.turkraft.springfilter.boot.Filter;
 import iuh.fit.edu.dto.response.ResultPaginationDTO;
+import iuh.fit.edu.dto.response.account.UserInfoResponse;
 import iuh.fit.edu.dto.response.book.ResBookDTO;
 import iuh.fit.edu.dto.response.book.ResCreateBookDTO;
 import iuh.fit.edu.dto.response.book.ResUpdateBookDTO;
 import iuh.fit.edu.entity.Book;
 import iuh.fit.edu.exception.IdInvalidException;
 import iuh.fit.edu.service.BookService;
+import iuh.fit.edu.util.GetTokenRequest;
 import iuh.fit.edu.util.anotation.ApiMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -44,7 +47,7 @@ public class BookController {
 
     @PostMapping
     @ApiMessage("Tạo sách mới")
-    public ResponseEntity<ResCreateBookDTO> createNewBook(@Valid @RequestBody Book book) throws IdInvalidException {
+    public ResponseEntity<ResCreateBookDTO> createNewBook(@Valid @RequestBody Book book, HttpServletRequest request) throws IdInvalidException {
         System.out.println("=== CREATE BOOK - Received data ===");
         System.out.println("ISBN: " + book.getIsbn());
         System.out.println("Title: " + book.getTitle());
@@ -56,24 +59,25 @@ public class BookController {
         System.out.println("Quantity: " + book.getQuantity());
         System.out.println("Categories: " + (book.getCategories() != null ? book.getCategories().size() : "null"));
         System.out.println("Images: " + (book.getImage() != null ? book.getImage().size() : "null"));
-        
+        UserInfoResponse user = GetTokenRequest.getInfoUser(request);
         if (this.bookService.existsByIsbn(book.getIsbn())) {
             throw new IdInvalidException("ISBN: " + book.getIsbn() + " đã tồn tại!");
         }
 
-        Book bookCreate = this.bookService.createBook(book);
+        Book bookCreate = this.bookService.createBook(book, user.getEmail());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(this.bookService.convertToResCreateBookDTO(bookCreate));
     }
 
     @DeleteMapping("/{id}")
     @ApiMessage("Xóa sách (cập nhật trạng thái thành ngừng bán)")
-    public ResponseEntity<Void> deleteBook(@PathVariable long id) throws IdInvalidException {
+    public ResponseEntity<Void> deleteBook(@PathVariable long id, HttpServletRequest request) throws IdInvalidException {
         Book currentBook = this.bookService.findBookById(id);
         if (currentBook == null) {
             throw new IdInvalidException("Book với id: " + id + " không tồn tại");
         }
-        this.bookService.deleteBook(id);
+        UserInfoResponse user = GetTokenRequest.getInfoUser(request);
+        this.bookService.deleteBook(id, user.getEmail());
         return ResponseEntity.ok(null);
     }
 
@@ -87,7 +91,7 @@ public class BookController {
 
     @PutMapping
     @ApiMessage("Cập nhật book")
-    public ResponseEntity<ResUpdateBookDTO> updateBook(@Valid @RequestBody Book book) throws IdInvalidException {
+    public ResponseEntity<ResUpdateBookDTO> updateBook(@Valid @RequestBody Book book, HttpServletRequest request) throws IdInvalidException {
         try {
             System.out.println("=== UPDATE BOOK - Received ISBN: " + book.getIsbn());
 
@@ -95,7 +99,8 @@ public class BookController {
                 throw new IdInvalidException("ID sách không được để trống");
             }
 
-            Book updatedBook = this.bookService.updateBook(book);
+            UserInfoResponse user = GetTokenRequest.getInfoUser(request);
+            Book updatedBook = this.bookService.updateBook(book, user.getEmail());
             if (updatedBook == null) {
                 throw new IdInvalidException("Book với id: " + book.getId() + " không tồn tại hoặc ISBN đã trùng");
             }
@@ -116,8 +121,10 @@ public class BookController {
     @ApiMessage("Cập nhật số lượng sách")
     public ResponseEntity<ResUpdateBookDTO> updateBookQuantity(
             @PathVariable Long id,
-            @RequestParam int quantity
+            @RequestParam int quantity,
+            HttpServletRequest request
     ) throws IdInvalidException {
+        UserInfoResponse user = GetTokenRequest.getInfoUser(request);
         Book updatedBook = this.bookService.updateBookQuantity(id, quantity);
         return ResponseEntity.ok(this.bookService.convertToResUpdateBookDTO(updatedBook));
     }

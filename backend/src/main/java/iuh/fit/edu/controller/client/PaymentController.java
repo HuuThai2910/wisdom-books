@@ -2,9 +2,11 @@ package iuh.fit.edu.controller.client;
 
 import iuh.fit.edu.dto.request.order.OrderRequest;
 import iuh.fit.edu.dto.response.ApiResponse;
+import iuh.fit.edu.dto.response.account.UserInfoResponse;
 import iuh.fit.edu.dto.response.order.OrderResponse;
 import iuh.fit.edu.dto.response.PaymentResponse;
 import iuh.fit.edu.service.OrderService;
+import iuh.fit.edu.util.GetTokenRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,8 +30,8 @@ public class PaymentController {
      */
     @PostMapping("/create-order")
     public ResponseEntity<?> createOrder(@RequestBody OrderRequest orderRequest, HttpServletRequest request) {
-            String email = "admin@bookstore.com";
-            Object result = this.orderService.createOrder(email, orderRequest, request);
+            UserInfoResponse user = GetTokenRequest.getInfoUser(request);
+            Object result = this.orderService.createOrder(user.getEmail(), orderRequest, request);
             return ResponseEntity.ok(result);
     }
 

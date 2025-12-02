@@ -11,9 +11,6 @@ import iuh.fit.edu.exception.IdInvalidException;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 /**
  * @author Nguyen Tan Nghi
@@ -22,15 +19,15 @@ import java.util.Optional;
  */
 
 public interface BookService {
-    Book createBook(Book book);
+    Book createBook(Book book, String email);
 
-    Book createBookFromDTO(ReqCreateBookDTO reqCreateBookDTO);
 
-    Book updateBook(Book book);
 
-    Book updateBookFromDTO(ReqUpdateBookDTO reqUpdateBookDTO);
+    Book updateBook(Book book, String email);
 
-    void deleteBook(Long id);
+
+
+    void deleteBook(Long id, String email);
 
     Book findBookById(Long id);
 

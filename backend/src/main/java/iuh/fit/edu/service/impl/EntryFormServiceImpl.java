@@ -5,14 +5,8 @@ import iuh.fit.edu.dto.request.entryform.CreateEntryFormDTO;
 import iuh.fit.edu.dto.response.ResultPaginationDTO;
 import iuh.fit.edu.dto.response.entryform.ResEntryFormDTO;
 import iuh.fit.edu.dto.response.entryform.ResEntryFormDetailDTO;
-import iuh.fit.edu.entity.Book;
-import iuh.fit.edu.entity.EntryForm;
-import iuh.fit.edu.entity.EntryFormDetail;
-import iuh.fit.edu.entity.Inventory;
-import iuh.fit.edu.repository.BookRepository;
-import iuh.fit.edu.repository.EntryFormDetailRepository;
-import iuh.fit.edu.repository.EntryFormRepository;
-import iuh.fit.edu.repository.InventoryRepository;
+import iuh.fit.edu.entity.*;
+import iuh.fit.edu.repository.*;
 import iuh.fit.edu.service.EntryFormService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,6 +30,7 @@ public class EntryFormServiceImpl implements EntryFormService {
     private final EntryFormDetailRepository entryFormDetailRepository;
     private final InventoryRepository inventoryRepository;
     private final BookRepository bookRepository;
+    private final UserRepository userRepository;
 
     @Override
     public ResultPaginationDTO getAllEntryForms(Specification<EntryForm> spec, Pageable pageable) {
@@ -85,7 +80,7 @@ public class EntryFormServiceImpl implements EntryFormService {
 
     @Override
     @Transactional
-    public ResEntryFormDTO createEntryForm(CreateEntryFormDTO dto) {
+    public ResEntryFormDTO createEntryForm(CreateEntryFormDTO dto, String email) {
         // Validate total quantity
         int totalQuantity = dto.getBooks().stream()
                 .mapToInt(BookItemDTO::getQuantity)
@@ -107,6 +102,10 @@ public class EntryFormServiceImpl implements EntryFormService {
             }
         }
 
+        User user = this.userRepository.findByEmail(email);
+        if(user == null){
+            throw new RuntimeException("User not found");
+        }
         // Create EntryForm
         EntryForm entryForm = new EntryForm();
         entryForm.setTotalQuantity(totalQuantity);
@@ -114,6 +113,7 @@ public class EntryFormServiceImpl implements EntryFormService {
                 .mapToDouble(BookItemDTO::getAmount)
                 .sum());
         entryForm.setCreatedAt(LocalDateTime.now());
+        entryForm.setUser(user);
         
         // TODO: Set current user - you need to implement SecurityUtil or get user from context
         // User currentUser = SecurityUtil.getCurrentUser();

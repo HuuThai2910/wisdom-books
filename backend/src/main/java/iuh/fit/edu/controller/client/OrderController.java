@@ -7,21 +7,22 @@ package iuh.fit.edu.controller.client;
 import com.turkraft.springfilter.boot.Filter;
 import iuh.fit.edu.dto.request.order.UpdateOrderRequest;
 import iuh.fit.edu.dto.response.ResultPaginationDTO;
-import iuh.fit.edu.dto.response.order.OrderItemResponse;
+import iuh.fit.edu.dto.response.account.UserInfoResponse;
 import iuh.fit.edu.dto.response.order.OrderResponse;
 import iuh.fit.edu.dto.response.order.UpdateOrderStatusResponse;
 import iuh.fit.edu.entity.Order;
-import iuh.fit.edu.entity.OrderItem;
 import iuh.fit.edu.service.OrderService;
+import iuh.fit.edu.util.GetTokenRequest;
 import iuh.fit.edu.util.anotation.ApiMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Security;
 import java.util.List;
 
 /*
@@ -45,8 +46,9 @@ public class OrderController {
 
     @GetMapping("/user")
     @ApiMessage("Get orders by user")
-    public ResponseEntity<List<OrderResponse>> getOrdersByUser(){
-        List<OrderResponse> orderResponses = this.orderService.getOrdersByEmail("admin@bookstore.com");
+    public ResponseEntity<List<OrderResponse>> getOrdersByUser(HttpServletRequest request){
+        UserInfoResponse user = GetTokenRequest.getInfoUser(request);
+        List<OrderResponse> orderResponses = this.orderService.getOrdersByEmail(user.getEmail());
         return ResponseEntity.ok(orderResponses);
     }
 
@@ -59,17 +61,20 @@ public class OrderController {
 
     @PutMapping
     @ApiMessage("Update order status")
-    public ResponseEntity<UpdateOrderStatusResponse> updateOrderStatus(@RequestBody UpdateOrderRequest request){
+    public ResponseEntity<UpdateOrderStatusResponse> updateOrderStatus(@RequestBody UpdateOrderRequest request, HttpServletRequest httpServletRequest){
         log.info("Request " + request);
-        UpdateOrderStatusResponse orderResponse = this.orderService.updateOrderStatus(request);
+        UserInfoResponse user = GetTokenRequest.getInfoUser(httpServletRequest);
+        UpdateOrderStatusResponse orderResponse = this.orderService.updateOrderStatus(request, user.getEmail());
         log.info("Response: " + orderResponse);
         return ResponseEntity.ok(orderResponse);
     }
 
     @PutMapping("/cancel")
     @ApiMessage("Cancel order")
-    public ResponseEntity<UpdateOrderStatusResponse> cancelOrder(@RequestBody UpdateOrderRequest request){
-        return ResponseEntity.ok(this.orderService.updateOrderStatus(request));
+    public ResponseEntity<UpdateOrderStatusResponse> cancelOrder(@RequestBody UpdateOrderRequest request, HttpServletRequest httpServletRequest){
+        UserInfoResponse user = GetTokenRequest.getInfoUser(httpServletRequest);
+        return ResponseEntity.ok(this.orderService.updateOrderStatus(request, user.getEmail()));
     }
+
 
 }

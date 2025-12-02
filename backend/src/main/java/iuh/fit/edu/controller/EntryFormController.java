@@ -3,11 +3,14 @@ package iuh.fit.edu.controller;
 import com.turkraft.springfilter.boot.Filter;
 import iuh.fit.edu.dto.request.entryform.CreateEntryFormDTO;
 import iuh.fit.edu.dto.response.ResultPaginationDTO;
+import iuh.fit.edu.dto.response.account.UserInfoResponse;
 import iuh.fit.edu.dto.response.entryform.ResEntryFormDTO;
 import iuh.fit.edu.dto.response.entryform.ResEntryFormDetailDTO;
 import iuh.fit.edu.entity.EntryForm;
 import iuh.fit.edu.service.EntryFormService;
+import iuh.fit.edu.util.GetTokenRequest;
 import iuh.fit.edu.util.anotation.ApiMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -51,9 +54,10 @@ public class EntryFormController {
 
     @PostMapping
     @ApiMessage("Tạo phiếu nhập kho")
-    public ResponseEntity<ResEntryFormDTO> createEntryForm(@Valid @RequestBody CreateEntryFormDTO dto) {
+    public ResponseEntity<ResEntryFormDTO> createEntryForm(@Valid @RequestBody CreateEntryFormDTO dto, HttpServletRequest request) {
+        UserInfoResponse user = GetTokenRequest.getInfoUser(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(this.entryFormService.createEntryForm(dto));
+                .body(this.entryFormService.createEntryForm(dto, user.getEmail()));
     }
 
     @GetMapping("/{id}/details")

@@ -3,6 +3,7 @@ package iuh.fit.edu.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import iuh.fit.edu.entity.constant.BookStatus;
 import jakarta.persistence.*;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -96,13 +97,11 @@ public class Book {
     private List<EntryFormDetail> entryFormDetails;
     @PrePersist
     public void handleBeforeCreateAt() {
-        this.createdBy =  "Tan Nghi";
         this.createdAt = LocalDateTime.now();
     }
 
     @PreUpdate
     public void handleBeforeUpdateAt() {
-        this.createdBy =  "Tan Nghi";
         this.updatedAt = LocalDateTime.now();
     }
 }
