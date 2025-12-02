@@ -49,7 +49,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         } lg:translate-x-0 transition-[width] duration-200 ease-in-out will-change-[width]`}
         style={{
           background:
-            "linear-gradient(5deg, rgba(50,20,140,1) 0%, rgba(80,50,160,1) 7%, rgba(90,60,170,1) 16%, rgba(70,40,150,1) 39%, rgba(60,30,140,1) 76%, rgba(20,10,100,1) 100%)",
+            "linear-gradient(5deg, rgba(0, 60, 200, 1) 2%,rgba(0, 90, 220, 1) 7%,rgba(20, 110, 230, 1) 16%,rgba(0, 80, 210, 1) 39%,rgba(0, 70, 190, 1) 76%,rgba(0, 80, 130, 1) 100%",
         }}
         onMouseEnter={() => setSidebarHovered(true)}
         onMouseLeave={() => setSidebarHovered(false)}

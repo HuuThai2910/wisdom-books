@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import UserTableHeader from "../../components/admin/UserTableHeader";
 import UserTableRow from "../../components/admin/UserTableRow";
 import AdminLayout from "../../pages/admin/AdminLayout";
@@ -24,7 +27,18 @@ const ManageUserPage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const renderSortIcon = (column: string) => {
+    if (sortBy !== column) {
+      return <FaSort className="ml-1 text-gray-400" />;
+    }
+    return sortDirection === "asc" ? (
+      <FaSortUp className="ml-1 text-blue-500" />
+    ) : (
+      <FaSortDown className="ml-1 text-blue-500" />
+    );
+  };
 
   const loadUsers = () => {
     setLoading(true);
@@ -260,187 +274,219 @@ const ManageUserPage = () => {
 
   return (
     <AdminLayout>
-      <div className="max-w-[1400px] mx-auto bg-white text-black rounded-xl shadow-md p-1 mt-0">
-        <UserTableHeader
-          onAddUser={handleAddUser}
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          filterRole={filterRole}
-          filterStatus={filterStatus}
-          onFilterRoleChange={setFilterRole}
-          onFilterStatusChange={setFilterStatus}
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          onSortChange={(newSortBy, newDirection) => {
-            setSortBy(newSortBy);
-            setSortDirection(newDirection);
-          }}
-          selectedCount={selectedUserIds.length}
-          onExportExcel={handleExportToExcel}
-        />
+      <>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-lg shadow-md p-6 mb-6"
+        >
+          <h1 className="text-3xl font-bold wisbook-gradient-text mb-6">
+            Quản Lý Người Dùng
+          </h1>
+          <UserTableHeader
+            onAddUser={handleAddUser}
+            searchValue={searchValue}
+            onSearchChange={setSearchValue}
+            filterRole={filterRole}
+            filterStatus={filterStatus}
+            onFilterRoleChange={setFilterRole}
+            onFilterStatusChange={setFilterStatus}
+            selectedCount={selectedUserIds.length}
+            onExportExcel={handleExportToExcel}
+          />
+        </motion.div>
 
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2196F3]"></div>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    <input
-                      type="checkbox"
-                      className="w-[18px] h-[18px] cursor-pointer rounded"
-                      checked={
-                        selectedUserIds.length === users.length &&
-                        users.length > 0
-                      }
-                      onChange={(e) => handleSelectAll(e.target.checked)}
-                    />
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    No
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Avatar
-                  </th>
-                  <th
-                    className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort("fullName")}
-                  >
-                    <div className="flex items-center gap-2">
-                      Tên
-                      {sortBy === "fullName" && (
-                        <span className="text-[#2196F3]">
-                          {sortDirection === "asc" ? "↑" : "↓"}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                  <th
-                    className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort("email")}
-                  >
-                    <div className="flex items-center gap-2">
-                      Email
-                      {sortBy === "email" && (
-                        <span className="text-[#2196F3]">
-                          {sortDirection === "asc" ? "↑" : "↓"}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Số điện thoại
-                  </th>
-                  <th
-                    className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort("role")}
-                  >
-                    <div className="flex items-center gap-2">
-                      Vai trò
-                      {sortBy === "role" && (
-                        <span className="text-[#2196F3]">
-                          {sortDirection === "asc" ? "↑" : "↓"}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Hành động
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.length > 0 ? (
-                  users
-                    .slice(
-                      (currentPage - 1) * itemsPerPage,
-                      currentPage * itemsPerPage
-                    )
-                    .map((user, index) => (
-                      <UserTableRow
-                        key={user.id}
-                        user={user}
-                        index={(currentPage - 1) * itemsPerPage + index}
-                        onView={handleViewUser}
-                        onEdit={handleEditUser}
-                        onDelete={handleDeleteUser}
-                        isSelected={selectedUserIds.includes(Number(user.id))}
-                        onSelectChange={handleSelectUser}
-                      />
-                    ))
-                ) : (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-lg shadow-md overflow-hidden"
+        >
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <td
-                      colSpan={8}
-                      className="px-4 py-8 text-center text-gray-500"
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      <input
+                        type="checkbox"
+                        className="w-[18px] h-[18px] cursor-pointer rounded"
+                        checked={
+                          selectedUserIds.length === users.length &&
+                          users.length > 0
+                        }
+                        onChange={(e) => handleSelectAll(e.target.checked)}
+                      />
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      STT
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Avatar
+                    </th>
+                    <th
+                      className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none transition-colors"
+                      onClick={() => handleSort("fullName")}
                     >
-                      {searchValue
-                        ? "Không tìm thấy người dùng phù hợp"
-                        : "Chưa có người dùng nào"}
-                    </td>
+                      <div className="flex items-center">
+                        Tên
+                        {renderSortIcon("fullName")}
+                      </div>
+                    </th>
+                    <th
+                      className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none transition-colors"
+                      onClick={() => handleSort("email")}
+                    >
+                      <div className="flex items-center">
+                        Email
+                        {renderSortIcon("email")}
+                      </div>
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Số điện thoại
+                    </th>
+                    <th
+                      className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none transition-colors"
+                      onClick={() => handleSort("role")}
+                    >
+                      <div className="flex items-center">
+                        Vai trò
+                        {renderSortIcon("role")}
+                      </div>
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Hành động
+                    </th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Pagination */}
-        {users.length > 0 && (
-          <div className="mt-6 flex items-center justify-between">
-            <div className="text-sm text-gray-700">
-              Hiển thị {(currentPage - 1) * itemsPerPage + 1} -{" "}
-              {Math.min(currentPage * itemsPerPage, users.length)} trong tổng số{" "}
-              {users.length} người dùng
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {users.length > 0 ? (
+                    users
+                      .slice(
+                        (currentPage - 1) * itemsPerPage,
+                        currentPage * itemsPerPage
+                      )
+                      .map((user, index) => (
+                        <UserTableRow
+                          key={user.id}
+                          user={user}
+                          index={(currentPage - 1) * itemsPerPage + index}
+                          onView={handleViewUser}
+                          onEdit={handleEditUser}
+                          onDelete={handleDeleteUser}
+                          isSelected={selectedUserIds.includes(Number(user.id))}
+                          onSelectChange={handleSelectUser}
+                        />
+                      ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={8}
+                        className="px-4 py-8 text-center text-gray-500"
+                      >
+                        {searchValue
+                          ? "Không tìm thấy người dùng phù hợp"
+                          : "Chưa có người dùng nào"}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium 
-                  disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-              >
-                Trước
-              </button>
+          )}
 
-              {Array.from(
-                { length: Math.ceil(users.length / itemsPerPage) },
-                (_, i) => i + 1
-              ).map((page) => (
+          {/* Pagination */}
+          {users.length > 0 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
+              <div className="text-sm text-gray-700">
+                Hiển thị {(currentPage - 1) * itemsPerPage + 1}-
+                {Math.min(currentPage * itemsPerPage, users.length)} trên{" "}
+                {users.length} người dùng
+              </div>
+              <div className="flex items-center gap-2">
                 <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-4 py-2 border rounded-lg text-sm font-medium transition-colors ${
-                    currentPage === page
-                      ? "bg-[#3b82f6] text-white border-[#3b82f6]"
-                      : "border-gray-300 hover:bg-gray-50"
-                  }`}
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                  className="p-2 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Trang đầu"
                 >
-                  {page}
+                  <span className="text-gray-600 text-sm font-medium">«</span>
                 </button>
-              ))}
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
+                  disabled={currentPage === 1}
+                  className="p-2 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="text-gray-600" size={18} />
+                </button>
 
-              <button
-                onClick={() =>
-                  setCurrentPage((prev) =>
-                    Math.min(Math.ceil(users.length / itemsPerPage), prev + 1)
-                  )
-                }
-                disabled={
-                  currentPage === Math.ceil(users.length / itemsPerPage)
-                }
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium 
-                  disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-              >
-                Sau
-              </button>
+                <div className="flex gap-1">
+                  {Array.from(
+                    { length: Math.ceil(users.length / itemsPerPage) },
+                    (_, i) => i + 1
+                  ).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1 rounded ${
+                        currentPage === page
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) =>
+                      Math.min(Math.ceil(users.length / itemsPerPage), prev + 1)
+                    )
+                  }
+                  disabled={
+                    currentPage === Math.ceil(users.length / itemsPerPage)
+                  }
+                  className="p-2 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="text-gray-600" size={18} />
+                </button>
+                <button
+                  onClick={() =>
+                    setCurrentPage(Math.ceil(users.length / itemsPerPage))
+                  }
+                  disabled={
+                    currentPage === Math.ceil(users.length / itemsPerPage)
+                  }
+                  className="p-2 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Trang cuối"
+                >
+                  <span className="text-gray-600 text-sm font-medium">»</span>
+                </button>
+
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="ml-2 px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                >
+                  <option value={10}>10 / trang</option>
+                  <option value={20}>20 / trang</option>
+                  <option value={50}>50 / trang</option>
+                </select>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </motion.div>
+      </>
     </AdminLayout>
   );
 };

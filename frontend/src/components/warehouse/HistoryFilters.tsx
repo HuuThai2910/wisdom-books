@@ -1,3 +1,5 @@
+import { FaRedo } from "react-icons/fa";
+
 interface HistoryFiltersProps {
   historySearchTerm: string;
   setHistorySearchTerm: (value: string) => void;
@@ -29,17 +31,20 @@ export default function HistoryFilters({
       <div className="md:col-span-2 flex items-end gap-4">
         <button
           onClick={onShowAdvancedFilter}
-          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-semibold transition-colors"
+          className="px-5 py-2.5 border border-gray-300 bg-white rounded-lg text-sm 
+              font-medium transition-all duration-200 hover:bg-gray-50 flex items-center gap-2"
         >
           Lọc tổng hợp
         </button>
-
-        <button
-          onClick={onReset}
-          className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md font-semibold transition-colors"
-        >
-          Làm lại
-        </button>
+        <div className="flex items-end">
+          <button
+            onClick={onReset}
+            className="flex items-center gap-2 bg-linear-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-2.5 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg transform hover:scale-105"
+          >
+            <FaRedo className="text-sm" />
+            Làm lại
+          </button>
+        </div>
       </div>
     </div>
   );

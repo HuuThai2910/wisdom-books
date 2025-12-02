@@ -90,25 +90,33 @@ export default function AdvancedFilterModal({
             <div className="flex gap-2">
               <input
                 type="number"
+                min="0"
                 value={advancedFilters.totalQuantityMin}
-                onChange={(e) =>
-                  setAdvancedFilters({
-                    ...advancedFilters,
-                    totalQuantityMin: e.target.value,
-                  })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || parseFloat(value) >= 0) {
+                    setAdvancedFilters({
+                      ...advancedFilters,
+                      totalQuantityMin: value,
+                    });
+                  }
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                 placeholder="Từ"
               />
               <input
                 type="number"
+                min="0"
                 value={advancedFilters.totalQuantityMax}
-                onChange={(e) =>
-                  setAdvancedFilters({
-                    ...advancedFilters,
-                    totalQuantityMax: e.target.value,
-                  })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || parseFloat(value) >= 0) {
+                    setAdvancedFilters({
+                      ...advancedFilters,
+                      totalQuantityMax: value,
+                    });
+                  }
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                 placeholder="Đến"
               />
@@ -122,25 +130,33 @@ export default function AdvancedFilterModal({
             <div className="flex gap-2">
               <input
                 type="number"
+                min="0"
                 value={advancedFilters.totalAmountMin}
-                onChange={(e) =>
-                  setAdvancedFilters({
-                    ...advancedFilters,
-                    totalAmountMin: e.target.value,
-                  })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || parseFloat(value) >= 0) {
+                    setAdvancedFilters({
+                      ...advancedFilters,
+                      totalAmountMin: value,
+                    });
+                  }
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                 placeholder="Từ (VNĐ)"
               />
               <input
                 type="number"
+                min="0"
                 value={advancedFilters.totalAmountMax}
-                onChange={(e) =>
-                  setAdvancedFilters({
-                    ...advancedFilters,
-                    totalAmountMax: e.target.value,
-                  })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || parseFloat(value) >= 0) {
+                    setAdvancedFilters({
+                      ...advancedFilters,
+                      totalAmountMax: value,
+                    });
+                  }
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                 placeholder="Đến (VNĐ)"
               />

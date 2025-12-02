@@ -1,3 +1,5 @@
+import { FaRedo } from "react-icons/fa";
+
 interface InventoryFiltersProps {
   searchTerm: string;
   setSearchTerm: (value: string) => void;
@@ -40,25 +42,33 @@ export default function InventoryFilters({
           <input
             type="number"
             placeholder="Từ"
+            min="0"
             value={importPriceRange.min}
-            onChange={(e) =>
-              setImportPriceRange({
-                ...importPriceRange,
-                min: e.target.value,
-              })
-            }
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "" || parseFloat(value) >= 0) {
+                setImportPriceRange({
+                  ...importPriceRange,
+                  min: value,
+                });
+              }
+            }}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
           />
           <input
             type="number"
             placeholder="Đến"
+            min="0"
             value={importPriceRange.max}
-            onChange={(e) =>
-              setImportPriceRange({
-                ...importPriceRange,
-                max: e.target.value,
-              })
-            }
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "" || parseFloat(value) >= 0) {
+                setImportPriceRange({
+                  ...importPriceRange,
+                  max: value,
+                });
+              }
+            }}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
           />
         </div>
@@ -72,35 +82,44 @@ export default function InventoryFilters({
           <input
             type="number"
             placeholder="Từ"
+            min="0"
             value={sellingPriceRange.min}
-            onChange={(e) =>
-              setSellingPriceRange({
-                ...sellingPriceRange,
-                min: e.target.value,
-              })
-            }
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "" || parseFloat(value) >= 0) {
+                setSellingPriceRange({
+                  ...sellingPriceRange,
+                  min: value,
+                });
+              }
+            }}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
           />
           <input
             type="number"
             placeholder="Đến"
+            min="0"
             value={sellingPriceRange.max}
-            onChange={(e) =>
-              setSellingPriceRange({
-                ...sellingPriceRange,
-                max: e.target.value,
-              })
-            }
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "" || parseFloat(value) >= 0) {
+                setSellingPriceRange({
+                  ...sellingPriceRange,
+                  max: value,
+                });
+              }
+            }}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
           />
         </div>
       </div>
 
-      <div className="flex items-end gap-2">
+      <div className="flex items-end">
         <button
           onClick={onReset}
-          className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md font-semibold transition-colors"
+          className="flex items-center gap-2 bg-linear-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-2.5 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg transform hover:scale-105"
         >
+          <FaRedo className="text-sm" />
           Làm lại
         </button>
       </div>
