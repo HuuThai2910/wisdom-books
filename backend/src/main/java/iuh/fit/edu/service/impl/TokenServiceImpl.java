@@ -22,9 +22,6 @@ public class TokenServiceImpl implements TokenService {
     @Override
     @Transactional
     public Token saveTokenRecord(User user, TokenType tokenType, long expirationMinutes) {
-        // Revoke các token cũ trước
-        revokeAllUserTokens(user, tokenType);
-        
         // Tạo token record mới
         Token token = Token.builder()
                 .user(user)
