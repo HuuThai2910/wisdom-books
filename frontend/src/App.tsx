@@ -33,11 +33,15 @@ function App() {
                 toastOptions={{
                     duration: 3000,
                     style: {
-                        background: "#363636",
-                        color: "#fff",
+                        background: "#fff",
+                        color: "#000",
                     },
                     success: {
                         duration: 3000,
+                        style: {
+                            background: "#fff",
+                            color: "#000",
+                        },  
                         iconTheme: {
                             primary: "#4ade80",
                             secondary: "#fff",
@@ -101,7 +105,8 @@ function App() {
                     <Route path="/orders" element={<OrdersPage />} />
                     <Route
                         path="/payment-success"
-                        element={<PaymentSuccessPage />}/>
+                        element={<PaymentSuccessPage />}
+                    />
                     <Route
                         path="/admin/manage-users"
                         element={<ManageUserPage />}

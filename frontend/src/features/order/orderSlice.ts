@@ -66,7 +66,7 @@ export const fetchOrderById = createAsyncThunk<
 
 // Hủy đơn hàng
 export const cancelOrder = createAsyncThunk<
-    Order,
+    UpdatedOrderResponse,
     number,
     { rejectValue: string }
 >("order/cancelOrder", async (orderId, thunkAPI) => {
@@ -223,27 +223,23 @@ const orderSlice = createSlice({
 
             // ===== CANCEL ORDER =====
             .addCase(cancelOrder.fulfilled, (state, action) => {
-                const canceledOrder = action.payload;
+                const { id, status } = action.payload;
 
-                // Update trong orders
-                const orderIndex = state.orders.findIndex(
-                    (o) => o.id === canceledOrder.id
-                );
-                if (orderIndex !== -1) {
-                    state.orders[orderIndex] = canceledOrder;
+                // Update status trong orders
+                const order = state.orders.find((o) => o.id === id);
+                if (order) {
+                    order.status = status;
                 }
 
                 // Update trong userOrders
-                const userOrderIndex = state.userOrders.findIndex(
-                    (o) => o.id === canceledOrder.id
-                );
-                if (userOrderIndex !== -1) {
-                    state.userOrders[userOrderIndex] = canceledOrder;
+                const userOrder = state.userOrders.find((o) => o.id === id);
+                if (userOrder) {
+                    userOrder.status = status;
                 }
 
                 // Update currentOrder
-                if (state.currentOrder?.id === canceledOrder.id) {
-                    state.currentOrder = canceledOrder;
+                if (state.currentOrder?.id === id) {
+                    state.currentOrder.status = status;
                 }
             })
 
