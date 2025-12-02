@@ -6,6 +6,7 @@ import iuh.fit.edu.dto.response.account.RegisterResponse;
 import iuh.fit.edu.dto.response.user.UserResponseById;
 import iuh.fit.edu.dto.response.user.UsersResponse;
 import iuh.fit.edu.entity.User;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
     boolean createUser(CreateUserRequest request);
@@ -15,5 +16,5 @@ public interface UserService {
     UsersResponse findAll();
     UsersResponse findAll(String keyword, String sortBy, String sortDirection, String role, String status);
     String getAvatarUrl(String filename);
-    String uploadAvatar(org.springframework.web.multipart.MultipartFile avatar);
+    String uploadAvatar(MultipartFile avatar);
 }

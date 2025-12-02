@@ -11,6 +11,7 @@ import iuh.fit.edu.dto.response.user.UserResponseById;
 import iuh.fit.edu.dto.response.user.UsersResponse;
 import iuh.fit.edu.entity.Role;
 import iuh.fit.edu.entity.User;
+import iuh.fit.edu.entity.constant.UserStatus;
 import iuh.fit.edu.mapper.UserMapper;
 import iuh.fit.edu.repository.RoleRepository;
 import iuh.fit.edu.repository.UserRepository;
@@ -64,7 +65,7 @@ public class UserServiceImpl implements UserService {
                 .fullName(user.getFullName())
                 .phone(user.getPhone())
                 .email(user.getEmail())
-                .password(user.getPassword())
+                .password(request.getPassword())
                 .confirmPassword(request.getConfirmPassword())
                 .build(), false);
         user.setRole(role);
@@ -104,8 +105,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long id) {
         User user = userRepository.findById(id).orElse(null);
-        userRepository.deleteById(id);
         assert user != null;
+        user.setStatus(UserStatus.INACTIVE);
+        userRepository.save(user);
         cognitoService.disableUser(user.getFullName());
     }
 
@@ -119,7 +121,7 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .gender(user.getGender())
                 .phone(user.getPhone())
-                .role(user.getRole().getId().toString())
+                .role(user.getRole() != null ? user.getRole().getId().toString() : null)
                 .userStatus(user.getStatus())
                 .address(user.getAddress())
                 .avatarURL(user.getAvatar())
@@ -131,12 +133,13 @@ public class UserServiceImpl implements UserService {
         List<User> users = userRepository.findAll();
         return UsersResponse.builder()
                 .users(users.stream()
+                        .filter(user -> user != null)  // Filter out null users
                         .map(user -> UserDTO.builder()
                                 .id(user.getId())
                                 .fullName(user.getFullName())
                                 .email(user.getEmail())
                                 .phone(user.getPhone())
-                                .role(user.getRole().getName().name())
+                                .role(user.getRole() != null ? user.getRole().getName().name() : null)
                                 .avatar(user.getAvatar())
                                 .build()).toList())
                 .build();
@@ -145,6 +148,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public UsersResponse findAll(String keyword, String sortBy, String sortDirection, String role, String status) {
         List<User> users = userRepository.findAll();
+        
+        // Filter out null users first
+        users = users.stream()
+                .filter(user -> user != null)
+                .toList();
         
         // Filter by keyword (search in fullName, email, phone)
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -221,12 +229,13 @@ public class UserServiceImpl implements UserService {
         
         return UsersResponse.builder()
                 .users(users.stream()
+                        .filter(user -> user != null)  // Extra safety check
                         .map(user -> UserDTO.builder()
                                 .id(user.getId())
                                 .fullName(user.getFullName())
                                 .email(user.getEmail())
                                 .phone(user.getPhone())
-                                .role(user.getRole().getName().name())
+                                .role(user.getRole() != null ? user.getRole().getName().name() : null)
                                 .avatar(user.getAvatar())
                                 .build()).toList())
                 .build();
@@ -239,9 +248,9 @@ public class UserServiceImpl implements UserService {
         }
         return s3Service.getFileUrl(filename);
     }
-    
+
     @Override
-    public String uploadAvatar(org.springframework.web.multipart.MultipartFile avatar) {
+    public String uploadAvatar(MultipartFile avatar) {
         if (avatar == null || avatar.isEmpty()) {
             throw new RuntimeException("Avatar file is empty");
         }

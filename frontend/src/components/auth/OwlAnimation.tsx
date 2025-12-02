@@ -52,24 +52,24 @@ const OwlAnimation = ({ isFlying, onAnimationComplete }: OwlAnimationProps) => {
         ${isFlying ? 'owl-fly-around' : ''}`}
     >
       <div className={`w-[100px] h-[100px] rounded-[50%_50%_50%_50%/60%_60%_40%_40%] relative
-        shadow-[0_8px_30px_rgba(139,134,199,0.6),inset_0_-10px_20px_rgba(0,0,0,0.1)]
+        shadow-[0_8px_30px_rgba(33,150,243,0.5),inset_0_-10px_20px_rgba(0,0,0,0.1)]
         ${!isFlying ? 'owl-float' : ''} ${isFlying ? 'owl-wings-active' : ''}`}
         style={{
-          background: 'linear-gradient(135deg, #E8E7F5 0%, #D1CFEA 40%, #A8A4D8 100%)'
+          background: 'linear-gradient(135deg, #64B5F6 0%, #42A5F5 50%, #2196F3 100%)'
         }}>
         
         {/* Left Ear */}
         <div className="absolute w-[25px] h-[35px] rounded-[0_50%_50%_0] top-[-8px] left-[-8px] rotate-[-25deg] 
           shadow-[-2px_2px_8px_rgba(0,0,0,0.2)]"
           style={{
-            background: 'linear-gradient(135deg, #D1CFEA 0%, #8B86C7 100%)'
+            background: 'linear-gradient(135deg, #42A5F5 0%, #1E88E5 100%)'
           }} />
         
         {/* Right Ear */}
         <div className="absolute w-[25px] h-[35px] rounded-[50%_0_0_50%] top-[-10px] right-[-8px] rotate-[25deg] 
           shadow-[2px_2px_8px_rgba(0,0,0,0.2)]"
           style={{
-            background: 'linear-gradient(135deg, #D1CFEA 0%, #8B86C7 100%)'
+            background: 'linear-gradient(135deg, #42A5F5 0%, #1E88E5 100%)'
           }} />
         
         {/* Left Eye */}
@@ -79,7 +79,7 @@ const OwlAnimation = ({ isFlying, onAnimationComplete }: OwlAnimationProps) => {
           <div className="pupil absolute w-[14px] h-[14px] rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
             transition-all duration-100 ease-out shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
             style={{
-              background: 'radial-gradient(circle at 35% 35%, #6B66A3, #544F87)'
+              background: 'radial-gradient(circle at 35% 35%, #1976D2, #0D47A1)'
             }}>
             <div className="absolute w-[4px] h-[4px] bg-white/90 rounded-full top-[3px] left-[3px]" />
           </div>
@@ -93,7 +93,7 @@ const OwlAnimation = ({ isFlying, onAnimationComplete }: OwlAnimationProps) => {
           <div className="pupil absolute w-[14px] h-[14px] rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
             transition-all duration-100 ease-out shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
             style={{
-              background: 'radial-gradient(circle at 35% 35%, #6B66A3, #544F87)'
+              background: 'radial-gradient(circle at 35% 35%, #1976D2, #0D47A1)'
             }}>
             <div className="absolute w-[4px] h-[4px] bg-white/90 rounded-full top-[3px] left-[3px]" />
           </div>
@@ -109,12 +109,12 @@ const OwlAnimation = ({ isFlying, onAnimationComplete }: OwlAnimationProps) => {
         <div className={`wing-left absolute w-[40px] h-[30px] rounded-[50%_50%_50%_50%/60%_60%_40%_40%] top-[40px] left-[-15px] -z-10
           ${isFlying ? 'opacity-100' : 'opacity-0'}`}
           style={{
-            background: 'linear-gradient(135deg, #D1CFEA 0%, #8B86C7 100%)'
+            background: 'linear-gradient(135deg, #42A5F5 0%, #1E88E5 100%)'
           }} />
         <div className={`wing-right absolute w-[40px] h-[30px] rounded-[50%_50%_50%_50%/60%_60%_40%_40%] top-[40px] right-[-15px] -z-10
           ${isFlying ? 'opacity-100' : 'opacity-0'}`}
           style={{
-            background: 'linear-gradient(135deg, #D1CFEA 0%, #8B86C7 100%)'
+            background: 'linear-gradient(135deg, #42A5F5 0%, #1E88E5 100%)'
           }} />
         
         {/* Enhanced Smoke trail */}
@@ -122,19 +122,19 @@ const OwlAnimation = ({ isFlying, onAnimationComplete }: OwlAnimationProps) => {
           <>
             <div className="smoke-trail absolute w-[15px] h-[15px] rounded-full 
               blur-[8px] opacity-0 -z-20 bottom-[10px] left-1/2"
-              style={{ background: 'radial-gradient(circle, #D1CFEA, transparent)' }} />
+              style={{ background: 'radial-gradient(circle, #42A5F5, transparent)' }} />
             <div className="smoke-trail absolute w-[12px] h-[12px] rounded-full 
               blur-[6px] opacity-0 -z-20 bottom-[5px] left-[45%] [animation-delay:0.15s]"
-              style={{ background: 'radial-gradient(circle, #B8B5E0, transparent)' }} />
+              style={{ background: 'radial-gradient(circle, #64B5F6, transparent)' }} />
             <div className="smoke-trail absolute w-[10px] h-[10px] rounded-full 
               blur-[5px] opacity-0 -z-20 bottom-0 left-[55%] [animation-delay:0.3s]"
-              style={{ background: 'radial-gradient(circle, #A8A4D8, transparent)' }} />
+              style={{ background: 'radial-gradient(circle, #2196F3, transparent)' }} />
             <div className="smoke-trail absolute w-[13px] h-[13px] rounded-full 
               blur-[7px] opacity-0 -z-20 bottom-[-5px] left-[50%] [animation-delay:0.45s]"
-              style={{ background: 'radial-gradient(circle, #D1CFEA, transparent)' }} />
+              style={{ background: 'radial-gradient(circle, #42A5F5, transparent)' }} />
             <div className="smoke-trail absolute w-[11px] h-[11px] rounded-full 
               blur-[6px] opacity-0 -z-20 bottom-[-10px] left-[48%] [animation-delay:0.6s]"
-              style={{ background: 'radial-gradient(circle, #B8B5E0, transparent)' }} />
+              style={{ background: 'radial-gradient(circle, #64B5F6, transparent)' }} />
           </>
         )}
       </div>

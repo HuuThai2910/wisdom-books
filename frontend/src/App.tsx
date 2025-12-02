@@ -22,11 +22,13 @@ import ScrollToTop from "./components/ScrollToTop";
 import ClientLayout from "./components/common/ClientLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import ManageUserPage from "./pages/admin/ManageUserPage";
+import UserFormPage from "./pages/admin/UserFormPage";
 import OrderManagement from "./pages/admin/OrderManagement";
 import WarehousePage from "./pages/admin/WarehousePage";
 import PermissionsPage from "./pages/admin/PermissionsPage";
 import AdminProfile from "./pages/admin/AdminProfile";
 import PaymentSuccessPage from "./pages/client/PaymentSuccessPage";
+import LoginPage from "./pages/client/LoginPage";
 
 function App() {
   const location = useLocation();
@@ -75,6 +77,7 @@ function App() {
               </ClientLayout>
             }
           />
+          <Route path="/login" element={<LoginPage />} />
           <Route
             path="/books"
             element={

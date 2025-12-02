@@ -363,7 +363,7 @@ export interface UserData {
     gender?: string;
     address?: Address;
     userStatus: string;
-    avatarURL?: string;
+    avatar?: string;
 }
 
 // Dashboard Types

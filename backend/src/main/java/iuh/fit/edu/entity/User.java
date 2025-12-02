@@ -23,12 +23,6 @@ public class User {
     @Column(unique = true)
     private String email;
 
-    @Column(nullable = false)
-    private String password;
-    
-    @Column(unique = true)
-    private String sub; // Cognito user sub (unique identifier)
-
     private String fullName;
     private String phone;
     @Embedded

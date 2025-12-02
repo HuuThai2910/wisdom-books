@@ -1,6 +1,6 @@
 import { RegisterFormData } from './../../types/index';
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { fetchtUser, login, register, resetPassword, sendOTP } from "../../api/auth";
+import { fetchtUser, login, register, resetPassword, sendOTP, verifyOTP } from "../../api/auth";
 // Thunk đăng ký user
 export const registerUser = createAsyncThunk<
     any,                               
@@ -59,6 +59,22 @@ export const sendOTPEmail = createAsyncThunk<
     async ({ email }, thunkAPI) => {
         try {
             const response = await sendOTP(email);
+            return response.data;
+        } catch (err: any) {
+            return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
+        }
+    }
+);
+
+export const verifyOTPCode = createAsyncThunk<
+    any,
+    { email: string, otp: string },
+    { rejectValue: string }
+>(
+    "auth/verify-otp", 
+    async ({ email, otp }, thunkAPI) => {
+        try {
+            const response = await verifyOTP({ email, otp });
             return response.data;
         } catch (err: any) {
             return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
