@@ -1,4 +1,4 @@
-import { UserParams, UpdateUserParams, UserDetailResponse } from '@/api/userApi';
+import { UserParams, UpdateUserParams, UserDetailResponse, uploadAvatar, getAvatarUrl } from '../../api/userApi';
 import { AppDispatch } from '@/app/store';
 import { createUserforAdmin, updateUserforAdmin } from '../../features/user/useSlice';
 import { useState, useRef, useEffect } from 'react';
@@ -57,7 +57,7 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
+  useEffect( () => {
     if ((mode === 'edit' || mode === 'view') && initialData) {
       console.log('UserModal initialData:', initialData);
       const roleId = initialData.role ? String(initialData.role) : '';
@@ -68,14 +68,18 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
         phone: initialData.phone || '',
         gender: initialData.gender || '',
         address: initialData.address || { address: '', ward: '', province: '' },
-        role: { id: roleId }, // ✅ Đảm bảo đúng structure
+        role: { id: roleId },
         userStatus: initialData.userStatus || 'ACTIVE',
         password: 'Abcd1234!',
         confirmPassword: 'Abcd1234!',
       });
 
-      if (initialData.avatarURL) {
-        setAvatarPreview(initialData.avatarURL);
+      // Only set avatar preview if avatarURL exists and is not empty
+      if (initialData.avatarURL && initialData.avatarURL.trim() !== '') {
+        const url = "https://hai-project-images.s3.us-east-1.amazonaws.com/" + initialData.avatarURL;
+        setAvatarPreview(url);
+      } else {
+        setAvatarPreview(null);
       }
     } else if (mode === 'add') {
       setFormData({
@@ -107,6 +111,12 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
         setAvatarPreview(event.target?.result as string);
       };
       reader.readAsDataURL(file);
+      
+      // Store file in formData
+      setFormData(prev => ({
+        ...prev,
+        avatarFile: file
+      }));
     }
   };
 
@@ -115,60 +125,63 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+    setFormData(prev => ({
+      ...prev,
+      avatarFile: undefined
+    }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setLoading(true);
 
-    if (mode === 'add') {
-      dispatch(createUserforAdmin({user: formData}))
-        .unwrap()
-        .then(() => {
-          alert('Thêm người dùng thành công!');
-          onSuccess();
-        })
-        .catch((error) => {
-          console.error('Error creating user:', error);
-          alert(`Lỗi khi thêm người dùng: ${error}`);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } else {
-      // Update existing user
-      if (!initialData?.id) {
-        alert('Lỗi: Không tìm thấy ID người dùng!');
-        setLoading(false);
-        return;
+    try {
+      let avatarFilename = initialData?.avatarURL; 
+            if (formData.avatarFile) {
+        const uploadResponse = await uploadAvatar(formData.avatarFile);
+        avatarFilename = uploadResponse.data.data;
+        console.log('Avatar uploaded:', avatarFilename);
       }
 
-      // ✅ Chuyển đổi từ formData sang updateData format
-      const updateData: UpdateUserParams = {
-        fullName: formData.fullName,
-        phone: formData.phone,
-        gender: formData.gender,
-        email: formData.email,
-        address: formData.address,
-        role: formData.role.id, // ✅ Extract id từ object
-        status: formData.userStatus,
-        avatarURL: avatarPreview || undefined,
-      };
-
-      dispatch(updateUserforAdmin({ id: String(initialData.id), user: updateData }))
-        .unwrap()
-        .then(() => {
-          alert('Cập nhật người dùng thành công!');
-          onSuccess();
-        })
-        .catch((error) => {
-          console.error('Error updating user:', error);
-          alert(`Lỗi khi cập nhật người dùng: ${error}`);
-        })
-        .finally(() => {
+      if (mode === 'add') {
+        const userDataToSubmit = {
+          ...formData,
+          avatarURL: avatarFilename
+        };
+        
+        console.log('Creating user with data:', JSON.stringify(userDataToSubmit, null, 2));
+        await dispatch(createUserforAdmin({user: userDataToSubmit})).unwrap();
+        alert('Thêm người dùng thành công!');
+        onSuccess();
+      } else {
+        // Update existing user
+        if (!initialData?.id) {
+          alert('Lỗi: Không tìm thấy ID người dùng!');
           setLoading(false);
-        });
+          return;
+        }
+
+        const updateData: UpdateUserParams = {
+          fullName: formData.fullName,
+          phone: formData.phone,
+          gender: formData.gender,
+          email: formData.email,
+          address: formData.address,
+          role: formData.role.id,
+          status: formData.userStatus,
+          avatarURL: avatarFilename,
+        };
+
+        await dispatch(updateUserforAdmin({ id: String(initialData.id), user: updateData })).unwrap();
+        alert('Cập nhật người dùng thành công!');
+        onSuccess();
+      }
+    } catch (error: any) {
+      console.error('Error:', error);
+      alert(`Lỗi: ${error?.message || error}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -205,7 +218,15 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
                 flex items-center justify-center text-white text-5xl font-semibold
                 overflow-hidden">
                 {avatarPreview ? (
-                  <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                  <img 
+                    src={avatarPreview} 
+                    alt="Avatar" 
+                    className="w-full h-full object-cover" 
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement!.innerHTML = '<span class="text-white text-5xl font-semibold">👤</span>';
+                    }}
+                  />
                 ) : (
                   <span>👤</span>
                 )}

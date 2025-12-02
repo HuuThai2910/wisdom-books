@@ -27,9 +27,11 @@ public interface UserMapper {
     UserCheckoutReponse toUserCheckoutReponse(User user);
     RegisterResponse toRegisterResponse(User user,String sub);
     User toUserAccount(RegisterRequest request);
-    @Mapping(target = "role",ignore = true)
+    
+    @Mapping(target = "role", ignore = true)
     User toUser(CreateUserRequest request);
-    @Mapping(target = "email",ignore = true)
+    
+    @Mapping(target = "email", ignore = true)
     @Mapping(target = "role",ignore = true)
     User toUpdateUser(UpdateUserRequest request,@MappingTarget User user);
 

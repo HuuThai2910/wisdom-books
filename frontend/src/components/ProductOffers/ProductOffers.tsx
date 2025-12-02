@@ -27,7 +27,7 @@ const offers = [
 
 export default function ProductOffers() {
     return (
-        <section className="bg-gray-50 py-16">
+        <section className="bg-gray-50 py-16 px-35 border-0">
             <div className="container mx-auto px-6 grid md:grid-cols-2 gap-8">
                 {offers.map((offer, i) => (
                     <MotionLink
@@ -39,7 +39,7 @@ export default function ProductOffers() {
                         viewport={{ once: true }}
                         className="
                             flex items-center justify-between
-                            bg-white rounded-xl shadow-md p-8 border
+                            bg-white rounded-xl shadow-md p-8 border border-gray-200
                             hover:shadow-lg transition group
                         "
                     >
@@ -59,7 +59,7 @@ export default function ProductOffers() {
                             src={offer.image}
                             alt={offer.title}
                             className="
-                                w-52 h-52
+                                w-42 h-42
                                 object-cover object-center
                                 rounded-xl border border-gray-200 shadow-md
                                 transform transition-transform duration-500 ease-out

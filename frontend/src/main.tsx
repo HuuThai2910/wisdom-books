@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+// import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
@@ -10,15 +10,16 @@ import Footer from "./components/Footer/Footer.js";
 import { BookProvider } from "./contexts/BookContext";
 
 createRoot(document.getElementById("root")!).render(
-    <StrictMode>
-        <Provider store={store}>
-            <BookProvider>
-                <BrowserRouter>
-                    <Header />
-                    <App />
-                    <Footer />
-                </BrowserRouter>
-            </BookProvider>
-        </Provider>
+    // StrictMode causes double render in development - uncomment for production
+    // <StrictMode>
+    <Provider store={store}>
+        <BookProvider>
+            <BrowserRouter>
+                <Header />
+                <App />
+                <Footer />
+            </BrowserRouter>
+        </BookProvider>
+    </Provider>
     // </StrictMode>
 );

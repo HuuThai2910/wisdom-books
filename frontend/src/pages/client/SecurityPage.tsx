@@ -4,8 +4,12 @@ import {
     FaCheckCircle,
     FaExclamationTriangle,
     FaEye,
+    FaShieldAlt,
+    FaUserShield,
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer/Footer";
 
 // 🟦 IMPORT DỮ LIỆU
 import {
@@ -16,27 +20,70 @@ import {
 } from "../../data/service/security";
 
 export default function SecurityPage() {
+    const floatAnimation = {
+        y: [-10, 10],
+        transition: {
+            duration: 2,
+            repeat: Infinity,
+            repeatType: "reverse" as const,
+            ease: "easeInOut",
+        },
+    };
+
     return (
-        <div className="min-h-screen wisbook-gradient-overlay pt-20">
-            {/* HEADER */}
+        <div className="min-h-screen bg-gray-50">
+            <Header />
+
+            {/* HEADER với floating animations */}
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.8 }}
-                className="relative wisbook-card-gradient text-gray-800 py-20 overflow-hidden"
+                className="relative bg-blue-600 text-white py-24 overflow-hidden"
             >
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-10 left-20 text-8xl">🔒</div>
-                    <div className="absolute bottom-10 right-20 text-8xl">
-                        🛡️
-                    </div>
-                    <div className="absolute top-1/3 right-1/4 text-6xl">
-                        🔐
-                    </div>
-                    <div className="absolute bottom-1/3 left-1/4 text-6xl">
-                        🔑
-                    </div>
-                </div>
+                {/* Floating decorations */}
+                <motion.div
+                    className="absolute top-10 left-10 text-7xl opacity-30"
+                    animate={floatAnimation}
+                >
+                    🔒
+                </motion.div>
+                <motion.div
+                    className="absolute top-20 right-20 text-6xl opacity-20"
+                    animate={{
+                        ...floatAnimation,
+                        transition: {
+                            ...floatAnimation.transition,
+                            delay: 0.3,
+                        },
+                    }}
+                >
+                    📚
+                </motion.div>
+                <motion.div
+                    className="absolute bottom-10 left-1/4 text-5xl opacity-25"
+                    animate={{
+                        ...floatAnimation,
+                        transition: {
+                            ...floatAnimation.transition,
+                            delay: 0.6,
+                        },
+                    }}
+                >
+                    🛡️
+                </motion.div>
+                <motion.div
+                    className="absolute bottom-20 right-1/3 text-8xl opacity-15"
+                    animate={{
+                        ...floatAnimation,
+                        transition: {
+                            ...floatAnimation.transition,
+                            delay: 0.9,
+                        },
+                    }}
+                >
+                    🔐
+                </motion.div>
 
                 <div className="container mx-auto px-4 relative z-10">
                     <motion.div
@@ -48,30 +95,32 @@ export default function SecurityPage() {
                         <motion.div
                             animate={{ scale: [1, 1.1, 1] }}
                             transition={{ duration: 2, repeat: Infinity }}
+                            className="inline-block"
                         >
-                            <FaLock className="text-6xl mx-auto mb-6" />
+                            <FaLock className="text-7xl mx-auto mb-6" />
                         </motion.div>
 
-                        <h1 className="text-5xl font-bold mb-4">
+                        <h1 className="text-6xl font-bold mb-4">
                             Mua Sắm An Toàn
                         </h1>
 
-                        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                            Bảo mật thông tin khách hàng – Cam kết bảo vệ quyền
-                            riêng tư tuyệt đối
+                        <p className="text-2xl max-w-2xl mx-auto opacity-90">
+                            🔒 Bảo mật thông tin khách hàng – Cam kết bảo vệ
+                            quyền riêng tư tuyệt đối
                         </p>
                     </motion.div>
                 </div>
             </motion.div>
 
             <div className="container mx-auto px-4 py-16">
-                {/* SECURITY PILLARS */}
+                {/* SECURITY PILLARS với book theme */}
                 <motion.div className="mb-16">
-                    <h2 className="text-3xl font-bold mb-10 text-center wisbook-gradient-text">
-                        4 Trụ Cột Bảo Mật
+                    <h2 className="text-4xl font-bold mb-12 text-center text-gray-800 flex items-center justify-center gap-3">
+                        <FaShieldAlt className="text-blue-600" />4 Trụ Cột Bảo
+                        Mật
                     </h2>
 
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="grid md:grid-cols-2 gap-8">
                         {securityPillars.map((pillar, i) => {
                             const Icon = pillar.icon;
 
@@ -80,41 +129,92 @@ export default function SecurityPage() {
                                     key={i}
                                     initial={{ opacity: 0, y: 30 }}
                                     whileInView={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.1 }}
-                                    className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl"
+                                    viewport={{ once: true }}
+                                    transition={{
+                                        delay: i * 0.1,
+                                        type: "spring",
+                                    }}
+                                    whileHover={{
+                                        scale: 1.03,
+                                        y: -5,
+                                        boxShadow:
+                                            "0 20px 40px rgba(37, 99, 235, 0.2)",
+                                    }}
+                                    className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-transparent hover:border-blue-600 transition-all relative group"
                                 >
-                                    <div
-                                        className={`bg-gradient-to-r ${pillar.color} p-6 text-white`}
+                                    {/* Book decoration */}
+                                    <motion.div
+                                        className="absolute top-3 right-3 text-4xl opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                        animate={{ rotate: [0, 10, -10, 0] }}
+                                        transition={{
+                                            duration: 2,
+                                            repeat: Infinity,
+                                        }}
                                     >
-                                        <div className="flex items-center gap-4">
-                                            <div className="text-5xl">
+                                        📚
+                                    </motion.div>
+
+                                    <div className="bg-blue-600 p-8 text-white relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 opacity-50" />
+
+                                        <div className="flex items-center gap-4 relative z-10">
+                                            <motion.div
+                                                className="text-6xl"
+                                                animate={{ rotateY: [0, 360] }}
+                                                transition={{
+                                                    duration: 20,
+                                                    repeat: Infinity,
+                                                    ease: "linear",
+                                                    delay: i * 0.5,
+                                                }}
+                                            >
                                                 <Icon />
-                                            </div>
+                                            </motion.div>
                                             <div>
-                                                <h3 className="text-2xl font-bold">
+                                                <h3 className="text-3xl font-bold">
                                                     {pillar.title}
                                                 </h3>
-                                                <p className="text-sm opacity-90">
+                                                <p className="text-sm opacity-90 mt-1">
                                                     {pillar.desc}
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="p-6">
-                                        <ul className="space-y-3">
+                                    <div className="p-8 relative">
+                                        <ul className="space-y-4">
                                             {pillar.details.map(
                                                 (detail, idx) => (
-                                                    <li
+                                                    <motion.li
                                                         key={idx}
-                                                        className="flex items-start gap-2 text-gray-700"
+                                                        initial={{
+                                                            opacity: 0,
+                                                            x: -10,
+                                                        }}
+                                                        whileInView={{
+                                                            opacity: 1,
+                                                            x: 0,
+                                                        }}
+                                                        viewport={{
+                                                            once: true,
+                                                        }}
+                                                        transition={{
+                                                            delay: idx * 0.1,
+                                                        }}
+                                                        whileHover={{ x: 5 }}
+                                                        className="flex items-start gap-3 text-gray-700"
                                                     >
-                                                        <FaCheckCircle className="wisbook-gradient-text mt-1" />
-                                                        {detail}
-                                                    </li>
+                                                        <FaCheckCircle className="text-blue-600 mt-1 text-lg shrink-0" />
+                                                        <span className="leading-relaxed">
+                                                            📖 {detail}
+                                                        </span>
+                                                    </motion.li>
                                                 )
                                             )}
                                         </ul>
+
+                                        {/* Hover background */}
+                                        <div className="absolute inset-0 bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity -z-10" />
                                     </div>
                                 </motion.div>
                             );
@@ -122,26 +222,56 @@ export default function SecurityPage() {
                     </div>
                 </motion.div>
 
-                {/* DATA PROTECTION */}
-                <motion.div className="bg-white rounded-xl shadow-xl p-8 mb-16">
-                    <h2 className="text-3xl font-bold mb-10 text-center wisbook-gradient-text">
+                {/* DATA PROTECTION với book theme */}
+                <motion.div className="bg-white rounded-2xl shadow-2xl p-10 mb-16 border border-blue-100">
+                    <h2 className="text-4xl font-bold mb-12 text-center text-gray-800 flex items-center justify-center gap-3">
+                        <FaUserShield className="text-blue-600" />
                         Cam Kết Bảo Vệ Dữ Liệu
                     </h2>
 
-                    <div className="grid md:grid-cols-4 gap-6">
+                    <div className="grid md:grid-cols-4 gap-8">
                         {dataProtection.map((item, i) => (
                             <motion.div
                                 key={i}
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: i * 0.1 }}
-                                className="text-center p-6 border-2 border-purple-100 rounded-lg"
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.1, type: "spring" }}
+                                whileHover={{
+                                    scale: 1.1,
+                                    y: -10,
+                                    boxShadow:
+                                        "0 15px 30px rgba(37, 99, 235, 0.2)",
+                                }}
+                                className="text-center p-8 border-2 border-transparent hover:border-blue-600 rounded-2xl bg-blue-50 hover:bg-blue-100 transition-all cursor-pointer relative group"
                             >
-                                <div className="text-5xl mb-4">{item.icon}</div>
-                                <h3 className="text-lg font-bold">
+                                <motion.div
+                                    className="absolute top-2 right-2 text-2xl opacity-0 group-hover:opacity-100 transition-opacity"
+                                    animate={{ rotate: [0, 360] }}
+                                    transition={{
+                                        duration: 4,
+                                        repeat: Infinity,
+                                        ease: "linear",
+                                    }}
+                                >
+                                    📚
+                                </motion.div>
+
+                                <motion.div
+                                    className="text-6xl mb-4 inline-block"
+                                    animate={{ y: [0, -5, 0] }}
+                                    transition={{
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        delay: i * 0.3,
+                                    }}
+                                >
+                                    {item.icon}
+                                </motion.div>
+                                <h3 className="text-xl font-bold text-gray-800 mb-2">
                                     {item.title}
                                 </h3>
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-gray-600 leading-relaxed">
                                     {item.desc}
                                 </p>
                             </motion.div>
@@ -171,12 +301,17 @@ export default function SecurityPage() {
                                             key={i}
                                             initial={{ opacity: 0, x: -20 }}
                                             whileInView={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: i * 0.1 }}
-                                            className="flex gap-3 p-4 bg-blue-50 border-l-4 border-blue-400 rounded"
+                                            viewport={{ once: true }}
+                                            transition={{
+                                                delay: i * 0.1,
+                                                type: "spring",
+                                            }}
+                                            whileHover={{ scale: 1.02, x: 5 }}
+                                            className="flex gap-4 p-5 bg-blue-50 border-l-4 border-blue-600 rounded-r-xl hover:bg-blue-100 transition-all cursor-pointer shadow-sm"
                                         >
-                                            <Icon className="text-green-600 text-xl" />
-                                            <p className="text-gray-700">
-                                                {tip.tip}
+                                            <Icon className="text-blue-600 text-2xl shrink-0" />
+                                            <p className="text-gray-800 leading-relaxed">
+                                                📖 {tip.tip}
                                             </p>
                                         </motion.div>
                                     );
@@ -185,7 +320,7 @@ export default function SecurityPage() {
 
                         {/* DON'T */}
                         <div>
-                            <h3 className="text-xl font-bold text-red-700 mb-4 flex gap-2">
+                            <h3 className="text-2xl font-bold text-red-700 mb-6 flex gap-3 items-center">
                                 <FaExclamationTriangle /> KHÔNG NÊN LÀM
                             </h3>
 
@@ -198,12 +333,17 @@ export default function SecurityPage() {
                                             key={i}
                                             initial={{ opacity: 0, x: 20 }}
                                             whileInView={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: i * 0.1 }}
-                                            className="flex gap-3 p-4 bg-red-50 border-l-4 border-red-500 rounded"
+                                            viewport={{ once: true }}
+                                            transition={{
+                                                delay: i * 0.1,
+                                                type: "spring",
+                                            }}
+                                            whileHover={{ scale: 1.02, x: -5 }}
+                                            className="flex gap-4 p-5 bg-red-50 border-l-4 border-red-600 rounded-r-xl hover:bg-red-100 transition-all cursor-pointer shadow-sm"
                                         >
-                                            <Icon className="text-red-600 text-xl" />
-                                            <p className="text-gray-700">
-                                                {tip.tip}
+                                            <Icon className="text-red-600 text-2xl shrink-0" />
+                                            <p className="text-gray-800 leading-relaxed">
+                                                ⛔ {tip.tip}
                                             </p>
                                         </motion.div>
                                     );
@@ -212,100 +352,162 @@ export default function SecurityPage() {
                     </div>
                 </motion.div>
 
-                {/* CERTIFICATIONS */}
-                <motion.div className="bg-white border-2 border-purple-100 rounded-xl p-8 mb-16">
-                    <h2 className="text-3xl font-bold mb-10 text-center wisbook-gradient-text">
-                        Chứng Nhận & Tiêu Chuẩn
+                {/* CERTIFICATIONS với book theme */}
+                <motion.div className="bg-white border-2 border-blue-100 rounded-2xl p-10 mb-16 shadow-xl">
+                    <h2 className="text-4xl font-bold mb-12 text-center text-gray-800">
+                        🏆 Chứng Nhận & Tiêu Chuẩn
                     </h2>
 
-                    <div className="grid md:grid-cols-4 gap-6">
+                    <div className="grid md:grid-cols-4 gap-8">
                         {certifications.map((cert, i) => (
                             <motion.div
                                 key={i}
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.1 }}
-                                className={`${cert.color} p-6 rounded-lg text-center`}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.1, type: "spring" }}
+                                whileHover={{
+                                    scale: 1.1,
+                                    y: -10,
+                                    boxShadow:
+                                        "0 15px 30px rgba(37, 99, 235, 0.2)",
+                                }}
+                                className="bg-gradient-to-br from-blue-50 to-white p-8 rounded-2xl text-center border-2 border-blue-200 hover:border-blue-600 transition-all cursor-pointer relative group"
                             >
-                                <div className="text-4xl mb-3">🏆</div>
-                                <h3 className="font-bold text-lg">
+                                <motion.div
+                                    animate={{ rotate: [0, 10, -10, 0] }}
+                                    transition={{
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        delay: i * 0.3,
+                                    }}
+                                    className="text-5xl mb-4"
+                                >
+                                    🏆
+                                </motion.div>
+                                <h3 className="font-bold text-xl text-gray-800 mb-2">
                                     {cert.name}
                                 </h3>
-                                <p className="text-sm">{cert.desc}</p>
+                                <p className="text-sm text-gray-600 leading-relaxed">
+                                    {cert.desc}
+                                </p>
                             </motion.div>
                         ))}
                     </div>
                 </motion.div>
 
-                {/* MONITORING */}
-                <motion.div className="bg-white border-2 border-purple-100 rounded-lg p-8 mb-16">
-                    <div className="flex gap-6">
-                        <FaEye className="text-6xl" />
+                {/* MONITORING với book theme */}
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="bg-white border-2 border-blue-100 rounded-2xl p-10 mb-16 shadow-xl"
+                >
+                    <div className="flex gap-8 items-start">
+                        <motion.div
+                            animate={{ scale: [1, 1.1, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                        >
+                            <FaEye className="text-7xl text-blue-600" />
+                        </motion.div>
                         <div>
-                            <h2 className="text-2xl font-bold mb-4">
+                            <h2 className="text-3xl font-bold mb-4 text-gray-800">
                                 Giám Sát 24/7
                             </h2>
 
-                            <p className="text-gray-700 mb-4">
+                            <p className="text-gray-700 mb-6 leading-relaxed text-lg">
                                 Hệ thống giám sát bảo mật hoạt động liên tục,
                                 phát hiện và ngăn chặn các mối đe dọa.
                             </p>
 
-                            <ul className="space-y-2 text-gray-700">
-                                <li className="flex gap-2">
-                                    <FaCheckCircle className="text-blue-600" />{" "}
-                                    Phát hiện xâm nhập tự động (IDS/IPS)
-                                </li>
-                                <li className="flex gap-2">
-                                    <FaCheckCircle className="text-blue-600" />{" "}
-                                    Sao lưu dữ liệu hàng ngày
-                                </li>
-                                <li className="flex gap-2">
-                                    <FaCheckCircle className="text-blue-600" />{" "}
-                                    Cập nhật bảo mật liên tục
-                                </li>
+                            <ul className="space-y-3">
+                                <motion.li
+                                    className="flex gap-3 items-center text-gray-700"
+                                    whileHover={{ x: 5 }}
+                                >
+                                    <FaCheckCircle className="text-blue-600 text-xl" />
+                                    <span className="text-lg">
+                                        📖 Phát hiện xâm nhập tự động (IDS/IPS)
+                                    </span>
+                                </motion.li>
+                                <motion.li
+                                    className="flex gap-3 items-center text-gray-700"
+                                    whileHover={{ x: 5 }}
+                                >
+                                    <FaCheckCircle className="text-blue-600 text-xl" />
+                                    <span className="text-lg">
+                                        📖 Sao lưu dữ liệu hàng ngày
+                                    </span>
+                                </motion.li>
+                                <motion.li
+                                    className="flex gap-3 items-center text-gray-700"
+                                    whileHover={{ x: 5 }}
+                                >
+                                    <FaCheckCircle className="text-blue-600 text-xl" />
+                                    <span className="text-lg">
+                                        📖 Cập nhật bảo mật liên tục
+                                    </span>
+                                </motion.li>
                             </ul>
                         </div>
                     </div>
                 </motion.div>
 
-                {/* CONTACT BLOCK */}
-                <motion.div className="bg-white rounded-xl shadow-xl p-8 text-center">
-                    <h2 className="text-2xl font-bold mb-4 text-blue-600">
+                {/* CONTACT BLOCK với book theme */}
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-2xl p-10 text-center mb-16 border-2 border-blue-200"
+                >
+                    <h2 className="text-3xl font-bold mb-4 text-blue-600">
                         Phát hiện vấn đề bảo mật?
                     </h2>
 
-                    <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                    <p className="text-gray-700 mb-6 max-w-2xl mx-auto text-lg leading-relaxed">
                         Nếu bạn phát hiện bất kỳ lỗ hổng hoặc nghi ngờ tài khoản
-                        bị xâm nhập, hãy liên hệ ngay.
+                        bị xâm phạm, vui lòng liên hệ ngay:
                     </p>
 
-                    <div className="flex flex-wrap justify-center gap-4">
-                        <button className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg shadow-lg">
-                            Báo cáo sự cố bảo mật
-                        </button>
-
-                        <button className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-lg shadow-lg">
-                            security@wisdombooks.vn
-                        </button>
-                    </div>
+                    <motion.a
+                        href="mailto:security@wisbook.com"
+                        className="inline-flex items-center gap-3 bg-blue-600 text-white font-bold px-10 py-4 rounded-full shadow-xl hover:shadow-2xl hover:bg-blue-700 transition-all"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        <span>📧 security@wisbook.com</span>
+                    </motion.a>
                 </motion.div>
 
                 {/* BACK BUTTON */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mt-12"
+                    className="text-center"
                 >
-                    <Link
-                        to="/"
-                        className="inline-block wisbook-btn-gradient font-semibold px-8 py-3 rounded-lg shadow-lg"
+                    <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
                     >
-                        Quay lại trang chủ
-                    </Link>
+                        <Link
+                            to="/"
+                            className="inline-flex items-center gap-3 bg-blue-600 text-white font-bold px-10 py-4 rounded-full shadow-xl hover:shadow-2xl hover:bg-blue-700 transition-all group"
+                        >
+                            <span>Quay lại trang chủ</span>
+                            <motion.span
+                                animate={{ x: [0, -5, 0] }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                            >
+                                🏠
+                            </motion.span>
+                        </Link>
+                    </motion.div>
                 </motion.div>
             </div>
+
+            <Footer />
         </div>
     );
 }

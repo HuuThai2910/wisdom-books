@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { useAppDispatch } from "../../app/store";
 import { addItem } from "../../features/cart/cartSlice";
 
-
 interface BookCardProps {
     book: Book;
     index?: number;
@@ -29,7 +28,7 @@ export default function BookCard({
             })
         );
     };
-    
+
     const imageUrl =
         book.bookImage && book.bookImage.length > 0
             ? `https://hai-project-images.s3.us-east-1.amazonaws.com/${book.bookImage[0].imagePath}`
@@ -91,7 +90,7 @@ export default function BookCard({
                         Tác giả: {book.author}
                     </p>
                     <Link to={`/books/${book.id}`}>
-                        <p className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 h-14 hover:text-blue-600 transition-colors">
+                        <p className="text-base font-semibold text-gray-900 mb-2 truncate hover:text-blue-600 transition-colors">
                             {book.title}
                         </p>
                     </Link>
@@ -114,7 +113,7 @@ export default function BookCard({
                     <div className="flex justify-center mb-4">
                         <button
                             onClick={() => handleAddToCart(book.id)}
-                            className="inline-flex items-center justify-center gap-2 font-semibold rounded-full py-2 px-6 transition-all duration-500 bg-blue-600 hover:bg-orange-600 text-white hover:scale-[1.05]"
+                            className="inline-flex items-center justify-center gap-2 font-semibold rounded-full py-2 px-6 transition-all duration-500 bg-blue-600 hover:bg-red-500 text-white hover:scale-[1.05]"
                         >
                             <FaShoppingCart className="text-base" />
                             <span>Thêm giỏ hàng</span>
