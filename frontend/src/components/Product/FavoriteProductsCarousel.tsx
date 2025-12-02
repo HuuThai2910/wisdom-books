@@ -34,7 +34,7 @@ const InnerCarousel = ({ books }: { books: Book[] }) => {
 
     return (
         <div
-            className="productImg-carousel productList-item relative"
+            className="productImg-carousel productList-item relative group"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -43,16 +43,20 @@ const InnerCarousel = ({ books }: { books: Book[] }) => {
                 <>
                     <button
                         onClick={prevProduct}
-                        className={`absolute top-0 left-0 z-20 px-3 py-1 wisbook-btn-gradient rounded-full transition-all duration-300 ${
-                            isHovered ? "opacity-100" : "opacity-0"
+                        className={`absolute top-2 left-2 z-20 w-8 h-8 bg-white/90 hover:bg-blue-600 text-blue-600 hover:text-white rounded-full shadow-lg transition-all duration-300 flex items-center justify-center ${
+                            isHovered
+                                ? "opacity-100 scale-100"
+                                : "opacity-0 scale-75"
                         }`}
                     >
                         <FaArrowLeft className="text-sm" />
                     </button>
                     <button
                         onClick={nextProduct}
-                        className={`absolute top-0 right-0 z-20 px-3 py-1 wisbook-btn-gradient rounded-full transition-all duration-300 ${
-                            isHovered ? "opacity-100" : "opacity-0"
+                        className={`absolute top-2 right-2 z-20 w-8 h-8 bg-white/90 hover:bg-blue-600 text-blue-600 hover:text-white rounded-full shadow-lg transition-all duration-300 flex items-center justify-center ${
+                            isHovered
+                                ? "opacity-100 scale-100"
+                                : "opacity-0 scale-75"
                         }`}
                     >
                         <FaArrowRight className="text-sm" />
@@ -63,14 +67,12 @@ const InnerCarousel = ({ books }: { books: Book[] }) => {
             {/* Product Display */}
             <motion.div
                 key={currentIndex}
-                initial={{ opacity: 0, x: 100, scale: 0.95 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: -100, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
                 transition={{
-                    type: "spring",
-                    stiffness: 80,
-                    damping: 15,
-                    mass: 0.8,
+                    duration: 0.5,
+                    ease: [0.4, 0, 0.2, 1],
                 }}
             >
                 <BookCard
@@ -158,24 +160,31 @@ export default function FavoriteProductsCarousel({
     }, [productListData.length, currentGroupIndex, isHoveringOuterCarousel]);
 
     return (
-        <section className="products productList overflow-hidden bg-gray-50 py-10 px-35">
+        <section className="products productList overflow-hidden bg-gradient-to-b from-gray-50 to-white py-16 px-25">
             <div className="container mx-auto px-6">
                 {/* Header */}
-                <div className="mx-auto text-center mb-12 max-w-3xl">
-                    <motion.h4
+                <div className="mx-auto text-center mb-16 max-w-3xl">
+                    <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
-                        className="text-blue-500 text-3xl font-bold mb-2 pb-2 border-b-2 border-blue-500 inline-block rounded-b-lg"
-                        style={{
-                            fontFamily: "Playfair Display, serif",
-                            fontStyle: "italic",
-                            color: "#3b82f6",
-                            textShadow: "2px 4px 8px rgba(0,0,0,0.25)",
-                        }}
+                        className="inline-block"
                     >
-                        Sản Phẩm Được Yêu Thích
-                    </motion.h4>
+                        <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg mb-4 inline-block">
+                            ⭐ YÊU THÍCH
+                        </span>
+                        <h4
+                            className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 bg-clip-text text-transparent"
+                            style={{
+                                fontFamily: "Playfair Display, serif",
+                            }}
+                        >
+                            Sản Phẩm Được Yêu Thích
+                        </h4>
+                        <p className="text-gray-600 text-lg">
+                            Những cuốn sách được độc giả tin yêu nhất
+                        </p>
+                    </motion.div>
                 </div>
 
                 {/* Outer Carousel Container */}
@@ -193,15 +202,15 @@ export default function FavoriteProductsCarousel({
                             <>
                                 <button
                                     onClick={prevGroup}
-                                    className="absolute -top-10 left-0 z-30 px-10 py-2 wisbook-btn-gradient rounded-full transition-all duration-300 flex items-center gap-2"
+                                    className="absolute -top-16 left-0 z-30 w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-600 text-white rounded-full shadow-lg hover:shadow-blue-600/50 transition-all duration-300 flex items-center justify-center hover:scale-110"
                                 >
-                                    <FaChevronLeft />
+                                    <FaChevronLeft className="text-lg" />
                                 </button>
                                 <button
                                     onClick={nextGroup}
-                                    className="absolute -top-10 right-0 z-30 px-10 py-2 wisbook-btn-gradient rounded-full transition-all duration-300 flex items-center gap-2"
+                                    className="absolute -top-16 right-0 z-30 w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-600 text-white rounded-full shadow-lg hover:shadow-blue-600/50 transition-all duration-300 flex items-center justify-center hover:scale-110"
                                 >
-                                    <FaChevronRight />
+                                    <FaChevronRight className="text-lg" />
                                 </button>
                             </>
                         )}
@@ -209,16 +218,14 @@ export default function FavoriteProductsCarousel({
                         {/* Products Grid (Current Group) */}
                         <motion.div
                             key={currentGroupIndex}
-                            initial={{ opacity: 0, x: "100%" }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: "-100%" }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
                             transition={{
-                                type: "spring",
-                                stiffness: 70,
-                                damping: 18,
-                                mass: 1,
+                                duration: 0.6,
+                                ease: [0.4, 0, 0.2, 1],
                             }}
-                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-8"
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
                         >
                             {productListData[currentGroupIndex].map(
                                 (booksArray, idx) => (

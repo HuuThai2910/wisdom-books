@@ -75,6 +75,15 @@ export default function BookCard({
                         />
                     </div>
 
+                    {/* Out of Stock Badge */}
+                    {(!book.quantity || book.quantity <= 0) && (
+                        <div className="absolute top-0 right-0 overflow-hidden w-24 h-24 pointer-events-none">
+                            <div className="absolute top-6 -right-6 bg-red-600 text-white text-xs font-bold px-10 py-1 rotate-45 shadow-lg whitespace-nowrap">
+                                HẾT HÀNG
+                            </div>
+                        </div>
+                    )}
+
                     {/* Quick View Icon */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-500 bg-black/30">
                         <div className="flex items-center gap-3">

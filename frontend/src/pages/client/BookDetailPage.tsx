@@ -322,27 +322,7 @@ export default function BookDetailPage() {
                             {book.title}
                         </h1>
 
-                        <div className="flex items-center gap-4 mb-5">
-                            <div className="flex items-center gap-1">
-                                {[...Array(5)].map((_, i) => (
-                                    <FaStar
-                                        key={i}
-                                        className={`text-base ${
-                                            i < Math.floor(averageRating)
-                                                ? "text-yellow-400"
-                                                : "text-gray-300"
-                                        }`}
-                                    />
-                                ))}
-                            </div>
-                            <span className="text-sm text-gray-600">
-                                {averageRating > 0
-                                    ? `${averageRating.toFixed(
-                                          1
-                                      )} (${reviewCount} đánh giá)`
-                                    : "(Chưa có đánh giá)"}
-                            </span>
-                        </div>
+                       
 
                         <div className="mb-5">
                             <div className="flex items-baseline gap-3 mb-2">

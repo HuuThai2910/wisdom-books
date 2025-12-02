@@ -112,10 +112,21 @@ export default function CategoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-10">
+    <div className="min-h-screen bg-gray-50 pt-1">
       {/* Banner */}
       {/* FULL-BLEED WRAPPER */}
-      <div className="relative mt-20 left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen py-10 bg-transparent overflow-hidden">
+      <div className="relative mt-20 left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen py-10 overflow-hidden">
+        {/* Blurred background image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ 
+            backgroundImage: `url(${bannerImage})`,
+            filter: 'blur(20px)',
+            transform: 'scale(1.1)'
+          }}
+        />
+        <div className="absolute inset-0 bg-black/20" />
+        
         {/* CENTERED BANNER WITH ROUNDED CORNERS */}
         {/* LEFT + RIGHT DECORATION */}
         <motion.img
@@ -128,7 +139,7 @@ export default function CategoryPage() {
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="absolute left-[7%] top-1/2 -translate-y-1/2 w-[180px] rounded-sm pointer-events-none select-none opacity-90"
+          className="absolute left-[4%] top-1/2 -translate-y-1/2 w-[170px] rounded-sm pointer-events-none select-none opacity-90"
         />
 
         <motion.img
@@ -141,7 +152,7 @@ export default function CategoryPage() {
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="absolute right-[7%] top-1/2 -translate-y-1/2 w-[180px] rounded-sm pointer-events-none select-none opacity-90"
+          className="absolute right-[4%] top-1/2 -translate-y-1/2 w-[170px] rounded-sm pointer-events-none select-none opacity-90"
         />
         <motion.div
           initial={{ opacity: 0, y: 50, scale: 0.95 }}
@@ -154,7 +165,7 @@ export default function CategoryPage() {
             duration: 1,
             ease: [0.22, 1, 0.36, 1],
           }}
-          className="relative mx-auto w-[90%] max-w-[1200px] h-[600px] rounded-xl overflow-hidden shadow-2xl"
+          className="relative mx-auto w-[70%] max-w-[1200px] h-[600px] rounded-xl overflow-hidden shadow-2xl"
         >
           {/* Animated background gradient */}
           <motion.div

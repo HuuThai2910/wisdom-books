@@ -117,7 +117,11 @@ function App() {
                     />
                     <Route
                         path="/category/:categoryName"
-                        element={<CategoryPage />}
+                        element={
+                            <ClientLayout>
+                                <CategoryPage />
+                            </ClientLayout>
+                        }
                     />
                     <Route
                         path="/checkout"
@@ -199,7 +203,7 @@ function App() {
                             </ClientLayout>
                         }
                     />
-                     <Route
+                    <Route
                         path="/orders"
                         element={
                             <ClientLayout>
@@ -207,10 +211,7 @@ function App() {
                             </ClientLayout>
                         }
                     />
-                    <Route
-                        path="/settings"
-                        element={<SettingsPage />}
-                    />
+                    <Route path="/settings" element={<SettingsPage />} />
 
                     <Route path="/admin/books" element={<BookManagement />} />
                     <Route
@@ -227,10 +228,7 @@ function App() {
                     />
                     <Route path="/admin/dashboard" element={<Dashboard />} />
                     <Route path="/admin/profile" element={<AdminProfile />} />
-                    <Route
-                        path="/admin/users"
-                        element={<ManageUserPage />}
-                    />
+                    <Route path="/admin/users" element={<ManageUserPage />} />
                     <Route path="/admin/user-form" element={<UserFormPage />} />
                     <Route
                         path="/admin/user-form/:id"
