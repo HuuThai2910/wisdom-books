@@ -49,11 +49,24 @@ export default function CreateImportModal({
   const fetchAllBooks = async () => {
     try {
       setLoadingBooks(true);
+
+      // Build filter query similar to WarehousePage
+      const filterParts: string[] = [];
+
+      // Search by title or ISBN if searchKeyword exists
+      if (searchKeyword.trim()) {
+        filterParts.push(
+          `(title~'*${searchKeyword}*' or isbn~'*${searchKeyword}*')`
+        );
+      }
+
+      const filterQuery = filterParts.join(" and ");
+
       const response = await bookApi.getAllBooks({
         page: bookCurrentPage,
         size: bookPageSize,
         sort: "quantity,asc",
-        filter: undefined,
+        filter: filterQuery || undefined,
       });
 
       if (response.data) {
@@ -82,22 +95,19 @@ export default function CreateImportModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, bookCurrentPage, bookPageSize]);
 
+  // Fetch books when search keyword changes with debounce
   useEffect(() => {
-    if (!searchKeyword.trim()) {
-      setFilteredBooks(allBooks);
-      return;
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        setBookCurrentPage(0); // Reset to first page when searching
+        fetchAllBooks();
+      }, 500);
+      return () => clearTimeout(timer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchKeyword]);
 
-    const keyword = searchKeyword.toLowerCase();
-    const filtered = allBooks.filter(
-      (book) =>
-        book.isbn.toLowerCase().includes(keyword) ||
-        book.title.toLowerCase().includes(keyword) ||
-        book.author?.toLowerCase().includes(keyword) ||
-        book.publisher?.toLowerCase().includes(keyword)
-    );
-    setFilteredBooks(filtered);
-  }, [searchKeyword, allBooks]);
+  // Removed local filtering since we now filter on server side via API
 
   const fetchTotalInventory = async () => {
     try {
@@ -131,9 +141,29 @@ export default function CreateImportModal({
     }
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Fetch all books first for validation
+    let allBooksForValidation: ApiBook[] = [];
+    try {
+      const response = await bookApi.getAllBooks({
+        page: 0,
+        size: 10000, // Get all books
+        sort: "quantity,asc",
+        filter: undefined,
+      });
+      if (response.data) {
+        allBooksForValidation = response.data.result || [];
+      }
+    } catch (error) {
+      console.error("Error fetching books for validation:", error);
+      toast.error("Không thể tải danh sách sách để kiểm tra");
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -224,15 +254,6 @@ export default function CreateImportModal({
             errors.push(`Hàng ${i + 1}: Tên sách quá dài (tối đa 500 ký tự)`);
             continue;
           }
-          // Kiểm tra ký tự đặc biệt nguy hiểm trong tên sách
-          if (/[<>"'`;\\]/.test(title)) {
-            errors.push(
-              `Hàng ${
-                i + 1
-              }: Tên sách chứa ký tự đặc biệt không cho phép (< > " ' \` ; \\)`
-            );
-            continue;
-          }
 
           // Validate year
           if (!yearStr) {
@@ -295,8 +316,8 @@ export default function CreateImportModal({
             continue;
           }
 
-          // Tìm sách trong danh sách allBooks
-          const bookInDb = allBooks.find((b) => b.isbn === isbn);
+          // Tìm sách trong danh sách allBooksForValidation
+          const bookInDb = allBooksForValidation.find((b) => b.isbn === isbn);
           if (!bookInDb) {
             errors.push(`Hàng ${i + 1}: Không tìm thấy sách có ISBN ${isbn}`);
             continue;

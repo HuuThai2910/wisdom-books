@@ -128,7 +128,7 @@ const UserFormPage = () => {
         .catch((error) => {
           console.error("Error fetching user:", error);
           toast.error("Lỗi khi tải thông tin người dùng!");
-          navigate("/admin/manage-users");
+          navigate("/admin/users");
         })
         .finally(() => {
           setLoadingData(false);
@@ -275,7 +275,7 @@ const UserFormPage = () => {
 
         await dispatch(createUserforAdmin({ user: userDataToSubmit })).unwrap();
         toast.success("Thêm người dùng thành công!");
-        navigate("/admin/manage-users");
+        navigate("/admin/users");
       } else if (mode === "edit") {
         if (!id) {
           toast.error("Lỗi: Không tìm thấy ID người dùng!");
@@ -296,7 +296,7 @@ const UserFormPage = () => {
 
         await dispatch(updateUserforAdmin({ id, user: updateData })).unwrap();
         toast.success("Cập nhật người dùng thành công!");
-        navigate("/admin/manage-users");
+        navigate("/admin/users");
       }
     } catch (error: any) {
       console.error("Error:", error);
@@ -323,7 +323,7 @@ const UserFormPage = () => {
         <div className="max-w-[1400px] mx-auto px-8 py-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate("/admin/manage-users")}
+              onClick={() => navigate("/admin/users")}
               className="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
             >
               <svg
@@ -862,7 +862,7 @@ const UserFormPage = () => {
                 <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
                   <button
                     type="button"
-                    onClick={() => navigate("/admin/manage-users")}
+                    onClick={() => navigate("/admin/users")}
                     className="px-8 py-3.5 border-2 text-black border-gray-300 bg-white rounded-lg text-sm 
                       font-semibold transition-all duration-200 hover:bg-gray-50"
                   >
