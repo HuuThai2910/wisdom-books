@@ -1,9 +1,10 @@
 import { useAppDispatch, useAppSelector } from "../../app/store";
-import { fetchCart } from "../../features/cart/cartSlice";
+import { fetchCart, removeItem } from "../../features/cart/cartSlice";
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL as string;
 import { formatCurrency } from "../../util/formatting";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { UserCircle, ShoppingCart } from "lucide-react";
 import {
     FaSearch,
     FaShoppingCart,
@@ -52,6 +53,11 @@ export default function Header() {
     const totalQuantity = useMemo(() => {
         return cartItems.reduce((sum, item) => sum + item.quantity, 0);
     }, [cartItems]);
+
+    // Xóa item khỏi cart mini
+    const handleRemoveItem = (id: number) => {
+        dispatch(removeItem([id]));
+    };
 
     // Danh sách thể loại sách cố định
     const bookCategories = [
@@ -187,7 +193,7 @@ export default function Header() {
                                 setIsCategoryClosing(true);
                                 setTimeout(
                                     () => setShowCategoryMenu(false),
-                                    300
+                                    100
                                 );
                             }}
                         >
@@ -242,8 +248,8 @@ export default function Header() {
                                         className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200"
                                         style={{
                                             animation: isCategoryClosing
-                                                ? "slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards"
-                                                : "slideDown 1s cubic-bezier(0.4, 0, 0.2, 1) forwards",
+                                                ? "slideUp 0.1s cubic-bezier(0.4, 0, 0.2, 1) forwards"
+                                                : "slideDown 0.1s cubic-bezier(0.4, 0, 0.2, 1) forwards",
                                         }}
                                     >
                                         <div className="p-6">
@@ -359,16 +365,22 @@ export default function Header() {
                             </button>
                         </form>
                         {/* Cart Icon với Badge */}
-                        <div className="cart-menu relative">
+                        <div
+                            className="cart-menu relative"
+                            onMouseEnter={() => {
+                                setIsCartClosing(false);
+                                setShowCartMenu(true);
+                            }}
+                            onMouseLeave={() => {
+                                setIsCartClosing(true);
+                                setTimeout(() => setShowCartMenu(false), 200);
+                            }}
+                        >
                             <button
                                 className="text-white relative flex items-center p-2 rounded-full transition-all duration-500 "
-                                onMouseEnter={() => {
-                                    setIsCartClosing(false);
-                                    setShowCartMenu(true);
-                                }}
                                 onClick={() => navigate("/cart")}
                             >
-                                <FaShoppingCart className="text-3xl text-white" />
+                                <ShoppingCart className="text-3xl text-white" />
                                 {size > 0 && (
                                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
                                         {size}
@@ -378,26 +390,13 @@ export default function Header() {
 
                             {/* Cart Dropdown */}
                             {showCartMenu && (
-                                <div
-                                    className="absolute right-0 top-full pt-2 w-[400px]"
-                                    onMouseEnter={() => {
-                                        setIsCartClosing(false);
-                                        setShowCartMenu(true);
-                                    }}
-                                    onMouseLeave={() => {
-                                        setIsCartClosing(true);
-                                        setTimeout(
-                                            () => setShowCartMenu(false),
-                                            300
-                                        );
-                                    }}
-                                >
+                                <div className="absolute right-0 top-full pt-2 w-[400px]">
                                     <div
                                         className="bg-white rounded-lg shadow-lg overflow-hidden"
                                         style={{
                                             animation: isCartClosing
-                                                ? "slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards"
-                                                : "slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards",
+                                                ? "slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards"
+                                                : "slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards",
                                         }}
                                     >
                                         {cartItems.length === 0 ? (
@@ -409,11 +408,19 @@ export default function Header() {
                                                 {/* Cart Items */}
                                                 <div className="max-h-[300px] overflow-y-auto">
                                                     {cartItems
-                                                        .slice(0, 5)
+                                                        .slice(
+                                                            0,
+                                                            cartItems.length
+                                                        )
                                                         .map((item) => (
                                                             <div
                                                                 key={item.id}
-                                                                className="flex items-center gap-3 p-4 border-b border-gray-100"
+                                                                className="flex items-center gap-3 p-4 border-b border-gray-100 cursor-pointer"
+                                                                onClick={() =>
+                                                                    navigate(
+                                                                        `/books/${item.book.id}`
+                                                                    )
+                                                                }
                                                             >
                                                                 <img
                                                                     src={
@@ -443,7 +450,17 @@ export default function Header() {
                                                                         }
                                                                     </p>
                                                                 </div>
-                                                                <button className="text-gray-400 hover:text-gray-600 p-1">
+                                                                <button
+                                                                    className="text-black-400 hover:text-gray-600 p-1"
+                                                                    onClick={(
+                                                                        e
+                                                                    ) => {
+                                                                        e.stopPropagation();
+                                                                        handleRemoveItem(
+                                                                            item.id
+                                                                        );
+                                                                    }}
+                                                                >
                                                                     <FaTimes className="text-sm" />
                                                                 </button>
                                                             </div>
@@ -497,7 +514,7 @@ export default function Header() {
                                 }
                                 className="text-white relative flex items-center p-2 rounded-full transition-all duration-500 "
                             >
-                                <FaUser className="text-3xl text-white" />
+                                <UserCircle className="text-3xl text-white" />
                             </button>
 
                             {/* Account Dropdown */}

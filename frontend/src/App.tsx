@@ -28,25 +28,30 @@ function App() {
             <Toaster
                 position="top-right"
                 reverseOrder={false}
+                containerStyle={{
+                    top: 80,
+                    zIndex: 9999,
+                }}
                 toastOptions={{
-                    duration: 3000,
+                    duration: 2000,
                     style: {
                         background: "#fff",
                         color: "#000",
+                        zIndex: 9999,
                     },
                     success: {
-                        duration: 3000,
+                        duration: 2000,
                         style: {
                             background: "#fff",
                             color: "#000",
-                        },  
+                        },
                         iconTheme: {
                             primary: "#4ade80",
                             secondary: "#fff",
                         },
                     },
                     error: {
-                        duration: 3000,
+                        duration: 2000,
                         style: {
                             background: "#fff",
                             color: "#000",
@@ -90,9 +95,9 @@ function App() {
                         path="/book-collection"
                         element={<BookCollectionPage />}
                     />
-                    
+
                     <Route path="/contact" element={<ContactPage />} />
-                
+
                     <Route path="/admin/orders" element={<OrderManagement />} />
                     <Route path="/orders" element={<OrdersPage />} />
                     <Route

@@ -71,27 +71,52 @@ export default function BookDetailPage() {
             setQuantity(newQuantity);
         }
     };
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
         if (!book) {
             toast.error("Không tìm thấy sách!");
-            return; // thoát nếu book null
+            return;
         }
-        if (!book || quantity < 1 || quantity > book.quantity) {
+
+        // Kiểm tra số lượng trong kho
+        if (!book.quantity || book.quantity <= 0) {
+            toast.error("Sản phẩm hiện đã hết hàng!");
+            return;
+        }
+
+        // Parse và validate số lượng từ input (có thể là string hoặc number)
+        let validQuantity = parseInt(String(quantity)) || 1;
+
+        // Đảm bảo số lượng >= 1
+        if (validQuantity < 1 || isNaN(validQuantity)) {
+            validQuantity = 1;
+            setQuantity(1);
+            toast.error("Số lượng không hợp lệ!");
+            return;
+        }
+
+        // Đảm bảo số lượng không vượt quá tồn kho
+        if (validQuantity > book.quantity) {
+            setQuantity(book.quantity);
             toast.error(
-                quantity < 1
-                    ? "Số lượng phải lớn hơn 0!"
-                    : `Số lượng vượt quá tồn kho! Chỉ còn ${book?.quantity} cuốn.`
+                `Số lượng vượt quá tồn kho!\nChỉ còn ${book.quantity} cuốn.`
             );
             return;
         }
 
-        // TODO: gọi hàm addToCart thật sự
-        dispatch(
-            addItem({
-                bookId: book.id,
-                quantity,
-            })
-        );
+        // Thêm vào giỏ hàng với số lượng đã validate
+        try {
+            await dispatch(
+                addItem({
+                    bookId: book.id,
+                    quantity: validQuantity,
+                })
+            ).unwrap();
+        } catch (error: any) {
+            // Hiển thị lỗi từ backend nếu có (ví dụ: số lượng trong giỏ + số lượng thêm vượt quá tồn kho)
+            if (error) {
+                toast.error(error);
+            }
+        }
     };
 
     // Hàm mua sách ngay lập tức mà không thêm vào giỏ hàng
@@ -435,28 +460,63 @@ export default function BookDetailPage() {
                                         type="number"
                                         value={quantity}
                                         min={1}
+                                        max={book.quantity}
                                         onFocus={() => {
                                             setPrevQuantity(quantity);
                                         }}
                                         onChange={(e) => {
                                             const val = e.target.value;
+                                            
+                                            // Nếu rỗng, set về null tạm thời
                                             if (val === "") {
                                                 setQuantity(null as any);
                                                 return;
                                             }
+                                            
+                                            // Chỉ chấp nhận số
                                             const num = parseInt(val);
-                                            if (!isNaN(num) && num >= 1) {
-                                                setQuantity(num);
+                                            if (isNaN(num)) {
+                                                return; // Không làm gì nếu không phải số
                                             }
+                                            
+                                            // Nếu nhỏ hơn 1, set về 1
+                                            if (num < 1) {
+                                                setQuantity(1);
+                                                return;
+                                            }
+                                            
+                                            // Nếu lớn hơn tồn kho, set về book.quantity
+                                            if (num > (book.quantity || 1)) {
+                                                setQuantity(book.quantity);
+                                                toast.error(
+                                                    `Số lượng tối đa là ${book.quantity} cuốn.`
+                                                );
+                                                return;
+                                            }
+                                            
+                                            // Set giá trị hợp lệ
+                                            setQuantity(num);
                                         }}
                                         onBlur={() => {
+                                            // Parse số lượng hiện tại
+                                            const currentQty =
+                                                parseInt(String(quantity)) || 1;
+
+                                            // Nếu nhỏ hơn 1 hoặc NaN, set về 1
                                             if (
-                                                quantity > (book.quantity || 1)
+                                                currentQty < 1 ||
+                                                isNaN(currentQty)
                                             ) {
-                                                toast.error(
-                                                    `Số lượng vượt quá tồn kho!\n Chỉ còn ${book?.quantity} cuốn.`
-                                                );
-                                                setQuantity(prevQuantity);
+                                                setQuantity(1);
+                                                return;
+                                            }
+
+                                            // Nếu vượt quá tồn kho, set về book.quantity
+                                            if (
+                                                currentQty >
+                                                (book.quantity || 1)
+                                            ) {
+                                                setQuantity(book.quantity);
                                             }
                                         }}
                                         className="w-12 text-center font-semibold text-base text-gray-900 outline-none bg-transparent rounded-full"
