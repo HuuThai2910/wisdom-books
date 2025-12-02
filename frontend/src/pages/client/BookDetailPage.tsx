@@ -284,12 +284,7 @@ export default function BookDetailPage() {
                                 </>
                             )}
 
-                            {/* Badge */}
-                            {book.status === "SALE" && (
-                                <div className="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-full font-semibold shadow-lg">
-                                    Hot
-                                </div>
-                            )}
+                           
                         </div>
 
                         {/* Thumbnail Images */}

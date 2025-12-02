@@ -11,7 +11,7 @@ export default function BestsellerSection({ books }: BestsellerSectionProps) {
   const bestsellerData = books.slice(14, 20);
 
   return (
-    <section className="products bg-white px-35 pb-25">
+    <section className="products bg-gray-100 pb-25 pt-10 px-35">
       <div className="container mx-auto px-6">
         {/* Header */}
         <div className="mx-auto text-center mb-12 max-w-2xl">

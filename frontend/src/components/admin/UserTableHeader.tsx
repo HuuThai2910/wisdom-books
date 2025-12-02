@@ -33,7 +33,7 @@ const UserTableHeader = ({
   const [showSortDropdown, setShowSortDropdown] = useState(false);
 
   return (
-    <div className="flex flex-col md:flex-row justify-between text-black items-start md:items-center gap-4 mb-8 mt-20">
+    <div className="flex flex-col md:flex-row justify-between text-black items-start md:items-center gap-4 mb-8 mt-2">
       <h1 className="text-2xl font-semibold text-gray-900">Quản lý người dùng</h1>
       
       <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">

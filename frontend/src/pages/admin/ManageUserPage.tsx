@@ -260,7 +260,7 @@ const ManageUserPage = () => {
 
   return (
     <AdminLayout>
-      <div className="max-w-[1400px] mx-auto bg-white text-black rounded-xl shadow-md p-8">
+      <div className="max-w-[1400px] mx-auto bg-white text-black rounded-xl shadow-md p-1 mt-0">
         <UserTableHeader
           onAddUser={handleAddUser}
           searchValue={searchValue}

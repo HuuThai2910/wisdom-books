@@ -136,6 +136,8 @@ public class OrderServiceImpl implements OrderService {
             order.setPaymentStatus(PaymentStatus.PAID);
             order.setTxnRef(txnRef);
             orderRepository.save(order);
+            // Force load before leaving @Transactional
+            order.getOrderItems().size();
             this.emailService.sendEmailFromTemplateSync(
                     order.getReceiverEmail(),
                     "Đặt hàng thành công #" + order.getOrderCode(),

@@ -202,7 +202,7 @@ export default function BooksPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 pt-15">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 pt-15 px-20">
       <div className="container mx-auto px-6 py-8">
         {/* Page Header */}
 

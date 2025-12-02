@@ -357,7 +357,7 @@ export default function Header() {
                             />
                             <button
                                 type="submit"
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-white w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg bg-gray-400"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-white w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg bg-gray-400"
                             >
                                 <FaSearch className="text-sm" />
                             </button>

@@ -40,7 +40,7 @@ export default function Carousel() {
 
     useEffect(() => {
         // ⏱ Delay 2 giây trước khi chạy auto
-        const timer = setTimeout(() => setStart(true), 2000);
+        const timer = setTimeout(() => setStart(true), 1000);
         return () => clearTimeout(timer);
     }, []);
 
