@@ -464,36 +464,39 @@ export default function BookDetailPage() {
                                         onFocus={() => {
                                             setPrevQuantity(quantity);
                                         }}
+                                        onKeyPress={(e) => {
+                                            // Chỉ cho phép số (0-9)
+                                            if (!/[0-9]/.test(e.key)) {
+                                                e.preventDefault();
+                                            }
+                                        }}
                                         onChange={(e) => {
                                             const val = e.target.value;
-                                            
+
                                             // Nếu rỗng, set về null tạm thời
                                             if (val === "") {
                                                 setQuantity(null as any);
                                                 return;
                                             }
-                                            
+
                                             // Chỉ chấp nhận số
                                             const num = parseInt(val);
                                             if (isNaN(num)) {
                                                 return; // Không làm gì nếu không phải số
                                             }
-                                            
+
                                             // Nếu nhỏ hơn 1, set về 1
                                             if (num < 1) {
                                                 setQuantity(1);
                                                 return;
                                             }
-                                            
+
                                             // Nếu lớn hơn tồn kho, set về book.quantity
                                             if (num > (book.quantity || 1)) {
                                                 setQuantity(book.quantity);
-                                                toast.error(
-                                                    `Số lượng tối đa là ${book.quantity} cuốn.`
-                                                );
                                                 return;
                                             }
-                                            
+
                                             // Set giá trị hợp lệ
                                             setQuantity(num);
                                         }}
