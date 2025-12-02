@@ -191,6 +191,8 @@ function App() {
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/profile" element={<AdminProfile />} />
           <Route path="/admin/manage-users" element={<ManageUserPage />} />
+          <Route path="/admin/user-form" element={<UserFormPage />} />
+          <Route path="/admin/user-form/:id" element={<UserFormPage />} />
           <Route path="/admin/orders" element={<OrderManagement />} />
           <Route path="/admin/warehouse" element={<WarehousePage />} />
           <Route path="/admin/permissions" element={<PermissionsPage />} />
