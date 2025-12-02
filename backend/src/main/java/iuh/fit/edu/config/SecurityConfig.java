@@ -4,6 +4,11 @@
  */
 package iuh.fit.edu.config;
 
+import iuh.fit.edu.dto.response.account.UserInfoResponse;
+import iuh.fit.edu.service.AccountService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -21,6 +26,7 @@ import org.springframework.security.web.SecurityFilterChain;
  */
 @Configuration
 public class SecurityConfig {
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -40,13 +46,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/users").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/api/users/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/api/users/delete/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/users/**").permitAll()
                         .requestMatchers("/api/**").permitAll()
 
                         // Protected endpoints - cần authentication
                         .requestMatchers(HttpMethod.POST,"/api/auth/logout").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/auth/me").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/auth/users").authenticated()
+                        .requestMatchers(HttpMethod.GET,"/api/users").authenticated()
+
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
@@ -54,9 +61,11 @@ public class SecurityConfig {
                         .jwt(jwt -> jwt
                                 .jwkSetUri(COGNITO_JWKS_URL)
                         )
-                );
+                ).formLogin(f -> f.disable());
 
 
         return http.build();
     }
+
+
 }

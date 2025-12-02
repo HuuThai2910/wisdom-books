@@ -58,6 +58,7 @@ public class AccountServiceImpl implements AccountService {
             if (check){
                 Role role=roleRepository.findById(3L).orElse(null);
                 user.setPhone(phoneNumber);
+                user.setCreatedBy("system");
                 user.setRole(role);
                 userRepository.save(user);
             }

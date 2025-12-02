@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class AccountController {
     @Autowired
     AccountService accountService;
+    public static String email;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> registerAccount(@Valid @RequestBody RegisterRequest request){
@@ -37,6 +38,8 @@ public class AccountController {
         cookie.setPath("/");            // gửi cho toàn bộ domain
         cookie.setMaxAge(maxAge);       // thời gian sống cookie
         response.addCookie(cookie);
+        UserInfoResponse userInfoResponse=accountService.getCurrentUserInfo(token);
+        email= userInfoResponse.getEmail();
         return ResponseEntity.ok(cognitoResponse);
     }
 

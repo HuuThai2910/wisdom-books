@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
     AccountService accountService;
 
     @Override
-    public boolean createUser(CreateUserRequest request) {
+    public boolean createUser(CreateUserRequest request,String email) {
         System.out.println("CreateUserRequest avatarURL: " + request.getAvatarURL());
         
         User user = userMapper.toUser(request);
@@ -69,6 +69,7 @@ public class UserServiceImpl implements UserService {
                 .confirmPassword(request.getConfirmPassword())
                 .build(), false);
         user.setRole(role);
+        user.setCreatedBy(email);
         user.setAvatar(request.getAvatarURL());
 
         System.out.println("User avatar before save: " + user.getAvatar());
@@ -82,13 +83,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(Long id, UpdateUserRequest request) {
+    public void updateUser(Long id, UpdateUserRequest request,String email) {
         if (request != null) {
             User user = userRepository.findById(id).orElse(null);
             Role role=roleRepository.findById(Long.valueOf(request.getRole())).orElse(null);
             assert user != null;
             user.setRole(role);
-
+            user.setUpdatedBy(email);
             // Map other fields first
             User updatedUser = userMapper.toUpdateUser(request, user);
             updatedUser.setAvatar(request.getAvatarURL());
@@ -103,10 +104,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(Long id) {
+    public void deleteUser(Long id,String email) {
         User user = userRepository.findById(id).orElse(null);
         assert user != null;
         user.setStatus(UserStatus.INACTIVE);
+        user.setUpdatedBy(email);
         userRepository.save(user);
         cognitoService.disableUser(user.getFullName());
     }
