@@ -9,6 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginRequest {
-    private String fullName;
+    private String fullName; // Có thể là email hoặc fullName
     private String password;
+    
+    // Alias cho trường hợp frontend gửi email
+    public String getUsername() {
+        return fullName;
+    }
 }

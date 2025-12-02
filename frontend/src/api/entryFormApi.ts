@@ -4,7 +4,6 @@ import {
     PaginatedResponse,
     EntryForm,
     EntryFormDetail,
-    BookItemDTO,
     CreateEntryFormDTO
 } from "../types";
 
