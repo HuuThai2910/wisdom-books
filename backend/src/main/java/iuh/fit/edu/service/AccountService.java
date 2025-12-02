@@ -24,4 +24,5 @@ public interface AccountService {
     ResetPasswordResponse resetPassword(ResetPasswordRequest request);
     UserInfoResponse getCurrentUserInfo(String accessToken);
     UsersResponse findByAllUser(String email);
+    LoginResponse refreshAccessToken(String refreshToken);
 }

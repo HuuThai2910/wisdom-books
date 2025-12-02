@@ -83,4 +83,11 @@ public class AccountController {
         return ResponseEntity.ok(accountService.findByAllUser(email));
     }
 
+    @PostMapping("/refresh-token")
+    public ResponseEntity<LoginResponse> refreshToken(@RequestHeader("Authorization") String token){
+        String refreshToken = token.replace("Bearer ", "");
+        LoginResponse response = accountService.refreshAccessToken(refreshToken);
+        return ResponseEntity.ok(response);
+    }
+
 }

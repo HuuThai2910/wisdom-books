@@ -25,10 +25,15 @@ const SignInForm = ({ onForgotPassword, onSuccess }: SignInFormProps) => {
 
   useEffect(() => {
     if (user) {
-      console.log("Alo:", user);
+      // Lưu thông tin user vào localStorage
+      localStorage.setItem('user', JSON.stringify(user));
+      console.log("Đăng nhập thành công:", user);
+      // Chuyển về trang home
       navigate('/');
+      // Reload trang để cập nhật header
+      window.location.reload();
     }
-  }, [user]);
+  }, [user, navigate]);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};

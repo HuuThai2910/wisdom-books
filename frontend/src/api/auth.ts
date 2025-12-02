@@ -16,10 +16,19 @@ interface LoginParams {
 }
 
 interface UserInfo{
+    id: number;
     email: string;
     fullName: string;
     phone: string;
     avatar?: string;
+    address?: {
+        province: string;
+        ward: string;
+        address: string;
+    };
+    gender?: string;
+    role?: number;
+    userStatus?: string;
 }
 
 interface ResetPasswordParams {

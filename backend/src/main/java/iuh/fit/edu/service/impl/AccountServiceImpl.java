@@ -17,6 +17,7 @@ import iuh.fit.edu.repository.RoleRepository;
 import iuh.fit.edu.repository.UserRepository;
 import iuh.fit.edu.service.AccountService;
 import iuh.fit.edu.service.CognitoService;
+import iuh.fit.edu.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     CognitoService cognitoService;
+
+    @Autowired
+    TokenService tokenService;
 
 
     @Override
@@ -73,6 +77,24 @@ public class AccountServiceImpl implements AccountService {
     public LoginResponse loginUser(LoginRequest request) {
         String token= cognitoService.loginUser(request);
         if (token!=null){
+            // Lấy thông tin user để lưu token record
+            GetUserResult userResult = cognitoService.getUserInfo(token);
+            String email = userResult.getUserAttributes().stream()
+                    .filter(attr -> "email".equals(attr.getName()))
+                    .findFirst()
+                    .map(AttributeType::getValue)
+                    .orElse(null);
+            
+            if (email != null) {
+                User user = userRepository.findByEmail(email);
+                if (user != null) {
+                    // Lưu access token record (60 phút)
+                    tokenService.saveTokenRecord(user, iuh.fit.edu.entity.constant.TokenType.ACCESS_TOKEN, 60);
+                    // Lưu refresh token record (7 ngày)
+                    tokenService.saveTokenRecord(user, iuh.fit.edu.entity.constant.TokenType.REFRESH_TOKEN, 7 * 24 * 60);
+                }
+            }
+            
             return LoginResponse.builder()
                     .token(token)
                     .success(true)
@@ -83,6 +105,27 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void logout(String accessToken) {
+        // Lấy thông tin user từ token
+        try {
+            GetUserResult userResult = cognitoService.getUserInfo(accessToken);
+            String email = userResult.getUserAttributes().stream()
+                    .filter(attr -> "email".equals(attr.getName()))
+                    .findFirst()
+                    .map(AttributeType::getValue)
+                    .orElse(null);
+            
+            if (email != null) {
+                User user = userRepository.findByEmail(email);
+                if (user != null) {
+                    // Revoke tất cả tokens của user
+                    tokenService.revokeAllUserTokens(user);
+                }
+            }
+        } catch (Exception e) {
+            // Log error but continue with Cognito logout
+        }
+        
+        // Logout khỏi Cognito
         cognitoService.logout(accessToken);
     }
 
@@ -171,10 +214,15 @@ public class AccountServiceImpl implements AccountService {
 
         User user=userRepository.findByEmail(email);
         return UserInfoResponse.builder()
+                .id(user.getId())
                 .avatar(user.getAvatar())
                 .phone(user.getPhone())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
+                .address(user.getAddress())
+                .gender(user.getGender())
+                .role(user.getRole() != null ? user.getRole().getId() : null)
+                .userStatus(user.getStatus())
                 .build();
     }
 
@@ -185,5 +233,42 @@ public class AccountServiceImpl implements AccountService {
                 .users(users)
                 .email(email)
                 .build();
+    }
+
+    @Override
+    public LoginResponse refreshAccessToken(String refreshToken) {
+        try {
+            // Lấy thông tin user từ refresh token
+            GetUserResult userResult = cognitoService.getUserInfo(refreshToken);
+            String email = userResult.getUserAttributes().stream()
+                    .filter(attr -> "email".equals(attr.getName()))
+                    .findFirst()
+                    .map(AttributeType::getValue)
+                    .orElseThrow(() -> new RuntimeException("Email not found in token"));
+            
+            User user = userRepository.findByEmail(email);
+            if (user == null) {
+                throw new RuntimeException("User not found");
+            }
+            
+            // Kiểm tra refresh token còn hợp lệ không
+            if (!tokenService.hasValidToken(user, iuh.fit.edu.entity.constant.TokenType.REFRESH_TOKEN)) {
+                throw new RuntimeException("Refresh token expired or revoked");
+            }
+            
+            // Tạo access token mới (giả sử dùng lại token từ Cognito)
+            // Trong thực tế, bạn có thể call Cognito API để refresh token
+            String newAccessToken = refreshToken; // Placeholder - cần implement Cognito refresh
+            
+            // Lưu access token record mới (60 phút)
+            tokenService.saveTokenRecord(user, iuh.fit.edu.entity.constant.TokenType.ACCESS_TOKEN, 60);
+            
+            return LoginResponse.builder()
+                    .token(newAccessToken)
+                    .success(true)
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to refresh token: " + e.getMessage());
+        }
     }
 }

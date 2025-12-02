@@ -30,6 +30,7 @@ import AdminProfile from "./pages/admin/AdminProfile";
 import PaymentSuccessPage from "./pages/client/PaymentSuccessPage";
 import LoginPage from "./pages/client/LoginPage";
 import OrdersPage from "./pages/client/OrdersPage";
+import SettingsPage from "./pages/client/SettingsPage";
 
 function App() {
     const location = useLocation();
@@ -205,6 +206,10 @@ function App() {
                                 <OrdersPage />
                             </ClientLayout>
                         }
+                    />
+                    <Route
+                        path="/settings"
+                        element={<SettingsPage />}
                     />
 
                     <Route path="/admin/books" element={<BookManagement />} />

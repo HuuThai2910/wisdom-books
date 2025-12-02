@@ -26,11 +26,51 @@ export default function Header() {
     const [isCartClosing, setIsCartClosing] = useState(false);
     const [isCategoryClosing, setIsCategoryClosing] = useState(false);
     const [searchValue, setSearchValue] = useState("");
+    const [currentUser, setCurrentUser] = useState<any>(null);
     const location = useLocation();
     const navigate = useNavigate();
     const isHomePage = location.pathname === "/";
     const { cartItems } = useAppSelector((state) => state.cart);
     const dispatch = useAppDispatch();
+
+    // Lấy thông tin user từ localStorage và reload khi có thay đổi
+    useEffect(() => {
+        const loadUser = () => {
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                try {
+                    setCurrentUser(JSON.parse(userStr));
+                } catch (error) {
+                    console.error('Error parsing user data:', error);
+                }
+            } else {
+                setCurrentUser(null);
+            }
+        };
+
+        // Load user lần đầu
+        loadUser();
+
+        // Listen for storage changes (khi update từ tab khác hoặc component khác)
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === 'user') {
+                loadUser();
+            }
+        };
+
+        // Listen for custom event (khi update trong cùng tab)
+        const handleUserUpdate = () => {
+            loadUser();
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        window.addEventListener('userUpdated', handleUserUpdate);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('userUpdated', handleUserUpdate);
+        };
+    }, []);
 
     // Lấy dữ liệu từ cart để truyền vào cart mini
     useEffect(() => {
@@ -126,7 +166,7 @@ export default function Header() {
         <div className="relative">
             {/* Navbar cố định */}
             <nav
-                className="fixed top-0 left-0 w-full z-50 transition-all duration-500"
+                className="fixed top-0 left-0 w-full z-50 transition-all duration-500 px-8 py-4"
                 style={{
                     background: isHomePage
                         ? `rgba(37, 99, 235, ${opacity})` // Blue-600 + opacity
@@ -526,60 +566,111 @@ export default function Header() {
                                 onClick={() =>
                                     setShowAccountMenu(!showAccountMenu)
                                 }
-                                className="text-white relative flex items-center p-2 rounded-full transition-all duration-500 "
+                                className="text-white relative flex items-center p-1 rounded-full transition-all duration-500 hover:ring-2 hover:ring-white/50"
                             >
-                                <UserCircle className="text-3xl text-white" />
+                                {currentUser?.avatar ? (
+                                    <img 
+                                        src={currentUser.avatar} 
+                                        alt={currentUser.fullName}
+                                        className="w-10 h-10 rounded-full object-cover border-2 border-white"
+                                    />
+                                ) : currentUser ? (
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold border-2 border-white">
+                                        {currentUser.fullName?.charAt(0).toUpperCase() || 'U'}
+                                    </div>
+                                ) : (
+                                    <UserCircle className="text-3xl text-white" />
+                                )}
                             </button>
 
                             {/* Account Dropdown */}
                             {showAccountMenu && (
                                 <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-2xl overflow-hidden animate-fadeIn">
-                                    <div className="p-2">
-                                        <Link
-                                            to="/login"
-                                            className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-blue-50 rounded-lg transition group"
-                                        >
-                                            <FaSignInAlt className="text-lg text-blue-600 group-hover:scale-110 transition" />
-                                            <span className="font-medium">
-                                                Đăng nhập
-                                            </span>
-                                        </Link>
-                                        <Link
-                                            to="/register"
-                                            className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-blue-50 rounded-lg transition group"
-                                        >
-                                            <FaUserPlus className="text-lg text-green-600 group-hover:scale-110 transition" />
-                                            <span className="font-medium">
-                                                Đăng ký
-                                            </span>
-                                        </Link>
-                                        <div className="border-t border-gray-200 my-2"></div>
-                                        <Link
-                                            to="/orders"
-                                            className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-50 rounded-lg transition group"
-                                        >
-                                            <FaBox className="text-lg text-purple-600 group-hover:scale-110 transition" />
-                                            <span className="font-medium">
-                                                Đơn hàng
-                                            </span>
-                                        </Link>
-                                        <Link
-                                            to="/settings"
-                                            className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition group"
-                                        >
-                                            <FaCog className="text-lg text-gray-600 group-hover:scale-110 transition" />
-                                            <span className="font-medium">
-                                                Cài đặt
-                                            </span>
-                                        </Link>
-                                        <div className="border-t border-gray-200 my-2"></div>
-                                        <button className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition group">
-                                            <FaSignOutAlt className="text-lg group-hover:scale-110 transition" />
-                                            <span className="font-medium">
-                                                Đăng xuất
-                                            </span>
-                                        </button>
-                                    </div>
+                                    {currentUser ? (
+                                        <div className="p-2">
+                                            {/* User Info Section */}
+                                            <div className="px-4 py-3 border-b border-gray-200">
+                                                <div className="flex items-center gap-3">
+                                                    {currentUser.avatar ? (
+                                                        <img 
+                                                            src={currentUser.avatar} 
+                                                            alt={currentUser.fullName}
+                                                            className="w-12 h-12 rounded-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                                                            {currentUser.fullName?.charAt(0).toUpperCase() || 'U'}
+                                                        </div>
+                                                    )}
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-semibold text-gray-800 truncate">
+                                                            {currentUser.fullName}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 truncate">
+                                                            {currentUser.email}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <Link
+                                                to="/orders"
+                                                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-50 rounded-lg transition group"
+                                            >
+                                                <FaBox className="text-lg text-purple-600 group-hover:scale-110 transition" />
+                                                <span className="font-medium">
+                                                    Đơn hàng
+                                                </span>
+                                            </Link>
+                                            <Link
+                                                to="/settings"
+                                                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-blue-50 rounded-lg transition group"
+                                            >
+                                                <FaCog className="text-lg text-blue-600 group-hover:scale-110 transition" />
+                                                <span className="font-medium">
+                                                    Cài đặt
+                                                </span>
+                                            </Link>
+                                            <div className="border-t border-gray-200 my-2"></div>
+                                            <button 
+                                                onClick={() => {
+                                                    localStorage.removeItem('user');
+                                                    localStorage.removeItem('token');
+                                                    setCurrentUser(null);
+                                                    setShowAccountMenu(false);
+                                                    navigate('/');
+                                                    window.location.reload();
+                                                }}
+                                                className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition group"
+                                            >
+                                                <FaSignOutAlt className="text-lg group-hover:scale-110 transition" />
+                                                <span className="font-medium">
+                                                    Đăng xuất
+                                                </span>
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="p-2">
+                                            <Link
+                                                to="/login"
+                                                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-blue-50 rounded-lg transition group"
+                                            >
+                                                <FaSignInAlt className="text-lg text-blue-600 group-hover:scale-110 transition" />
+                                                <span className="font-medium">
+                                                    Đăng nhập
+                                                </span>
+                                            </Link>
+                                            <Link
+                                                to="/register"
+                                                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-blue-50 rounded-lg transition group"
+                                            >
+                                                <FaUserPlus className="text-lg text-green-600 group-hover:scale-110 transition" />
+                                                <span className="font-medium">
+                                                    Đăng ký
+                                                </span>
+                                            </Link>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

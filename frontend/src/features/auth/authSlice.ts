@@ -1,6 +1,14 @@
 import { RegisterFormData } from './../../types/index';
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { fetchtUser, login, register, resetPassword, sendOTP, verifyOTP } from "../../api/auth";
+
+// Helper function để lưu cookie
+const setCookie = (name: string, value: string, days: number = 7) => {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/`;
+};
+
 // Thunk đăng ký user
 export const registerUser = createAsyncThunk<
     any,                               
@@ -160,6 +168,13 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.user = action.payload.data;
                 state.error = null;
+                
+                // Lưu token vào cookie theo email để phân biệt nhiều user
+                if (state.token && action.payload.data?.email) {
+                    setCookie(`token_${action.payload.data.email}`, state.token, 7);
+                    // Lưu token chung để backward compatible
+                    setCookie('token', state.token, 7);
+                }
             })
             .addCase(fetchCurrentUser.rejected, (state, action) => {
                 state.loading = false;
