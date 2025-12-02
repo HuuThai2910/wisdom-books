@@ -1,8 +1,6 @@
 import "./App.css";
 import CartPage from "./pages/client/CartPage";
 import CheckOutPage from "./pages/client/CheckoutPage";
-import OrdersPage from "./pages/client/OrdersPage";
-import PaymentSuccessPage from "./pages/client/PaymentSuccessPage";
 import { Toaster } from "react-hot-toast";
 import { Route, Routes, useLocation } from "react-router-dom";
 import Home from "./pages/client/Home";
@@ -22,13 +20,10 @@ import ViewUpsertBook from "./pages/admin/ViewUpsertBook";
 import ViewBookDetail from "./pages/admin/ViewBookDetail";
 import ScrollToTop from "./components/ScrollToTop";
 import ClientLayout from "./components/common/ClientLayout";
-
 import Dashboard from "./pages/admin/Dashboard";
 import ManageUserPage from "./pages/admin/ManageUserPage";
-import CustomersPage from "./pages/admin/CustomersPage";
 import OrderManagement from "./pages/admin/OrderManagement";
 import WarehousePage from "./pages/admin/WarehousePage";
-import StatisticsPage from "./pages/admin/StatisticsPage";
 import PermissionsPage from "./pages/admin/PermissionsPage";
 
 function App() {
@@ -182,10 +177,8 @@ function App() {
           <Route path="/admin/books/view" element={<ViewBookDetail />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/manage-users" element={<ManageUserPage />} />
-          <Route path="/admin/customers" element={<CustomersPage />} />
           <Route path="/admin/orders" element={<OrderManagement />} />
           <Route path="/admin/warehouse" element={<WarehousePage />} />
-          <Route path="/admin/statistics" element={<StatisticsPage />} />
           <Route path="/admin/permissions" element={<PermissionsPage />} />
         </Routes>
       </div>

@@ -30,12 +30,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   const menuItems = [
     { name: "Dashboard", path: "/admin/dashboard", icon: Home },
-    { name: "Nhân viên", path: "/admin/employees", icon: UserCheck },
-    { name: "Khách hàng", path: "/admin/customers", icon: Users },
+    { name: "Nhân viên", path: "/admin/manage-users", icon: UserCheck },
     { name: "Đơn hàng", path: "/admin/orders", icon: ShoppingCart },
     { name: "Quản lý sách", path: "/admin/books", icon: BookOpen },
     { name: "Kho", path: "/admin/warehouse", icon: Warehouse },
-    { name: "Thống kê", path: "/admin/statistics", icon: BarChart3 },
     { name: "Phân quyền", path: "/admin/permissions", icon: Shield },
   ];
 
