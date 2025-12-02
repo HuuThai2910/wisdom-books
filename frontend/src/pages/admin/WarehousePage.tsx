@@ -15,6 +15,7 @@
 // npm install papaparse
 // npm install --save-dev @types/papaparse   # (tốt cho TypeScript)
 import { useMemo, useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import AdminLayout from "./AdminLayout";
 import bookApi from "../../api/bookApi";
 import entryFormApi from "../../api/entryFormApi";
@@ -23,22 +24,20 @@ import { Book as ApiBook } from "../../types";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import {
+  Eye,
+  Download,
+  Trash,
   RefreshCw,
   Settings,
   ChevronLeft,
   ChevronRight,
   Plus,
+  FileDown,
 } from "lucide-react";
 import CreateImportModal from "../../components/warehouse/CreateImportModal";
 import EntryFormDetailModal from "../../components/warehouse/EntryFormDetailModal";
-import {
-  FaSort,
-  FaSortUp,
-  FaSortDown,
-  FaEye,
-  FaTrash,
-  FaDownload,
-} from "react-icons/fa";
+import ExportInventoryModal from "../../components/warehouse/ExportInventoryModal";
+import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 
 export default function WarehousePage() {
   const [books, setBooks] = useState<ApiBook[]>([]);
@@ -89,6 +88,7 @@ export default function WarehousePage() {
   });
   const [showCreateImportModal, setShowCreateImportModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [selectedImport, setSelectedImport] = useState<EntryForm | null>(null);
   const [entryFormDetails, setEntryFormDetails] = useState<EntryFormDetail[]>(
     []
@@ -503,9 +503,13 @@ export default function WarehousePage() {
 
   return (
     <AdminLayout>
-      <div className="container mx-auto px-6">
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h1 className="text-3xl font-bold bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent mb-6">
+      <>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-lg shadow-md p-6 mb-6"
+        >
+          <h1 className="text-3xl font-bold wisbook-gradient-text mb-6">
             Quản Lý Kho
           </h1>
 
@@ -629,163 +633,174 @@ export default function WarehousePage() {
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-lg shadow-md overflow-hidden"
+        >
+          {/* Table Header Actions */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div className="flex gap-1">
+              <button
+                onClick={() => {
+                  setActiveTab("inventory");
+                  setBookCurrentPage(0);
+                }}
+                className={`px-6 py-3 font-semibold transition-colors ${
+                  activeTab === "inventory"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-600 hover:text-gray-800"
+                }`}
+              >
+                Danh sách Tồn kho
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab("history");
+                  setCurrentPage(0);
+                }}
+                className={`px-6 py-3 font-semibold transition-colors ${
+                  activeTab === "history"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-600 hover:text-gray-800"
+                }`}
+              >
+                Lịch sử Nhập kho
+              </button>
+            </div>
 
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="border-b border-gray-200">
-            <div className="flex items-center justify-between px-4 pt-4">
-              <div className="flex gap-1">
+            <div className="flex items-center gap-2">
+              {activeTab === "inventory" && (
                 <button
-                  onClick={() => {
-                    setActiveTab("inventory");
-                    setBookCurrentPage(0);
-                  }}
-                  className={`px-6 py-3 font-semibold transition-colors ${
-                    activeTab === "inventory"
-                      ? "text-blue-600 border-b-2 border-blue-600"
-                      : "text-gray-600 hover:text-gray-800"
-                  }`}
+                  onClick={() => setShowExportModal(true)}
+                  className="p-2 px-4 bg-blue-600 text-white hover:bg-blue-700 font-bold rounded-md transition-colors flex items-center gap-2"
+                  title="Xuất Excel"
                 >
-                  Danh sách Tồn kho
+                  <FileDown size={18} />
+                  Xuất Excel
                 </button>
+              )}
+              <button
+                onClick={handleOpenCreateImportModal}
+                className="p-2 px-4 bg-green-600 text-white hover:bg-green-700 font-bold rounded-md transition-colors flex items-center gap-2"
+                title="Tạo phiếu nhập kho"
+              >
+                <Plus size={18} />
+                Tạo phiếu nhập
+              </button>
+              <button
+                onClick={handleRefresh}
+                className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+                title="Làm mới"
+              >
+                <RefreshCw className="text-gray-600" size={18} />
+              </button>
+              <div className="relative">
                 <button
-                  onClick={() => {
-                    setActiveTab("history");
-                    setCurrentPage(0);
-                  }}
-                  className={`px-6 py-3 font-semibold transition-colors ${
-                    activeTab === "history"
-                      ? "text-blue-600 border-b-2 border-blue-600"
-                      : "text-gray-600 hover:text-gray-800"
-                  }`}
-                >
-                  Lịch sử Nhập kho
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleOpenCreateImportModal}
-                  className="p-2 px-4 bg-green-600 text-white hover:bg-green-700 font-bold rounded-md transition-colors flex items-center gap-2"
-                  title="Tạo phiếu nhập kho"
-                >
-                  <Plus size={18} />
-                  Tạo phiếu nhập
-                </button>
-                <button
-                  onClick={handleRefresh}
+                  onClick={() => setShowColumnConfig(!showColumnConfig)}
                   className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-                  title="Làm mới"
+                  title="Cấu hình cột"
                 >
-                  <RefreshCw className="text-gray-600" size={18} />
+                  <Settings className="text-gray-600" size={18} />
                 </button>
-                <div className="relative">
-                  <button
-                    onClick={() => setShowColumnConfig(!showColumnConfig)}
-                    className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-                    title="Cấu hình cột"
-                  >
-                    <Settings className="text-gray-600" size={18} />
-                  </button>
 
-                  {showColumnConfig && (
-                    <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50 w-64">
-                      <div className="flex items-center justify-between mb-3 pb-2 border-b">
-                        <span className="font-semibold text-gray-700">
-                          Cấu hình
-                        </span>
-                        <button
-                          onClick={toggleAllColumns}
-                          className="text-sm text-blue-500 hover:text-blue-600"
-                        >
-                          Cột hiện thị
-                        </button>
-                      </div>
-                      <div className="space-y-2 max-h-96 overflow-y-auto">
-                        {activeTab === "inventory"
-                          ? Object.entries(visibleColumns).map(
-                              ([key, value]) => (
-                                <label
-                                  key={key}
-                                  className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={value}
-                                    onChange={() =>
-                                      toggleColumn(
-                                        key as keyof typeof visibleColumns
-                                      )
-                                    }
-                                    className="w-4 h-4 text-blue-500 rounded focus:ring-2 focus:ring-blue-500"
-                                  />
-                                  <span className="text-sm text-gray-700">
-                                    {key === "stt" && "STT"}
-                                    {key === "isbn" && "ISBN"}
-                                    {key === "title" && "Tên Sách"}
-                                    {key === "year" && "Năm XB"}
-                                    {key === "importPrice" && "Giá nhập"}
-                                    {key === "sellingPrice" && "Giá bán"}
-                                    {key === "quantity" && "Tồn kho"}
-                                    {key === "status" && "Trạng thái"}
-                                  </span>
-                                </label>
-                              )
-                            )
-                          : Object.entries(visibleHistoryColumns).map(
-                              ([key, value]) => (
-                                <label
-                                  key={key}
-                                  className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={value}
-                                    onChange={() =>
-                                      toggleHistoryColumn(
-                                        key as keyof typeof visibleHistoryColumns
-                                      )
-                                    }
-                                    className="w-4 h-4 text-blue-500 rounded focus:ring-2 focus:ring-blue-500"
-                                  />
-                                  <span className="text-sm text-gray-700">
-                                    {key === "stt" && "STT"}
-                                    {key === "id" && "Mã phiếu"}
-                                    {key === "totalQuantity" && "Tổng số lượng"}
-                                    {key === "totalAmount" && "Tổng tiền"}
-                                    {key === "createdDate" && "Ngày tạo"}
-                                    {key === "createdBy" && "Người tạo"}
-                                  </span>
-                                </label>
-                              )
-                            )}
-                      </div>
+                {showColumnConfig && (
+                  <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50 w-64">
+                    <div className="flex items-center justify-between mb-3 pb-2 border-b">
+                      <span className="font-semibold text-gray-700">
+                        Cấu hình
+                      </span>
                       <button
-                        onClick={() => setShowColumnConfig(false)}
-                        className="w-full mt-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition-colors"
+                        onClick={toggleAllColumns}
+                        className="text-sm text-blue-500 hover:text-blue-600"
                       >
-                        Đóng
+                        Cột hiện thị
                       </button>
                     </div>
-                  )}
-                </div>
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                      {activeTab === "inventory"
+                        ? Object.entries(visibleColumns).map(([key, value]) => (
+                            <label
+                              key={key}
+                              className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={value}
+                                onChange={() =>
+                                  toggleColumn(
+                                    key as keyof typeof visibleColumns
+                                  )
+                                }
+                                className="w-4 h-4 text-blue-500 rounded focus:ring-2 focus:ring-blue-500"
+                              />
+                              <span className="text-sm text-gray-700">
+                                {key === "stt" && "STT"}
+                                {key === "isbn" && "ISBN"}
+                                {key === "title" && "Tên Sách"}
+                                {key === "year" && "Năm XB"}
+                                {key === "importPrice" && "Giá nhập"}
+                                {key === "sellingPrice" && "Giá bán"}
+                                {key === "quantity" && "Tồn kho"}
+                                {key === "status" && "Trạng thái"}
+                              </span>
+                            </label>
+                          ))
+                        : Object.entries(visibleHistoryColumns).map(
+                            ([key, value]) => (
+                              <label
+                                key={key}
+                                className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={value}
+                                  onChange={() =>
+                                    toggleHistoryColumn(
+                                      key as keyof typeof visibleHistoryColumns
+                                    )
+                                  }
+                                  className="w-4 h-4 text-blue-500 rounded focus:ring-2 focus:ring-blue-500"
+                                />
+                                <span className="text-sm text-gray-700">
+                                  {key === "stt" && "STT"}
+                                  {key === "id" && "Mã phiếu"}
+                                  {key === "totalQuantity" && "Tổng số lượng"}
+                                  {key === "totalAmount" && "Tổng tiền"}
+                                  {key === "createdDate" && "Ngày tạo"}
+                                  {key === "createdBy" && "Người tạo"}
+                                </span>
+                              </label>
+                            )
+                          )}
+                    </div>
+                    <button
+                      onClick={() => setShowColumnConfig(false)}
+                      className="w-full mt-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold transition-colors"
+                    >
+                      Đóng
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
+          {/* Table */}
           <div className="overflow-x-auto">
             {activeTab === "inventory" ? (
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     {visibleColumns.stt && (
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         STT
                       </th>
                     )}
                     {visibleColumns.isbn && (
                       <th
-                        className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 select-none"
+                        className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
                         onClick={() => handleSort("isbn")}
                       >
                         <div className="flex items-center">
@@ -850,7 +865,7 @@ export default function WarehousePage() {
                       </th>
                     )}
                     {visibleColumns.status && (
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 w-36">
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-36">
                         Trạng thái
                       </th>
                     )}
@@ -889,7 +904,7 @@ export default function WarehousePage() {
                         className="hover:bg-gray-50 transition-colors"
                       >
                         {visibleColumns.stt && (
-                          <td className="px-4 py-3 text-sm text-gray-900">
+                          <td className="px-4 py-3 text-sm text-gray-900 text-center">
                             {startIndex + index + 1}
                           </td>
                         )}
@@ -954,13 +969,13 @@ export default function WarehousePage() {
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     {visibleHistoryColumns.stt && (
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         STT
                       </th>
                     )}
                     {visibleHistoryColumns.id && (
                       <th
-                        className="px-4 py-3 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 select-none"
+                        className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
                         onClick={() => handleHistorySort("id")}
                       >
                         <div className="flex items-center">
@@ -1013,8 +1028,8 @@ export default function WarehousePage() {
                         </div>
                       </th>
                     )}
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Tác vụ
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Thao tác
                     </th>
                   </tr>
                 </thead>
@@ -1053,7 +1068,7 @@ export default function WarehousePage() {
                         className="hover:bg-gray-50 transition-colors"
                       >
                         {visibleHistoryColumns.stt && (
-                          <td className="px-4 py-3 text-sm text-gray-900">
+                          <td className="px-4 py-3 text-sm text-gray-900 text-center">
                             {startIndex + index + 1}
                           </td>
                         )}
@@ -1086,26 +1101,20 @@ export default function WarehousePage() {
                           </td>
                         )}
                         <td className="px-4 py-3 text-sm">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-center gap-3">
                             <button
                               onClick={() => handleViewDetail(item)}
-                              className="hover:text-blue-600 transition-colors"
+                              className="text-blue-600 hover:text-blue-800 transition-colors"
                               title="Xem chi tiết"
                             >
-                              <FaEye size={16} color="blue" />
+                              <Eye size={16} />
                             </button>
                             <button
                               onClick={() => handlePrintInvoice(item)}
-                              className="hover:text-green-600 transition-colors"
+                              className="text-green-600 hover:text-green-800 transition-colors"
                               title="Tải PDF"
                             >
-                              <FaDownload size={16} color="green" />
-                            </button>
-                            <button
-                              className="hover:text-red-600 transition-colors"
-                              title="Xóa"
-                            >
-                              <FaTrash size={16} color="red" />
+                              <Download size={16} />
                             </button>
                           </div>
                         </td>
@@ -1206,176 +1215,177 @@ export default function WarehousePage() {
               </select>
             </div>
           </div>
-        </div>
-      </div>
-
-      <CreateImportModal
-        isOpen={showCreateImportModal}
-        onClose={() => setShowCreateImportModal(false)}
-        onSubmit={handleSubmitImport}
-      />
-
-      <EntryFormDetailModal
-        isOpen={showDetailModal}
-        onClose={() => setShowDetailModal(false)}
-        entryForm={selectedImport}
-        details={entryFormDetails}
-        loading={loadingDetails}
-      />
-
-      {showAdvancedFilter && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
-          <div className="bg-white w-full max-w-2xl rounded-lg shadow-2xl">
-            <div className="bg-linear-to-r from-blue-600 to-blue-700 text-white px-6 py-4 flex justify-between items-center rounded-t-lg">
-              <h2 className="text-xl font-bold">Lọc tổng hợp</h2>
-              <button
-                onClick={() => setShowAdvancedFilter(false)}
-                className="text-white hover:bg-white/20 rounded-full p-2 transition"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+        </motion.div>
+        <CreateImportModal
+          isOpen={showCreateImportModal}
+          onClose={() => setShowCreateImportModal(false)}
+          onSubmit={handleSubmitImport}
+        />
+        <EntryFormDetailModal
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
+          entryForm={selectedImport}
+          details={entryFormDetails}
+          loading={loadingDetails}
+        />
+        <ExportInventoryModal
+          isOpen={showExportModal}
+          onClose={() => setShowExportModal(false)}
+        />{" "}
+        {showAdvancedFilter && (
+          <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
+            <div className="bg-white w-full max-w-2xl rounded-lg shadow-2xl">
+              <div className="bg-linear-to-r from-blue-600 to-blue-700 text-white px-6 py-4 flex justify-between items-center rounded-t-lg">
+                <h2 className="text-xl font-bold">Lọc tổng hợp</h2>
+                <button
+                  onClick={() => setShowAdvancedFilter(false)}
+                  className="text-white hover:bg-white/20 rounded-full p-2 transition"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
 
-            <div className="p-6 space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ngày tạo:
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="date"
-                    value={dateRange.from}
-                    onChange={(e) =>
-                      setDateRange((prev) => ({
-                        ...prev,
-                        from: e.target.value,
-                      }))
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    placeholder="Từ ngày"
-                  />
-                  <input
-                    type="date"
-                    value={dateRange.to}
-                    onChange={(e) =>
-                      setDateRange((prev) => ({
-                        ...prev,
-                        to: e.target.value,
-                      }))
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    placeholder="Đến ngày"
-                  />
+              <div className="p-6 space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ngày tạo:
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="date"
+                      value={dateRange.from}
+                      onChange={(e) =>
+                        setDateRange((prev) => ({
+                          ...prev,
+                          from: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                      placeholder="Từ ngày"
+                    />
+                    <input
+                      type="date"
+                      value={dateRange.to}
+                      onChange={(e) =>
+                        setDateRange((prev) => ({
+                          ...prev,
+                          to: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                      placeholder="Đến ngày"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tổng số lượng:
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      value={advancedFilters.totalQuantityMin}
+                      onChange={(e) =>
+                        setAdvancedFilters((prev) => ({
+                          ...prev,
+                          totalQuantityMin: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                      placeholder="Từ"
+                    />
+                    <input
+                      type="number"
+                      value={advancedFilters.totalQuantityMax}
+                      onChange={(e) =>
+                        setAdvancedFilters((prev) => ({
+                          ...prev,
+                          totalQuantityMax: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                      placeholder="Đến"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tổng tiền:
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      value={advancedFilters.totalAmountMin}
+                      onChange={(e) =>
+                        setAdvancedFilters((prev) => ({
+                          ...prev,
+                          totalAmountMin: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                      placeholder="Từ (VNĐ)"
+                    />
+                    <input
+                      type="number"
+                      value={advancedFilters.totalAmountMax}
+                      onChange={(e) =>
+                        setAdvancedFilters((prev) => ({
+                          ...prev,
+                          totalAmountMax: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                      placeholder="Đến (VNĐ)"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tổng số lượng:
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    value={advancedFilters.totalQuantityMin}
-                    onChange={(e) =>
-                      setAdvancedFilters((prev) => ({
-                        ...prev,
-                        totalQuantityMin: e.target.value,
-                      }))
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    placeholder="Từ"
-                  />
-                  <input
-                    type="number"
-                    value={advancedFilters.totalQuantityMax}
-                    onChange={(e) =>
-                      setAdvancedFilters((prev) => ({
-                        ...prev,
-                        totalQuantityMax: e.target.value,
-                      }))
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    placeholder="Đến"
-                  />
-                </div>
+              <div className="flex justify-end gap-3 px-6 pb-6">
+                <button
+                  onClick={() => {
+                    setAdvancedFilters({
+                      totalQuantityMin: "",
+                      totalQuantityMax: "",
+                      totalAmountMin: "",
+                      totalAmountMax: "",
+                    });
+                    setDateRange({ from: "", to: "" });
+                    setCurrentPage(0);
+                  }}
+                  className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition"
+                >
+                  Xóa bộ lọc
+                </button>
+                <button
+                  onClick={() => {
+                    setCurrentPage(0);
+                    setShowAdvancedFilter(false);
+                    fetchEntryForms();
+                  }}
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+                >
+                  Áp dụng
+                </button>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tổng tiền:
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    value={advancedFilters.totalAmountMin}
-                    onChange={(e) =>
-                      setAdvancedFilters((prev) => ({
-                        ...prev,
-                        totalAmountMin: e.target.value,
-                      }))
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    placeholder="Từ (VNĐ)"
-                  />
-                  <input
-                    type="number"
-                    value={advancedFilters.totalAmountMax}
-                    onChange={(e) =>
-                      setAdvancedFilters((prev) => ({
-                        ...prev,
-                        totalAmountMax: e.target.value,
-                      }))
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    placeholder="Đến (VNĐ)"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 px-6 pb-6">
-              <button
-                onClick={() => {
-                  setAdvancedFilters({
-                    totalQuantityMin: "",
-                    totalQuantityMax: "",
-                    totalAmountMin: "",
-                    totalAmountMax: "",
-                  });
-                  setDateRange({ from: "", to: "" });
-                  setCurrentPage(0);
-                }}
-                className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition"
-              >
-                Xóa bộ lọc
-              </button>
-              <button
-                onClick={() => {
-                  setCurrentPage(0);
-                  setShowAdvancedFilter(false);
-                  fetchEntryForms();
-                }}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
-              >
-                Áp dụng
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </>
     </AdminLayout>
   );
 }

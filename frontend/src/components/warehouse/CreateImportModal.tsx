@@ -36,6 +36,7 @@ export default function CreateImportModal({
   const [supplier, setSupplier] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [booksInImport, setBooksInImport] = useState<BookInImport[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedBookIsbn, setSelectedBookIsbn] = useState("");
   const [importQuantity, setImportQuantity] = useState("");
   const [totalInventoryQty, setTotalInventoryQty] = useState(0);
@@ -155,7 +156,7 @@ export default function CreateImportModal({
         const expectedHeaders = [
           "ISBN",
           "Tên sách",
-          "Năm XB",
+          "Năm xuất bản",
           "Giá nhập",
           "Số lượng",
         ];
@@ -186,16 +187,111 @@ export default function CreateImportModal({
 
         for (let i = 1; i < jsonData.length; i++) {
           const row = jsonData[i];
-          if (!row || row.length === 0) continue;
+          // Skip completely empty rows
+          if (!row || row.length === 0 || row.every((cell) => !cell)) continue;
 
           const isbn = row[0]?.toString().trim();
           const title = row[1]?.toString().trim();
-          const year = Number(row[2]);
-          const price = Number(row[3]);
-          const quantity = Number(row[4]);
+          const yearStr = row[2]?.toString().trim();
+          const priceStr = row[3]?.toString().trim();
+          const quantityStr = row[4]?.toString().trim();
 
-          if (!isbn || !title || !year || !price || !quantity) {
-            errors.push(`Hàng ${i + 1}: Thiếu dữ liệu`);
+          // Validate ISBN
+          if (!isbn) {
+            errors.push(`Hàng ${i + 1}: Thiếu ISBN`);
+            continue;
+          }
+          if (isbn.length < 10 || isbn.length > 13) {
+            errors.push(`Hàng ${i + 1}: ISBN phải có 10-13 ký tự`);
+            continue;
+          }
+          // Kiểm tra ký tự đặc biệt trong ISBN (chỉ cho phép chữ, số, và dấu gạch ngang)
+          if (!/^[a-zA-Z0-9-]+$/.test(isbn)) {
+            errors.push(
+              `Hàng ${
+                i + 1
+              }: ISBN chứa ký tự không hợp lệ (chỉ cho phép chữ, số và dấu -)`
+            );
+            continue;
+          }
+
+          // Validate title
+          if (!title) {
+            errors.push(`Hàng ${i + 1}: Thiếu tên sách`);
+            continue;
+          }
+          if (title.length > 500) {
+            errors.push(`Hàng ${i + 1}: Tên sách quá dài (tối đa 500 ký tự)`);
+            continue;
+          }
+          // Kiểm tra ký tự đặc biệt nguy hiểm trong tên sách
+          if (/[<>"'`;\\]/.test(title)) {
+            errors.push(
+              `Hàng ${
+                i + 1
+              }: Tên sách chứa ký tự đặc biệt không cho phép (< > " ' \` ; \\)`
+            );
+            continue;
+          }
+
+          // Validate year
+          if (!yearStr) {
+            errors.push(`Hàng ${i + 1}: Thiếu năm xuất bản`);
+            continue;
+          }
+          if (isNaN(Number(yearStr))) {
+            errors.push(`Hàng ${i + 1}: Năm xuất bản phải là số`);
+            continue;
+          }
+          const year = Number(yearStr);
+          if (!Number.isInteger(year)) {
+            errors.push(`Hàng ${i + 1}: Năm xuất bản phải là số nguyên`);
+            continue;
+          }
+          if (year < 1900 || year > 2100) {
+            errors.push(`Hàng ${i + 1}: Năm xuất bản phải từ 1900-2100`);
+            continue;
+          }
+
+          // Validate price
+          if (!priceStr) {
+            errors.push(`Hàng ${i + 1}: Thiếu giá nhập`);
+            continue;
+          }
+          if (isNaN(Number(priceStr))) {
+            errors.push(`Hàng ${i + 1}: Giá nhập phải là số`);
+            continue;
+          }
+          const price = Number(priceStr);
+          if (price <= 0) {
+            errors.push(`Hàng ${i + 1}: Giá nhập phải lớn hơn 0`);
+            continue;
+          }
+          if (price > 10000000) {
+            errors.push(`Hàng ${i + 1}: Giá nhập quá lớn (tối đa 10,000,000₫)`);
+            continue;
+          }
+
+          // Validate quantity
+          if (!quantityStr) {
+            errors.push(`Hàng ${i + 1}: Thiếu số lượng`);
+            continue;
+          }
+          if (isNaN(Number(quantityStr))) {
+            errors.push(`Hàng ${i + 1}: Số lượng phải là số`);
+            continue;
+          }
+          const quantity = Number(quantityStr);
+          if (!Number.isInteger(quantity)) {
+            errors.push(`Hàng ${i + 1}: Số lượng phải là số nguyên`);
+            continue;
+          }
+          if (quantity < 0) {
+            errors.push(`Hàng ${i + 1}: Số lượng không được là số âm`);
+            continue;
+          }
+          if (quantity > 10000) {
+            errors.push(`Hàng ${i + 1}: Số lượng tối đa mỗi sách là 10,000`);
             continue;
           }
 
@@ -278,6 +374,20 @@ export default function CreateImportModal({
     reader.readAsArrayBuffer(file);
     // Reset input để có thể upload lại cùng file
     event.target.value = "";
+  };
+
+  const handleClearAll = () => {
+    if (booksInImport.length === 0) {
+      toast.error("Không có sách nào để xóa");
+      return;
+    }
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmClearAll = () => {
+    setBooksInImport([]);
+    setShowDeleteConfirm(false);
+    toast.success("Đã xóa tất cả sách");
   };
 
   const handleAddBook = () => {
@@ -375,6 +485,16 @@ export default function CreateImportModal({
       toast.error("Vui lòng thêm ít nhất một sách vào phiếu");
       return;
     }
+    // Kiểm tra có sách nào số lượng = 0
+    const booksWithZeroQty = booksInImport.filter(
+      (book) => book.quantity === 0
+    );
+    if (booksWithZeroQty.length > 0) {
+      toast.error(
+        `Có ${booksWithZeroQty.length} sách có số lượng = 0. Vui lòng xóa hoặc cập nhật số lượng`
+      );
+      return;
+    }
 
     onSubmit({
       supplier: supplier.trim(),
@@ -468,9 +588,19 @@ export default function CreateImportModal({
             </div>
 
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
-              <h4 className="text-sm font-semibold text-gray-800 mb-3">
-                Sách đã thêm ({booksInImport.length})
-              </h4>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-semibold text-gray-800">
+                  Sách đã thêm ({booksInImport.length})
+                </h4>
+                {booksInImport.length > 0 && (
+                  <button
+                    onClick={handleClearAll}
+                    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md transition-colors flex items-center gap-1"
+                  >
+                    Xóa tất cả
+                  </button>
+                )}
+              </div>
               {booksInImport.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   Chưa có sách nào được thêm
@@ -783,6 +913,47 @@ export default function CreateImportModal({
           </div>
         </div>
       </div>
+
+      {/* Modal xác nhận xóa tất cả */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-60">
+          <div className="bg-white rounded-lg shadow-2xl p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center shrink-0">
+                <Trash2 className="text-red-600" size={24} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">
+                  Xác nhận xóa tất cả
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Bạn có chắc muốn xóa tất cả {booksInImport.length} sách?
+                </p>
+              </div>
+            </div>
+
+            <p className="text-sm text-gray-500 mb-6">
+              Hành động này không thể hoàn tác. Tất cả sách đã thêm sẽ bị xóa
+              khỏi phiếu nhập.
+            </p>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmClearAll}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition flex items-center gap-2"
+              >
+                Xóa tất cả
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

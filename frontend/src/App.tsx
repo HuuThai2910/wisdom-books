@@ -26,6 +26,7 @@ import OrderManagement from "./pages/admin/OrderManagement";
 import WarehousePage from "./pages/admin/WarehousePage";
 import PermissionsPage from "./pages/admin/PermissionsPage";
 import AdminProfile from "./pages/admin/AdminProfile";
+import PaymentSuccessPage from "./pages/client/PaymentSuccessPage";
 
 function App() {
   const location = useLocation();
@@ -104,6 +105,14 @@ function App() {
             element={
               <ClientLayout>
                 <CheckOutPage />
+              </ClientLayout>
+            }
+          />
+          <Route
+            path="/payment-success"
+            element={
+              <ClientLayout>
+                <PaymentSuccessPage />
               </ClientLayout>
             }
           />
