@@ -68,7 +68,7 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
                   Trang chủ
                 </Link>
                 <Link
-                  to="/profile"
+                  to="/admin/profile"
                   className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                   onClick={() => setDropdownOpen(false)}
                 >
@@ -79,7 +79,6 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
                   className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                   onClick={() => {
                     setDropdownOpen(false);
-                    // TODO: Implement logout
                   }}
                 >
                   <LogOut className="w-4 h-4" />

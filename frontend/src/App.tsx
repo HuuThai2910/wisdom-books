@@ -25,6 +25,7 @@ import ManageUserPage from "./pages/admin/ManageUserPage";
 import OrderManagement from "./pages/admin/OrderManagement";
 import WarehousePage from "./pages/admin/WarehousePage";
 import PermissionsPage from "./pages/admin/PermissionsPage";
+import AdminProfile from "./pages/admin/AdminProfile";
 
 function App() {
   const location = useLocation();
@@ -176,6 +177,7 @@ function App() {
           <Route path="/admin/books/edit" element={<ViewUpsertBook />} />
           <Route path="/admin/books/view" element={<ViewBookDetail />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/admin/profile" element={<AdminProfile />} />
           <Route path="/admin/manage-users" element={<ManageUserPage />} />
           <Route path="/admin/orders" element={<OrderManagement />} />
           <Route path="/admin/warehouse" element={<WarehousePage />} />
