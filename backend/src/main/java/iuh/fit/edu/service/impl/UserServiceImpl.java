@@ -107,6 +107,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id).orElse(null);
         assert user != null;
         user.setStatus(UserStatus.INACTIVE);
+        userRepository.save(user);
         cognitoService.disableUser(user.getFullName());
     }
 
