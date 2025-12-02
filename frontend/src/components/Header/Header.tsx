@@ -166,7 +166,7 @@ export default function Header() {
         <div className="relative">
             {/* Navbar cố định */}
             <nav
-                className="fixed top-0 left-0 w-full z-50 transition-all duration-500 px-8 py-4"
+                className="fixed top-0 left-0 w-full z-50 transition-all duration-500 px-8 py-1"
                 style={{
                     background: isHomePage
                         ? `rgba(37, 99, 235, ${opacity})` // Blue-600 + opacity
