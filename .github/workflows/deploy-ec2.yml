@@ -3,8 +3,10 @@ name: Deploy to EC2
 on:
     push:
         branches:
-            - main
             - develop
+        paths:
+            - "backend/**"
+            - ".github/workflows/deploy-ec2.yml"
     workflow_dispatch: # Cho phép trigger thủ công
 
 jobs:
