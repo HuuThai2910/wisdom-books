@@ -1,18 +1,18 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { fetchUsers, createUser, UserParams, updateUser, UpdateUserParams, deleteUser, getUserById } from './../../api/userApi';
+import { fetchUsers, createUser, UserParams, updateUser, UpdateUserParams, deleteUser, getUserById, UserQueryParams } from './../../api/userApi';
 import { UserData } from "@/types";
 
 
 
 export const fetchUsersDashboard=createAsyncThunk<
     any,
-    void,
+    UserQueryParams | undefined,
     { rejectValue: string }
 >(
     "users", 
-    async (_, thunkAPI) => {
+    async (params, thunkAPI) => {
         try {
-            const response = await fetchUsers();
+            const response = await fetchUsers(params);
             return response.data.data;
         } catch (err: any) {
             return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);

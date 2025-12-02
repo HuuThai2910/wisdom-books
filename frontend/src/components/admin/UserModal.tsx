@@ -3,6 +3,12 @@ import { AppDispatch } from '@/app/store';
 import { createUserforAdmin, updateUserforAdmin } from '../../features/user/useSlice';
 import { useState, useRef, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import toast from 'react-hot-toast';
+import addressData, { WardMapping } from "vietnam-address-database";
+
+const wardMappings = addressData.find(
+  (x: any) => x.type === "table" && x.name === "ward_mappings"
+)!.data as WardMapping[];
 
 interface UserModalProps {
   isOpen: boolean;
@@ -12,10 +18,25 @@ interface UserModalProps {
   initialData?: UserDetailResponse;
 }
 
+interface FormErrors {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
+  confirmPassword?: string;
+  gender?: string;
+  province?: string;
+  ward?: string;
+  address?: string;
+  role?: string;
+}
+
 const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalProps) => {
   const dispatch=useDispatch<AppDispatch>();
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [wardsForSelectedCity, setWardsForSelectedCity] = useState<string[]>([]);
   
   const getRoleName = (roleId: string): string => {
     const roleMap: { [key: string]: string } = {
@@ -57,6 +78,33 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    // Lọc phường theo tỉnh/thành phố được chọn (giống DeliveryInformation.tsx)
+    if (!formData.address.province) {
+      setWardsForSelectedCity([]);
+      return;
+    }
+    
+    const filteredWards = wardMappings
+      .filter((w) => {
+        const provinceToMatch = formData.address.province.replace(
+          /^(Thành phố |Tỉnh )/i,
+          ""
+        );
+        const wardProvince = w.new_province_name.replace(
+          /^(Thành phố |Tỉnh )/i,
+          ""
+        );
+        return (
+          wardProvince === provinceToMatch ||
+          w.new_province_name === formData.address.province
+        );
+      })
+      .map((w) => w.new_ward_name);
+
+    setWardsForSelectedCity(Array.from(new Set(filteredWards)));
+  }, [formData.address.province]);
+
   useEffect( () => {
     if ((mode === 'edit' || mode === 'view') && initialData) {
       console.log('UserModal initialData:', initialData);
@@ -95,6 +143,7 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
       });
       setAvatarPreview(null);
     }
+    setErrors({});
   }, [mode, initialData, isOpen]);
 
   if (!isOpen) return null;
@@ -131,14 +180,82 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
     }));
   };
 
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    // Validate fullName
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Vui lòng nhập họ và tên';
+    } else if (formData.fullName.trim().length < 3) {
+      newErrors.fullName = 'Họ và tên phải có ít nhất 3 ký tự';
+    }
+
+    // Validate email
+    if (!formData.email.trim()) {
+      newErrors.email = 'Vui lòng nhập email';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Email không hợp lệ';
+    }
+
+    // Validate phone
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Vui lòng nhập số điện thoại';
+    } else if (!/^0\d{9}$/.test(formData.phone)) {
+      newErrors.phone = 'Số điện thoại phải có 10 số và bắt đầu bằng 0';
+    }
+
+    // Validate password (only for add mode)
+    if (mode === 'add') {
+      if (!formData.password) {
+        newErrors.password = 'Vui lòng nhập mật khẩu';
+      } else if (formData.password.length < 6) {
+        newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+      }
+
+      if (!formData.confirmPassword) {
+        newErrors.confirmPassword = 'Vui lòng xác nhận mật khẩu';
+      } else if (formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
+      }
+    }
+
+    // Validate role
+    if (!formData.role.id) {
+      newErrors.role = 'Vui lòng chọn vai trò';
+    }
+
+    // Validate address fields
+    if (!formData.address.province.trim()) {
+      newErrors.province = 'Vui lòng chọn tỉnh/thành phố';
+    }
+
+    if (!formData.address.ward.trim()) {
+      newErrors.ward = 'Vui lòng chọn phường/xã';
+    }
+
+    if (!formData.address.address.trim()) {
+      newErrors.address = 'Vui lòng nhập địa chỉ chi tiết';
+    } else if (formData.address.address.trim().length < 5) {
+      newErrors.address = 'Địa chỉ phải có ít nhất 5 ký tự';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      toast.error('Vui lòng kiểm tra lại thông tin!');
+      return;
+    }
 
     setLoading(true);
 
     try {
       let avatarFilename = initialData?.avatarURL; 
-            if (formData.avatarFile) {
+      if (formData.avatarFile) {
         const uploadResponse = await uploadAvatar(formData.avatarFile);
         avatarFilename = uploadResponse.data.data;
         console.log('Avatar uploaded:', avatarFilename);
@@ -152,12 +269,13 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
         
         console.log('Creating user with data:', JSON.stringify(userDataToSubmit, null, 2));
         await dispatch(createUserforAdmin({user: userDataToSubmit})).unwrap();
-        alert('Thêm người dùng thành công!');
+        toast.success('Thêm người dùng thành công!');
         onSuccess();
+        onClose();
       } else {
         // Update existing user
         if (!initialData?.id) {
-          alert('Lỗi: Không tìm thấy ID người dùng!');
+          toast.error('Lỗi: Không tìm thấy ID người dùng!');
           setLoading(false);
           return;
         }
@@ -174,12 +292,14 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
         };
 
         await dispatch(updateUserforAdmin({ id: String(initialData.id), user: updateData })).unwrap();
-        alert('Cập nhật người dùng thành công!');
+        toast.success('Cập nhật người dùng thành công!');
         onSuccess();
+        onClose();
       }
     } catch (error: any) {
       console.error('Error:', error);
-      alert(`Lỗi: ${error?.message || error}`);
+      const errorMessage = error?.response?.data?.message || error?.message || 'Có lỗi xảy ra';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -191,31 +311,20 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
         justify-center animate-fadeIn"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-gradient-to-br from-white to-blue-50 rounded-3xl w-[90%] max-w-[900px] 
-        max-h-[90vh] overflow-auto shadow-2xl animate-modalSlide flex relative">
-        
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0ea5e9] 
-          via-[#3b82f6] to-[#0ea5e9] bg-[length:200%_100%] animate-gradientMove" />
+      <div className="bg-white rounded-2xl w-[90%] max-w-[900px] 
+        max-h-[90vh] overflow-auto shadow-2xl flex relative">
 
         {/* Left Side - Avatar Section */}
-        <div className="w-[300px] bg-gradient-to-b from-[#0ea5e9] to-[#3b82f6] p-10 
-          flex flex-col items-center relative overflow-hidden">
-          <div className="absolute top-[-50%] right-[-30%] w-[250px] h-[250px] 
-            bg-white/8 rounded-full animate-float" />
-          <div className="absolute bottom-[-40%] left-[-30%] w-[200px] h-[200px] 
-            bg-white/5 rounded-full animate-floatReverse" />
-
-          <h3 className="text-white text-lg font-semibold mb-6 text-center relative z-10 
-            [text-shadow:0_2px_10px_rgba(0,0,0,0.2)]">
+        <div className="w-[300px] h-[138vh] bg-[#3b82f6] p-10 
+          flex flex-col items-center">
+          <h3 className="text-white text-lg font-semibold mb-6 text-center">
             Ảnh đại diện
           </h3>
 
-          <div className="relative z-10 mb-6">
+          <div className="relative mb-6">
             <div className="relative w-[150px] h-[150px]">
-              <div className="w-[150px] h-[150px] rounded-full border-4 border-white/30 
-                shadow-[0_12px_40px_rgba(0,0,0,0.3)] transition-all duration-400 
-                hover:scale-110 hover:rotate-[5deg] bg-white/15 backdrop-blur-md 
-                flex items-center justify-center text-white text-5xl font-semibold
+              <div className="w-[150px] h-[150px] rounded-full border-4 border-white/40 
+                shadow-lg bg-white/20 flex items-center justify-center text-white text-5xl font-semibold
                 overflow-hidden">
                 {avatarPreview ? (
                   <img 
@@ -237,9 +346,8 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
                   type="button"
                   onClick={removeAvatar}
                   className="absolute top-0 right-0 w-9 h-9 rounded-full bg-red-500 
-                    border-4 border-white/30 text-white text-xl flex items-center 
-                    justify-center transition-all duration-300 hover:scale-115 
-                    hover:rotate-90 hover:bg-red-600 shadow-lg"
+                    border-2 border-white text-white text-xl flex items-center 
+                    justify-center transition-all duration-200 hover:bg-red-600 shadow-md"
                 >
                   ×
                 </button>
@@ -248,11 +356,10 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
           </div>
 
           {mode !== 'view' && (
-            <label className="relative px-8 py-3.5 bg-white/20 backdrop-blur-md text-black 
-              border-2 border-white/30 rounded-full text-sm font-semibold cursor-pointer 
-              transition-all duration-300 hover:bg-white/30 hover:border-white/50 
-              hover:-translate-y-0.5 shadow-lg hover:shadow-xl overflow-hidden z-10">
-              <span className="relative z-10">📷 Chọn ảnh</span>
+            <label className="px-8 py-3 bg-white text-[#3b82f6] 
+              rounded-lg text-sm font-semibold cursor-pointer 
+              transition-all duration-200 hover:bg-white/90 shadow-md">
+              Chọn ảnh
               <input
                 ref={fileInputRef}
                 type="file"
@@ -263,41 +370,22 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
             </label>
           )}
 
-          <p className="text-center text-white/90 text-xs mt-6 bg-white/10 px-5 py-3 
-            rounded-xl backdrop-blur-md leading-relaxed z-10">
+          <p className="text-center text-white/90 text-xs mt-6 px-5 py-3 leading-relaxed">
             JPG, PNG hoặc GIF<br />Tối đa 2MB
           </p>
-
-          <div className="mt-auto pt-8 text-center text-white/70 text-xs space-y-2 z-10">
-            <p className="py-2 px-3 bg-white/5 rounded-lg backdrop-blur-md">
-              💡 Ảnh đại diện giúp dễ nhận biết
-            </p>
-            <p className="py-2 px-3 bg-white/5 rounded-lg backdrop-blur-md">
-              ✨ Chọn ảnh rõ nét, chân dung
-            </p>
-          </div>
         </div>
 
         {/* Right Side - Form Section */}
         <div className="flex-1 flex flex-col bg-white">
-          <div className="px-9 py-7 bg-gradient-to-r from-[#0ea5e9] to-[#3b82f6] 
-            text-white flex justify-between items-center relative overflow-hidden">
-            <div className="absolute top-[-50%] right-[-10%] w-[200px] h-[200px] 
-              bg-white/10 rounded-full animate-float" />
-            <div className="absolute bottom-[-30%] left-[-5%] w-[150px] h-[150px] 
-              bg-white/8 rounded-full animate-floatReverse" />
-            
-            <h2 className="text-2xl font-semibold relative z-10 
-              [text-shadow:0_2px_10px_rgba(0,0,0,0.2)]">
+          <div className="px-9 py-7 bg-[#3b82f6] text-white flex justify-between items-center">
+            <h2 className="text-2xl font-semibold">
               {mode === 'add' ? 'Thêm người dùng mới' : mode === 'view' ? 'Xem thông tin người dùng' : 'Chỉnh sửa người dùng'}
             </h2>
             
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-full border-2 border-white/30 bg-white/15 
-                backdrop-blur-md text-white text-2xl flex items-center justify-center 
-                transition-all duration-300 hover:bg-white/25 hover:border-white/50 
-                hover:rotate-90 hover:scale-110 relative z-10"
+              className="w-10 h-10 rounded-lg bg-white/20 text-white text-2xl flex items-center justify-center 
+                transition-all duration-200 hover:bg-white/30"
             >
               ×
             </button>
@@ -312,73 +400,123 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
                   </label>
                   <input
                     type="email"
-                    required
                     disabled={mode === 'edit' || mode === 'view'}
                     readOnly={mode === 'view'}
                     value={formData.email}
-                    onChange={(e)=>setFormData({...formData, email:e.target.value})}
+                    onChange={(e)=>{
+                      setFormData({...formData, email:e.target.value});
+                      if (errors.email) setErrors({...errors, email: undefined});
+                    }}
                     placeholder="example@email.com"
-                    className={`w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-xl text-sm 
-                      outline-none transition-all duration-300 hover:border-gray-300 
-                      hover:-translate-y-0.5 hover:shadow-md focus:border-[#0ea5e9] 
-                      focus:-translate-y-0.5 focus:shadow-[0_8px_24px_rgba(14,165,233,0.2)]
+                    className={`w-full px-4 py-3.5 text-black border-2 rounded-lg text-sm 
+                      outline-none transition-all duration-200 hover:border-gray-300 
+                      focus:border-[#2196F3] 
+                      focus:shadow-lg
+                      ${errors.email ? 'border-red-500' : 'border-gray-200'}
                       ${mode === 'edit' || mode === 'view' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   />
+                  {errors.email && (
+                    <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                  )}
                 </div>
 
                 {mode === 'add' && (
-                  <div className="col-span-2 animate-fadeInUp [animation-delay:0.15s]">
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Mật khẩu <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="password"
-                      required
-                      value={formData.password}
-                      onChange={(e)=>setFormData({...formData, password:e.target.value})}
-                      placeholder="Nhập mật khẩu"
-                      className="w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-xl text-sm 
-                        outline-none transition-all duration-300 hover:border-gray-300 
-                        hover:-translate-y-0.5 hover:shadow-md focus:border-[#0ea5e9] 
-                        focus:-translate-y-0.5 focus:shadow-[0_8px_24px_rgba(14,165,233,0.2)]"
-                    />
-                  </div>
+                  <>
+                    <div className="col-span-2 animate-fadeInUp [animation-delay:0.15s]">
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
+                        Mật khẩu <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="password"
+                        value={formData.password}
+                        onChange={(e)=>{
+                          setFormData({...formData, password:e.target.value});
+                          if (errors.password) setErrors({...errors, password: undefined});
+                        }}
+                        placeholder="Nhập mật khẩu"
+                        className={`w-full px-4 py-3.5 text-black border-2 rounded-lg text-sm 
+                          outline-none transition-all duration-200 hover:border-gray-300 
+                          focus:border-[#2196F3] 
+                          focus:shadow-lg
+                          ${errors.password ? 'border-red-500' : 'border-gray-200'}`}
+                      />
+                      {errors.password && (
+                        <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                      )}
+                    </div>
+                    <div className="col-span-2 animate-fadeInUp [animation-delay:0.18s]">
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
+                        Xác nhận mật khẩu <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="password"
+                        value={formData.confirmPassword}
+                        onChange={(e)=>{
+                          setFormData({...formData, confirmPassword:e.target.value});
+                          if (errors.confirmPassword) setErrors({...errors, confirmPassword: undefined});
+                        }}
+                        placeholder="Nhập lại mật khẩu"
+                        className={`w-full px-4 py-3.5 text-black border-2 rounded-lg text-sm 
+                          outline-none transition-all duration-200 hover:border-gray-300 
+                          focus:border-[#2196F3] 
+                          focus:shadow-lg
+                          ${errors.confirmPassword ? 'border-red-500' : 'border-gray-200'}`}
+                      />
+                      {errors.confirmPassword && (
+                        <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
+                      )}
+                    </div>
+                  </>
                 )}
 
                 <div className="col-span-2 animate-fadeInUp [animation-delay:0.2s]">
                   <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Họ và tên
+                    Họ và tên <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     readOnly={mode === 'view'}
                     value={formData.fullName}
-                    onChange={(e)=>setFormData({...formData, fullName:e.target.value})}
+                    onChange={(e)=>{
+                      setFormData({...formData, fullName:e.target.value});
+                      if (errors.fullName) setErrors({...errors, fullName: undefined});
+                    }}
                     placeholder="Nguyễn Văn A"
-                    className={`w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-xl text-sm 
-                      outline-none transition-all duration-300 hover:border-gray-300 
-                      hover:-translate-y-0.5 hover:shadow-md focus:border-[#0ea5e9] 
-                      focus:-translate-y-0.5 focus:shadow-[0_8px_24px_rgba(14,165,233,0.2)]
+                    className={`w-full px-4 py-3.5 text-black border-2 rounded-lg text-sm 
+                      outline-none transition-all duration-200 hover:border-gray-300 
+                      focus:border-[#2196F3] 
+                      focus:shadow-lg
+                      ${errors.fullName ? 'border-red-500' : 'border-gray-200'}
                       ${mode === 'view' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   />
+                  {errors.fullName && (
+                    <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
+                  )}
                 </div>
 
                 <div className="animate-fadeInUp [animation-delay:0.25s]">
                   <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Số điện thoại
+                    Số điện thoại <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="tel"
                     readOnly={mode === 'view'}
                     value={formData.phone}
-                    onChange={(e)=>setFormData({...formData, phone:e.target.value})}
-                    placeholder="(555) 123-4567"
-                    className={`w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-xl text-sm 
-                      outline-none transition-all duration-300 hover:border-gray-300 
-                      hover:-translate-y-0.5 hover:shadow-md focus:border-[#0ea5e9] 
-                      focus:-translate-y-0.5 focus:shadow-[0_8px_24px_rgba(14,165,233,0.2)]
+                    onChange={(e)=>{
+                      setFormData({...formData, phone:e.target.value});
+                      if (errors.phone) setErrors({...errors, phone: undefined});
+                    }}
+                    placeholder="0123456789"
+                    className={`w-full px-4 py-3.5 text-black border-2 rounded-lg text-sm 
+                      outline-none transition-all duration-200 hover:border-gray-300 
+                      focus:border-[#2196F3] 
+                      focus:shadow-lg
+                      ${errors.phone ? 'border-red-500' : 'border-gray-200'}
                       ${mode === 'view' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   />
+                  {errors.phone && (
+                    <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                  )}
                 </div>
 
                 <div className="animate-fadeInUp [animation-delay:0.3s]">
@@ -390,19 +528,19 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
                       type="text"
                       readOnly
                       value={getGenderDisplay(formData.gender)}
-                      className="w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-xl text-sm bg-gray-100 cursor-not-allowed"
+                      className="w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-lg text-sm bg-gray-100 cursor-not-allowed"
                     />
                   ) : (
                     <select
                       value={formData.gender}
                       onChange={(e)=>setFormData({...formData, gender:e.target.value})}
-                      className="w-full px-4 py-3.5 border-2 text-black border-gray-200 rounded-xl text-sm 
-                        outline-none transition-all duration-300 hover:border-gray-300 
-                        hover:-translate-y-0.5 hover:shadow-md focus:border-[#0ea5e9] 
-                        focus:-translate-y-0.5 focus:shadow-[0_8px_24px_rgba(14,165,233,0.2)]
+                      className="w-full px-4 py-3.5 border-2 text-black border-gray-200 rounded-lg text-sm 
+                        outline-none transition-all duration-200 hover:border-gray-300 
+                        focus:border-[#2196F3] 
+                        focus:shadow-lg
                         appearance-none bg-no-repeat bg-[right_16px_center] cursor-pointer pr-12"
                       style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%230ea5e9' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232196F3' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`
                       }}
                     >
                       <option value="">-- Chọn giới tính --</option>
@@ -414,56 +552,117 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
 
                 <div className="animate-fadeInUp [animation-delay:0.35s]">
                   <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Tỉnh/Thành phố
+                    Tỉnh/Thành phố <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    readOnly={mode === 'view'}
-                    value={formData.address.province}
-                    onChange={(e)=>setFormData({...formData, address:{...formData.address, province:e.target.value}})}
-                    placeholder="Hồ Chí Minh"
-                    className={`w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-xl text-sm 
-                      outline-none transition-all duration-300 hover:border-gray-300 
-                      hover:-translate-y-0.5 hover:shadow-md focus:border-[#0ea5e9] 
-                      focus:-translate-y-0.5 focus:shadow-[0_8px_24px_rgba(14,165,233,0.2)]
-                      ${mode === 'view' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                  />
+                  {mode === 'view' ? (
+                    <input
+                      type="text"
+                      readOnly
+                      value={formData.address.province}
+                      className="w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-lg text-sm bg-gray-100 cursor-not-allowed"
+                    />
+                  ) : (
+                    <>
+                      <select
+                        value={formData.address.province}
+                        onChange={(e)=>{
+                          setFormData({...formData, address:{...formData.address, province:e.target.value, ward: ''}});
+                          if (errors.province) setErrors({...errors, province: undefined});
+                        }}
+                        className={`w-full px-4 py-3.5 border-2 text-black rounded-lg text-sm 
+                          outline-none transition-all duration-200 hover:border-gray-300 
+                          focus:border-[#2196F3] 
+                          focus:shadow-lg
+                          appearance-none bg-no-repeat bg-[right_16px_center] cursor-pointer pr-12
+                          ${errors.province ? 'border-red-500' : 'border-gray-200'}`}
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232196F3' d='4l5 5 5-5z'/%3E%3C/svg%3E")`
+                        }}
+                      >
+                        <option value="">-- Chọn Tỉnh/Thành phố --</option>
+                        {Array.from(
+                          new Set(wardMappings.map((w) => w.new_province_name))
+                        ).map((province) => (
+                          <option key={province} value={province}>
+                            {province}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.province && (
+                        <p className="text-red-500 text-xs mt-1">{errors.province}</p>
+                      )}
+                    </>
+                  )}
                 </div>
 
                 <div className="animate-fadeInUp [animation-delay:0.36s]">
                   <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Phường/Xã
+                    Phường/Xã <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    readOnly={mode === 'view'}
-                    value={formData.address.ward}
-                    onChange={(e)=>setFormData({...formData, address:{...formData.address, ward:e.target.value}})}
-                    placeholder="Phường 1"
-                    className={`w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-xl text-sm 
-                      outline-none transition-all duration-300 hover:border-gray-300 
-                      hover:-translate-y-0.5 hover:shadow-md focus:border-[#0ea5e9] 
-                      focus:-translate-y-0.5 focus:shadow-[0_8px_24px_rgba(14,165,233,0.2)]
-                      ${mode === 'view' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                  />
+                  {mode === 'view' ? (
+                    <input
+                      type="text"
+                      readOnly
+                      value={formData.address.ward}
+                      className="w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-lg text-sm bg-gray-100 cursor-not-allowed"
+                    />
+                  ) : (
+                    <>
+                      <select
+                        value={formData.address.ward}
+                        onChange={(e)=>{
+                          setFormData({...formData, address:{...formData.address, ward:e.target.value}});
+                          if (errors.ward) setErrors({...errors, ward: undefined});
+                        }}
+                        disabled={!formData.address.province}
+                        className={`w-full px-4 py-3.5 border-2 text-black rounded-lg text-sm 
+                          outline-none transition-all duration-200 hover:border-gray-300 
+                          focus:border-[#2196F3] 
+                          focus:shadow-lg
+                          appearance-none bg-no-repeat bg-[right_16px_center] cursor-pointer pr-12
+                          ${errors.ward ? 'border-red-500' : 'border-gray-200'}
+                          ${!formData.address.province ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232196F3' d='M1 4l5 5 5-5z'/%3E%3C/svg%3E")`
+                        }}
+                      >
+                        <option value="">-- Chọn Phường/Xã --</option>
+                        {wardsForSelectedCity.map((ward) => (
+                          <option key={ward} value={ward}>
+                            {ward}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.ward && (
+                        <p className="text-red-500 text-xs mt-1">{errors.ward}</p>
+                      )}
+                    </>
+                  )}
                 </div>
 
                 <div className="col-span-2 animate-fadeInUp [animation-delay:0.37s]">
                   <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Địa chỉ chi tiết
+                    Địa chỉ chi tiết <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     readOnly={mode === 'view'}
                     value={formData.address.address}
-                    onChange={(e)=>setFormData({...formData, address:{...formData.address, address:e.target.value}})}
-                    placeholder="123 Nguyễn Văn Linh"
-                    className={`w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-xl text-sm 
-                      outline-none transition-all duration-300 hover:border-gray-300 
-                      hover:-translate-y-0.5 hover:shadow-md focus:border-[#0ea5e9] 
-                      focus:-translate-y-0.5 focus:shadow-[0_8px_24px_rgba(14,165,233,0.2)]
+                    onChange={(e)=>{
+                      setFormData({...formData, address:{...formData.address, address:e.target.value}});
+                      if (errors.address) setErrors({...errors, address: undefined});
+                    }}
+                    placeholder="Số nhà, tên đường"
+                    className={`w-full px-4 py-3.5 text-black border-2 rounded-lg text-sm 
+                      outline-none transition-all duration-200 hover:border-gray-300 
+                      focus:border-[#2196F3] 
+                      focus:shadow-lg
+                      ${errors.address ? 'border-red-500' : 'border-gray-200'}
                       ${mode === 'view' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   />
+                  {errors.address && (
+                    <p className="text-red-500 text-xs mt-1">{errors.address}</p>
+                  )}
                 </div>
 
                 <div className="animate-fadeInUp [animation-delay:0.4s]">
@@ -475,28 +674,36 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
                       type="text"
                       readOnly
                       value={getRoleName(formData.role.id)}
-                      className="w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-xl text-sm bg-gray-100 cursor-not-allowed"
+                      className="w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-lg text-sm bg-gray-100 cursor-not-allowed"
                     />
                   ) : (
-                    <select
-                      required
-                      value={formData.role.id}
-                      onChange={(e)=>setFormData({...formData, role:{id:e.target.value}})}
-                      className="w-full px-4 py-3.5 border-2 text-black border-gray-200 rounded-xl text-sm 
-                        outline-none transition-all duration-300 hover:border-gray-300 
-                        hover:-translate-y-0.5 hover:shadow-md focus:border-[#0ea5e9] 
-                        focus:-translate-y-0.5 focus:shadow-[0_8px_24px_rgba(14,165,233,0.2)]
-                        appearance-none bg-no-repeat bg-[right_16px_center] cursor-pointer pr-12"
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%230ea5e9' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`
-                      }}
-                    >
-                      <option value="">-- Chọn vai trò --</option>
-                      <option value="1">Admin</option>
-                      <option value="2">Nhân viên</option>
-                      <option value="3">Khách hàng</option>
-                      <option value="4">Thủ kho</option>
-                    </select>
+                    <>
+                      <select
+                        value={formData.role.id}
+                        onChange={(e)=>{
+                          setFormData({...formData, role:{id:e.target.value}});
+                          if (errors.role) setErrors({...errors, role: undefined});
+                        }}
+                        className={`w-full px-4 py-3.5 border-2 text-black rounded-lg text-sm 
+                          outline-none transition-all duration-200 hover:border-gray-300 
+                          focus:border-[#2196F3] 
+                          focus:shadow-lg
+                          appearance-none bg-no-repeat bg-[right_16px_center] cursor-pointer pr-12
+                          ${errors.role ? 'border-red-500' : 'border-gray-200'}`}
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232196F3' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`
+                        }}
+                      >
+                        <option value="">-- Chọn vai trò --</option>
+                        <option value="1">Admin</option>
+                        <option value="2">Nhân viên</option>
+                        <option value="3">Khách hàng</option>
+                        <option value="4">Thủ kho</option>
+                      </select>
+                      {errors.role && (
+                        <p className="text-red-500 text-xs mt-1">{errors.role}</p>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -509,19 +716,19 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
                       type="text"
                       readOnly
                       value={getStatusDisplay(formData.userStatus)}
-                      className="w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-xl text-sm bg-gray-100 cursor-not-allowed"
+                      className="w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-lg text-sm bg-gray-100 cursor-not-allowed"
                     />
                   ) : (
                     <select
                       value={formData.userStatus}
                       onChange={(e)=>setFormData({...formData, userStatus:e.target.value})}
-                      className="w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-xl text-sm 
-                        outline-none transition-all duration-300 hover:border-gray-300 
-                        hover:-translate-y-0.5 hover:shadow-md focus:border-[#0ea5e9] 
-                        focus:-translate-y-0.5 focus:shadow-[0_8px_24px_rgba(14,165,233,0.2)]
+                      className="w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-lg text-sm 
+                        outline-none transition-all duration-200 hover:border-gray-300 
+                        focus:border-[#2196F3] 
+                        focus:shadow-lg
                         appearance-none bg-no-repeat bg-[right_16px_center] cursor-pointer pr-12"
                       style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%230ea5e9' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232196F3' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`
                       }}
                     >
                       <option value="ACTIVE">Hoạt động</option>
@@ -536,9 +743,8 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
               <button
                 type="button"
                 onClick={onClose}
-                className="px-8 py-3.5 border-2 text-black border-gray-300 bg-white rounded-xl text-sm 
-                  font-semibold transition-all duration-300 hover:border-gray-400 
-                  hover:-translate-y-0.5 hover:shadow-md relative overflow-hidden"
+                className="px-8 py-3.5 border-2 text-black border-gray-300 bg-white rounded-lg text-sm 
+                  font-semibold transition-all duration-200 hover:bg-gray-50"
               >
                 {mode === 'view' ? 'Đóng' : 'Hủy'}
               </button>
@@ -547,12 +753,8 @@ const UserModal = ({ isOpen, onClose, onSuccess, mode, initialData }: UserModalP
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`px-8 py-3.5 text-white rounded-xl text-sm font-semibold 
-                    transition-all duration-300 hover:-translate-y-0.5 relative overflow-hidden
-                    shadow-lg hover:shadow-xl ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  style={{
-                    background: 'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)'
-                  }}
+                  className={`px-8 py-3.5 bg-[#3b82f6] hover:bg-[#2563eb] text-white rounded-lg text-sm font-semibold 
+                    transition-all duration-200 shadow-md ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {loading ? 'Đang xử lý...' : (mode === 'add' ? 'Thêm người dùng' : 'Cập nhật')}
                 </button>

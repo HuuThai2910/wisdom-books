@@ -38,15 +38,14 @@ const UserTableHeader = ({
       
       <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
         <div className="relative w-full md:w-[300px]">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
           <input
             type="text"
             placeholder="Tìm kiếm theo tên, email, số điện thoại..."
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm 
-              outline-none transition-all duration-300 focus:border-[#8B86C7] focus:ring-4 
-              focus:ring-[#8B86C7]/10"
+            className="w-full pl-4 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm 
+              outline-none transition-all duration-300 focus:border-[#2196F3] focus:ring-4 
+              focus:ring-[#2196F3]/10"
           />
         </div>
         
@@ -56,8 +55,7 @@ const UserTableHeader = ({
             onClick={() => setShowFilterDropdown(!showFilterDropdown)}
             className="px-5 py-2.5 border border-gray-300 bg-white rounded-lg text-sm 
               font-medium transition-all duration-200 hover:bg-gray-50 flex items-center gap-2">
-            <span>🔽</span>
-            Lọc {(filterRole || filterStatus) && <span className="ml-1 bg-[#8B86C7] text-white text-xs px-2 py-0.5 rounded-full">•</span>}
+            Lọc {(filterRole || filterStatus) && <span className="ml-1 bg-[#2196F3] text-white text-xs px-2 py-0.5 rounded-full">•</span>}
           </button>
           {showFilterDropdown && (
             <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50 p-4">
@@ -66,7 +64,7 @@ const UserTableHeader = ({
                 <select
                   value={filterRole}
                   onChange={(e) => onFilterRoleChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-[#8B86C7] focus:ring-2 focus:ring-[#8B86C7]/20 outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-[#2196F3] focus:ring-2 focus:ring-[#2196F3]/20 outline-none"
                 >
                   <option value="">Tất cả</option>
                   <option value="ADMIN">Admin</option>
@@ -80,7 +78,7 @@ const UserTableHeader = ({
                 <select
                   value={filterStatus}
                   onChange={(e) => onFilterStatusChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-[#8B86C7] focus:ring-2 focus:ring-[#8B86C7]/20 outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-[#2196F3] focus:ring-2 focus:ring-[#2196F3]/20 outline-none"
                 >
                   <option value="">Tất cả</option>
                   <option value="ACTIVE">Hoạt động</option>
@@ -107,7 +105,7 @@ const UserTableHeader = ({
             className="px-5 py-2.5 border border-gray-300 bg-white rounded-lg text-sm 
               font-medium transition-all duration-200 hover:bg-gray-50 flex items-center gap-2">
             <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
-            Sắp xếp {sortBy && <span className="ml-1 bg-[#8B86C7] text-white text-xs px-2 py-0.5 rounded-full">•</span>}
+            Sắp xếp {sortBy && <span className="ml-1 bg-[#2196F3] text-white text-xs px-2 py-0.5 rounded-full">•</span>}
           </button>
           {showSortDropdown && (
             <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50 py-2">
@@ -144,7 +142,7 @@ const UserTableHeader = ({
               <hr className="my-2" />
               <button
                 onClick={() => { onSortChange(sortBy, sortDirection === 'asc' ? 'desc' : 'asc'); setShowSortDropdown(false); }}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 text-[#8B86C7] font-medium"
+                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 text-[#2196F3] font-medium"
               >
                 {sortDirection === 'asc' ? '↓ Giảm dần' : '↑ Tăng dần'}
               </button>
@@ -169,21 +167,15 @@ const UserTableHeader = ({
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
         >
-          <span>📊</span>
           Xuất Excel {selectedCount > 0 && `(${selectedCount})`}
         </button>
         
         <button
           onClick={onAddUser}
-          className="px-5 py-2.5 text-white rounded-lg text-sm font-semibold 
-            transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2
-            shadow-lg hover:shadow-xl"
-          style={{
-            background: 'linear-gradient(135deg, #A8A4D8 0%, #8B86C7 50%, #6B66A3 100%)'
-          }}
+          className="px-5 py-2.5 bg-[#3b82f6] hover:bg-[#2563eb] text-white rounded-lg text-sm font-semibold 
+            transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
         >
-          <span>+</span>
-          Thêm người dùng
+          + Thêm mới
         </button>
       </div>
     </div>
