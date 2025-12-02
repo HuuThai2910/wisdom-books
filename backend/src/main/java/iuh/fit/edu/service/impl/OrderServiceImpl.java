@@ -27,10 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -226,6 +223,12 @@ public class OrderServiceImpl implements OrderService {
         Order order = this.orderRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
         order.setStatus(OrderStatus.valueOf(request.getStatus()));
+        if(Objects.equals(request.getStatus(), "CANCELLED")){
+            // Hoàn kho sau khi hủy đơn hàng
+            for (OrderItem item : order.getOrderItems()){
+                this.bookRepository.restoreStock(item.getBook().getId(), item.getQuantity());
+            }
+        }
         return this.orderMapper.toUpdateOrderStatusResponse(this.orderRepository.save(order));
     }
 
