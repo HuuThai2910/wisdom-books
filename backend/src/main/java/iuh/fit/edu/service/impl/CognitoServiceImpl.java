@@ -62,10 +62,15 @@ public class CognitoServiceImpl implements CognitoService {
 
     @Override
     public String loginUser(LoginRequest request) {
+        // Username phải match với username đã dùng khi register
+        // Trong registerUser, bạn dùng fullName làm username
+        String username = request.getFullName();
+        
         Map<String,String> authParams=new HashMap<>();
-        authParams.put("USERNAME",request.getFullName());
-        authParams.put("PASSWORD",request.getPassword());
-        authParams.put("SECRET_HASH", calculateSecretHash(request.getFullName(), clientId, clientSecret));
+        authParams.put("USERNAME", username);
+        authParams.put("PASSWORD", request.getPassword());
+        // SecretHash phải dùng đúng username
+        authParams.put("SECRET_HASH", calculateSecretHash(username, clientId, clientSecret));
 
         AdminInitiateAuthRequest authRequest=new AdminInitiateAuthRequest()
                 .withUserPoolId(userPoolId)
