@@ -1,5 +1,6 @@
 package iuh.fit.edu.dto.response.book;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import iuh.fit.edu.entity.*;
 import iuh.fit.edu.entity.constant.BookStatus;
 import jakarta.persistence.*;
@@ -31,7 +32,9 @@ public class ResBookDTO {
     private double sellingPrice;
     private double importPrice;
     private BookStatus status;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime updatedAt;
     private String createdBy;
     private String updatedBy;

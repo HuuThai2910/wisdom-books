@@ -1,5 +1,6 @@
 package iuh.fit.edu.dto.response.book;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import iuh.fit.edu.entity.constant.BookStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,6 +29,7 @@ public class ResCreateBookDTO {
     private double sellingPrice;
     private double importPrice;
     private BookStatus status;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime createdAt;
     private String createdBy;
     private int quantity;

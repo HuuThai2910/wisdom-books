@@ -1,5 +1,6 @@
 package iuh.fit.edu.dto.response.order;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import iuh.fit.edu.entity.constant.OrderStatus;
 import iuh.fit.edu.entity.constant.PaymentMethod;
 import iuh.fit.edu.entity.constant.PaymentStatus;
@@ -29,7 +30,9 @@ public class OrderResponse {
     private PaymentStatus paymentStatus;
     private String note;
     private double totalPrice;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime orderDate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime expiredAt;
     private List<OrderItemResponse> orderItems;
 }

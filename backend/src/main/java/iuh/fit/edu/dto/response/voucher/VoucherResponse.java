@@ -4,6 +4,7 @@
  */
 package iuh.fit.edu.dto.response.voucher;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,5 +24,6 @@ public class VoucherResponse {
     private String description;
     private int discountValue;
     private double minOrder;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime endDate;
 }
