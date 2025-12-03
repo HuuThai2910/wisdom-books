@@ -34,9 +34,10 @@ public class AccountController {
         int maxAge = 3600;
         Cookie cookie = new Cookie("id_token", token);
         cookie.setHttpOnly(true);       // Không thể đọc bằng JS
-        cookie.setSecure(false);         // Chỉ gửi qua HTTPS
+        cookie.setSecure(false);        // false cho HTTP, true cho HTTPS
         cookie.setPath("/");            // gửi cho toàn bộ domain
         cookie.setMaxAge(maxAge);       // thời gian sống cookie
+        cookie.setAttribute("SameSite", "Lax");  // Cho phép gửi cookie với cross-site requests
         response.addCookie(cookie);
         UserInfoResponse userInfoResponse=accountService.getCurrentUserInfo(token);
         email= userInfoResponse.getEmail();
