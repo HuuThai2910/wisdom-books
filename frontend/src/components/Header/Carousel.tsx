@@ -15,9 +15,22 @@ const NextArrow = (props: any) => {
     return (
         <button
             {...rest}
-            className="absolute right-6 top-1/2 -translate-y-1/2 text-white text-5xl z-50 hover:text-yellow-400 transition"
+            className="absolute right-8 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white flex items-center justify-center shadow-xl hover:shadow-2xl z-40 transition-all duration-300 hover:scale-110 border-2 border-white/30 backdrop-blur-sm group"
         >
-            ❯
+            <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <svg
+                className="w-7 h-7 relative z-10 transform group-hover:translate-x-0.5 transition-transform duration-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="-7 0 24 24"
+                strokeWidth={3}
+            >
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 5l7 7-7 7"
+                />
+            </svg>
         </button>
     );
 };
@@ -27,9 +40,22 @@ const PrevArrow = (props: any) => {
     return (
         <button
             {...rest}
-            className="absolute left-6 top-1/2 -translate-y-1/2 text-white text-5xl z-50 hover:text-yellow-400 transition"
+            className="absolute left-8 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white flex items-center justify-center shadow-xl hover:shadow-2xl z-40 transition-all duration-300 hover:scale-110 border-2 border-white/30 backdrop-blur-sm group"
         >
-            ❮
+            <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <svg
+                className="w-7 h-7 relative z-10 transform group-hover:-translate-x-0.5 transition-transform duration-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="-7 0 24 24"
+                strokeWidth={3}
+            >
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 19l-7-7 7-7"
+                />
+            </svg>
         </button>
     );
 };
@@ -39,82 +65,256 @@ export default function Carousel() {
     const [start, setStart] = useState(false);
 
     useEffect(() => {
-        // ⏱ Delay 2 giây trước khi chạy auto
         const timer = setTimeout(() => setStart(true), 1000);
         return () => clearTimeout(timer);
     }, []);
 
     const settings = {
-        autoplay: start, // chỉ bắt đầu sau 2s
-        autoplaySpeed: 4000,
-        fade: true,
+        autoplay: start,
+        autoplaySpeed: 5000,
+        fade: false,
         dots: true,
         infinite: true,
-        speed: 1000,
+        speed: 800,
         slidesToShow: 1,
         slidesToScroll: 1,
         arrows: true,
         nextArrow: <NextArrow />,
         prevArrow: <PrevArrow />,
+        appendDots: (dots: any) => (
+            <div style={{ bottom: "30px" }}>
+                <ul className="flex gap-2 justify-center"> {dots} </ul>
+            </div>
+        ),
+        customPaging: () => (
+            <div className="w-3 h-3 rounded-full bg-gray-400 hover:bg-blue-500 transition-all duration-300 cursor-pointer"></div>
+        ),
     };
 
     const slides = [
         {
             image: img1,
-            title: "Khám Phá Kho Tri Thức",
-            desc: "Từ những tác phẩm kinh điển đến sách hiện đại — nơi tri thức và cảm hứng hội tụ. Cùng bạn mở ra thế giới mới qua từng trang sách.",
+            badge: "Quality Food 😋",
+            title: "Đọc Sách Mỗi Ngày",
+            highlight: "Tri Thức",
+            subtitle: "Mở Ra Tương Lai",
+            desc: "Chúng tôi mang đến cho bạn những cuốn sách chất lượng cao trong vòng 30 phút. Nếu bạn muốn nâng cao kiến thức, hãy để chúng tôi đồng hành cùng bạn.",
+            awards: {
+                title: "#1 Nhà Sách Uy Tín",
+                year: "2024 Best Service Award",
+                rating: "4.8",
+                reviews: "12.9k Đánh giá",
+            },
         },
         {
             image: img2,
-            title: "Đọc Sách Mỗi Ngày",
-            desc: "Một cuốn sách hay có thể thay đổi cuộc đời bạn. Hãy để mỗi ngày là một hành trình khám phá tri thức và cảm xúc.",
+            badge: "Best Seller 📚",
+            title: "Khám Phá Kho",
+            highlight: "Sách Hay",
+            subtitle: "Nhất Việt Nam",
+            desc: "Từ tiểu thuyết, self-help đến sách thiếu nhi. Mỗi cuốn sách là một hành trình mới, một thế giới mới đang chờ bạn khám phá.",
+            awards: {
+                title: "#1 Cửa Hàng Sách Trực Tuyến",
+                year: "2024 Reader's Choice",
+                rating: "4.9",
+                reviews: "15.2k Đánh giá",
+            },
         },
         {
             image: img3,
-            title: "Ưu Đãi Đặc Biệt Cho Mùa Học Mới",
-            desc: "Giảm giá đến 30% cho các đầu sách học thuật, kỹ năng, và văn học Việt Nam. Cơ hội sở hữu tủ sách ước mơ!",
+            badge: "Special Offer 🎁",
+            title: "Ưu Đãi Đặc Biệt",
+            highlight: "Giảm Giá",
+            subtitle: "Lên Đến 40%",
+            desc: "Cơ hội sở hữu những đầu sách bán chạy nhất với giá ưu đãi. Đừng bỏ lỡ chương trình khuyến mãi đặc biệt dành riêng cho bạn!",
+            awards: {
+                title: "#1 Ưu Đãi Hấp Dẫn",
+                year: "2024 Hot Deal Award",
+                rating: "4.7",
+                reviews: "10.5k Đánh giá",
+            },
         },
         {
             image: img4,
-            title: "Thế Giới Sách Dành Cho Bạn",
-            desc: "Từ tiểu thuyết, kỹ năng sống đến sách thiếu nhi — chúng tôi mang đến cho bạn sự chọn lựa phong phú và đầy cảm hứng.",
+            badge: "New Arrivals 🆕",
+            title: "Sách Mới Về",
+            highlight: "Hàng Tuần",
+            subtitle: "Cập Nhật Liên Tục",
+            desc: "Luôn cập nhật những đầu sách mới nhất từ các tác giả trong và ngoài nước. Đón đọc ngay những tác phẩm hot nhất hiện nay!",
+            awards: {
+                title: "#1 Sách Mới Nhất",
+                year: "2024 Fresh Content",
+                rating: "5.0",
+                reviews: "8.3k Đánh giá",
+            },
         },
     ];
 
     return (
-        <div className="relative animate-fade-in">
+        <div className="relative bg-gradient-to-b from-orange-50 to-white pt-10">
             <Slider
                 key={start ? "started" : "waiting"}
                 ref={sliderRef}
                 {...settings}
             >
                 {slides.map((slide, i) => (
-                    <div key={i} className="relative">
-                        <img
-                            src={slide.image}
-                            alt={`slide-${i}`}
-                            className="w-full h-screen object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-center text-white px-4">
-                            <h5 className="text-lg mb-2 animate__animated animate__fadeInDown text-yellow-400">
-                                Cửa Hàng Sách Trực Tuyến
-                            </h5>
-                            <h1 className="text-4xl md:text-6xl font-bold mb-4 animate__animated animate__slideInDown text-yellow-300 drop-shadow-lg">
-                                {slide.title}
-                            </h1>
-                            <p className="text-lg max-w-2xl mx-auto mb-5 animate__animated animate__fadeInUp leading-relaxed">
-                                {slide.desc}
-                            </p>
-                            <Link
-                                to="/books"
-                                className="border-2 border-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-500 hover:text-white transition"
-                            >
-                                Khám Phá Ngay
-                            </Link>
+                    <div key={i}>
+                        <div className="container mx-auto px-8 py-16">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[600px]">
+                                {/* Left Content */}
+                                <div className="space-y-6 animate__animated animate__fadeInLeft">
+                                    {/* Badge */}
+                                    <div className="inline-block">
+                                        <span className="bg-blue-100 text-blue-600 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">
+                                            {slide.badge}
+                                        </span>
+                                    </div>
+
+                                    {/* Main Heading */}
+                                    <div>
+                                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
+                                            <span className="text-gray-900">
+                                                {slide.title}
+                                            </span>
+                                            <br />
+                                            <span className="text-blue-600">
+                                                {slide.highlight}
+                                            </span>
+                                            <br />
+                                            <span className="text-gray-900">
+                                                {slide.subtitle}
+                                            </span>
+                                        </h1>
+                                    </div>
+
+                                    {/* Description */}
+                                    <p className="text-gray-600 text-lg leading-relaxed max-w-xl">
+                                        {slide.desc}
+                                    </p>
+
+                                    {/* CTA Buttons */}
+                                    <div className="flex flex-wrap gap-4 pt-4">
+                                        <Link
+                                            to="/books"
+                                            className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-full font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                                        >
+                                            <span>Mua Sách Ngay</span>
+                                            <svg
+                                                className="w-5 h-5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                                                />
+                                            </svg>
+                                        </Link>
+                                        <button className="px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-full font-semibold hover:border-blue-500 hover:text-blue-500 transition-all duration-300">
+                                            Xem Thêm
+                                        </button>
+                                    </div>
+
+                                    {/* Awards Badge */}
+                                    <div className="flex items-center gap-4 pt-6 border-t border-gray-200">
+                                        <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                                            <svg
+                                                className="w-8 h-8 text-white"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-gray-900">
+                                                {slide.awards.title}
+                                            </h3>
+                                            <p className="text-sm text-blue-600 font-semibold">
+                                                {slide.awards.year}
+                                            </p>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <div className="flex items-center gap-1">
+                                                    {[...Array(5)].map(
+                                                        (_, idx) => (
+                                                            <svg
+                                                                key={idx}
+                                                                className="w-4 h-4 text-yellow-400 fill-current"
+                                                                viewBox="0 0 20 20"
+                                                            >
+                                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                            </svg>
+                                                        )
+                                                    )}
+                                                </div>
+                                                <span className="text-sm text-gray-600">
+                                                    {slide.awards.rating}
+                                                </span>
+                                                <span className="text-sm text-gray-400">
+                                                    • {slide.awards.reviews}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Right Image */}
+                                <div className="relative animate__animated animate__fadeInRight">
+                                    {/* Decorative Circle */}
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-br from-blue-400 to-blue-600 rounded-full opacity-20 blur-3xl"></div>
+
+                                    {/* Main Circle with Image */}
+                                    <div className="relative w-full max-w-[550px] mx-auto">
+                                        <div className="relative w-[500px] h-[500px] mx-auto">
+                                            {/* Background Circle */}
+                                            <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full"></div>
+
+                                            {/* Image Container */}
+                                            <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-full">
+                                                <img
+                                                    src={slide.image}
+                                                    alt={`slide-${i}`}
+                                                    className="w-full h-full object-cover scale-110"
+                                                />
+                                            </div>
+
+                                            {/* Quality Badge */}
+                                            <div className="absolute -top-6 -right-6 bg-yellow-400 text-gray-900 w-24 h-24 rounded-full flex items-center justify-center shadow-xl border-4 border-white transform rotate-12 z-10">
+                                                <div className="text-center">
+                                                    <div className="text-xs font-bold">
+                                                        🌟 Good
+                                                    </div>
+                                                    <div className="text-[10px] font-semibold">
+                                                        Quality
+                                                    </div>
+                                                    <div className="text-[10px]">
+                                                        Book
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 ))}
             </Slider>
+
+            {/* Custom Dots Styling */}
+            <style>{`
+                .slick-dots li.slick-active div {
+                    background-color: #3b82f6 !important;
+                    width: 32px !important;
+                    border-radius: 9999px !important;
+                }
+                .slick-dots li div {
+                    margin: 0 !important;
+                }
+            `}</style>
         </div>
     );
 }
