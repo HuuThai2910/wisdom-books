@@ -4,45 +4,31 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 public class DotenvConfig {
     public static void load() {
-        // Load file .env với cấu hình ignoreIfMissing để không bị lỗi khi không tìm thấy file
-        // Trên production (EC2), sẽ dùng environment variables từ systemd service
-        Dotenv dotenv = Dotenv.configure()
-                .ignoreIfMissing()
-                .load();
+        // Load file .env
+        Dotenv dotenv = Dotenv.load();
 
-        // Helper method để set property: ưu tiên system env, fallback về .env file
-        setPropertyFromEnv(dotenv, "SPRING_DATASOURCE_USERNAME");
-        setPropertyFromEnv(dotenv, "SPRING_DATASOURCE_PASSWORD");
+        // Set biến vào System property để Spring Boot đọc được ${...}
+        System.setProperty("SPRING_DATASOURCE_USERNAME", dotenv.get("SPRING_DATASOURCE_USERNAME"));
+        System.setProperty("SPRING_DATASOURCE_PASSWORD", dotenv.get("SPRING_DATASOURCE_PASSWORD"));
 
-        // AWS
-        setPropertyFromEnv(dotenv, "AWS_ACCESS_KEY");
-        setPropertyFromEnv(dotenv, "AWS_SECRET_KEY");
-        setPropertyFromEnv(dotenv, "AWS_REGION");
+        // Nếu muốn AWS hoặc Cognito
+        System.setProperty("AWS_ACCESS_KEY", dotenv.get("AWS_ACCESS_KEY"));
+        System.setProperty("AWS_SECRET_KEY", dotenv.get("AWS_SECRET_KEY"));
+        System.setProperty("AWS_REGION", dotenv.get("AWS_REGION"));
 
-        // Cognito
-        setPropertyFromEnv(dotenv, "COGNITO_USER_POOL_ID");
-        setPropertyFromEnv(dotenv, "COGNITO_CLIENT_ID");
-        setPropertyFromEnv(dotenv, "COGNITO_CLIENT_SECRET");
+        System.setProperty("COGNITO_USER_POOL_ID", dotenv.get("COGNITO_USER_POOL_ID"));
+        System.setProperty("COGNITO_CLIENT_ID", dotenv.get("COGNITO_CLIENT_ID"));
+        System.setProperty("COGNITO_CLIENT_SECRET", dotenv.get("COGNITO_CLIENT_SECRET"));
 
-        // VNPay
-        setPropertyFromEnv(dotenv, "TMN_CODE");
-        setPropertyFromEnv(dotenv, "HASH_SECRET");
-        setPropertyFromEnv(dotenv, "VNPAY_URL");
-        setPropertyFromEnv(dotenv, "VNPAY_RETURN_URL");
+        System.setProperty("TMN_CODE", dotenv.get("TMN_CODE"));
+        System.setProperty("HASH_SECRET", dotenv.get("HASH_SECRET"));
+        System.setProperty("VNPAY_URL", dotenv.get("VNPAY_URL"));
+        System.setProperty("VNPAY_RETURN_URL", dotenv.get("VNPAY_RETURN_URL"));
 
-        // Email
-        setPropertyFromEnv(dotenv, "EMAIL_USERNAME");
-        setPropertyFromEnv(dotenv, "EMAIL_PASSWORD");
-    }
-
-    private static void setPropertyFromEnv(Dotenv dotenv, String key) {
-        // Ưu tiên: System environment variable > .env file
-        String value = System.getenv(key);
-        if (value == null && dotenv != null) {
-            value = dotenv.get(key);
-        }
-        if (value != null) {
-            System.setProperty(key, value);
-        }
+        // ============================
+        // Spring Mail
+        // ============================
+        System.setProperty("EMAIL_USERNAME", dotenv.get("EMAIL_USERNAME"));
+        System.setProperty("EMAIL_PASSWORD", dotenv.get("EMAIL_PASSWORD"));
     }
 }
