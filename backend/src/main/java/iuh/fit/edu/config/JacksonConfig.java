@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
 
-@Configuration
+//@Configuration
 public class JacksonConfig {
 
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
