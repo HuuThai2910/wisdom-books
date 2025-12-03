@@ -41,9 +41,7 @@ public class Order {
     private String note;
     private double totalPrice;
     private String txnRef;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime orderDate;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime expiredAt;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
