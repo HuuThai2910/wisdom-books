@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
@@ -30,8 +31,8 @@ public class OrderResponse {
     private PaymentStatus paymentStatus;
     private String note;
     private double totalPrice;
-    private LocalDateTime orderDate;
-    private LocalDateTime expiredAt;
+    private OffsetDateTime orderDate;
+    private OffsetDateTime expiredAt;
     private List<OrderItemResponse> orderItems;
 }
 

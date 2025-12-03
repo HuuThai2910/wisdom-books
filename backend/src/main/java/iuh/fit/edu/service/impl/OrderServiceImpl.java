@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -63,7 +64,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.PENDING);
         order.setPaymentMethod(request.getPaymentMethod());
         order.setPaymentStatus(PaymentStatus.UNPAID);
-        order.setOrderDate(LocalDateTime.now());
+        order.setOrderDate(OffsetDateTime.now());
         List<OrderItem> orderItems = new ArrayList<>();
         for (OrderItemRequest item : request.getItems()) {
             Book book = bookRepository.findById(item.getBookId())
@@ -95,7 +96,7 @@ public class OrderServiceImpl implements OrderService {
             );
             return this.orderMapper.toOrderResponse(order);
         }else {
-            order.setExpiredAt(LocalDateTime.now().plusMinutes(2));
+            order.setExpiredAt(OffsetDateTime.now().plusMinutes(2));
             orderRepository.save(order);
             String paymentUrl = paymentService.createVNPayUrl(order, httpServletRequest);
             return PaymentResponse.builder()
@@ -131,7 +132,7 @@ public class OrderServiceImpl implements OrderService {
         if (order.getStatus() != OrderStatus.PENDING || order.getPaymentStatus() != PaymentStatus.UNPAID || order.getPaymentMethod() != PaymentMethod.VNPAY) {
             throw new RuntimeException("Đơn hàng không ở trạng thái thanh toán");
         }
-        if (order.getExpiredAt().isBefore(LocalDateTime.now())) {
+        if (order.getExpiredAt().isBefore(OffsetDateTime.now())) {
             throw new RuntimeException("Đơn hàng đã hết hạn thanh toán");
         }
         return PaymentResponse.builder()
@@ -184,7 +185,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public List<Order> getExpiredOrders(){
-        return this.orderRepository.findAllByPaymentMethodAndPaymentStatusAndExpiredAtBefore(PaymentMethod.VNPAY, PaymentStatus.UNPAID, LocalDateTime.now());
+        return this.orderRepository.findAllByPaymentMethodAndPaymentStatusAndExpiredAtBefore(PaymentMethod.VNPAY, PaymentStatus.UNPAID, OffsetDateTime.now());
     }
     @Override
     @Transactional

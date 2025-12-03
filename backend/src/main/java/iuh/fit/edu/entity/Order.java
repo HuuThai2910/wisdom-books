@@ -8,6 +8,7 @@ import iuh.fit.edu.entity.constant.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Entity
@@ -41,8 +42,8 @@ public class Order {
     private String note;
     private double totalPrice;
     private String txnRef;
-    private LocalDateTime orderDate;
-    private LocalDateTime expiredAt;
+    private OffsetDateTime orderDate;
+    private OffsetDateTime expiredAt;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;

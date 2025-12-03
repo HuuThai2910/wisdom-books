@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +18,7 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
     Optional<Order> findByOrderCode(String orderCode);
     List<Order> findByUserIdOrderByOrderDateDesc(Long userId);
-    List<Order> findAllByPaymentMethodAndPaymentStatusAndExpiredAtBefore(PaymentMethod paymentMethod, PaymentStatus paymentStatus, LocalDateTime now);
+    List<Order> findAllByPaymentMethodAndPaymentStatusAndExpiredAtBefore(PaymentMethod paymentMethod, PaymentStatus paymentStatus, OffsetDateTime now);
     
     @Query("SELECT COUNT(o) FROM Order o WHERE o.orderDate >= :startDate AND o.orderDate <= :endDate")
     long countOrdersByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
