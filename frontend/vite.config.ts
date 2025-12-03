@@ -10,7 +10,7 @@ export default defineConfig({
     proxy: {
       // tất cả request /api/* sẽ được forward tới backend EC2
       "/api": {
-        target: "http://18.141.4.147:8080",
+        target: "http://13.251.45.36:8080",
         changeOrigin: true,   // thay đổi origin header thành backend
         secure: false,        // nếu backend HTTP (không HTTPS)
         rewrite: (path) => path.replace(/^\/api/, "/api"), // giữ path nguyên

@@ -1,6 +1,7 @@
 package iuh.fit.edu.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import iuh.fit.edu.entity.constant.OrderStatus;
 import iuh.fit.edu.entity.constant.PaymentMethod;
 import iuh.fit.edu.entity.constant.PaymentStatus;
@@ -40,7 +41,9 @@ public class Order {
     private String note;
     private double totalPrice;
     private String txnRef;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime orderDate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime expiredAt;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
