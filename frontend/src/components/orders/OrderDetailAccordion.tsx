@@ -9,8 +9,7 @@ import {
 } from "lucide-react";
 import { Order } from "../../types";
 import { formatCurrency } from "../../util/formatting";
-
-const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL as string;
+import { S3_CONFIG } from './../../config/s3';
 
 interface OrderDetailAccordionProps {
     order: Order;
@@ -70,7 +69,7 @@ const OrderDetailAccordion = ({
                                     >
                                         <div className="shrink-0">
                                             <img
-                                                src={`${IMAGE_BASE_URL}${item.book.image}`}
+                                                src={`${S3_CONFIG.BASE_URL}${item.book.image}`}
                                                 alt={item.book.title}
                                                 className="w-20 h-20 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-all duration-300"
                                             />

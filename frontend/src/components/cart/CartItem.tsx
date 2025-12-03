@@ -8,8 +8,8 @@ import { useCartItemSelection } from "../../hooks/cart/useCartItemSelection";
 import CartItemQuantityControl from "./CartItemQuantityControl";
 import { CartItemProps } from "../../types";
 import { useNavigate } from "react-router-dom";
+import { S3_CONFIG } from "../../config/s3";
 
-const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL as string;
 
 export default function CartItem({ item }: CartItemProps) {
     const dispatch = useAppDispatch();
@@ -56,7 +56,7 @@ export default function CartItem({ item }: CartItemProps) {
                     onClick={() => navigate(`/books/${item.book.id}`)}
                 >
                     <img
-                        src={`${IMAGE_BASE_URL}${item.book.image}`}
+                        src={`${S3_CONFIG.BASE_URL}${item.book.image}`}
                         alt=""
                         className={isOutOfStock ? "opacity-50" : ""}
                     />

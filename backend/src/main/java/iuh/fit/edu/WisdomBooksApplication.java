@@ -1,5 +1,7 @@
 package iuh.fit.edu;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 import iuh.fit.edu.config.DotenvConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 
 const axiosClient: AxiosInstance = axios.create({
-    baseURL: "http://18.141.4.147:8080/api",
+    baseURL: "/api",
     withCredentials: true,
     headers: {
         "Content-Type": "application/json",

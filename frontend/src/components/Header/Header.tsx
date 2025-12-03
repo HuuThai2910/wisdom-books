@@ -1,6 +1,5 @@
 import { useAppDispatch, useAppSelector } from "../../app/store";
 import { fetchCart, removeItem } from "../../features/cart/cartSlice";
-const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL as string;
 import { formatCurrency } from "../../util/formatting";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -19,6 +18,7 @@ import logoImg from "../../assets/img/logo.png";
 import wisbook from "../../assets/img/wisbook.png";
 import bookApi from "../../api/bookApi";
 import { Book } from "../../types";
+import { S3_CONFIG } from './../../config/s3';
 export default function Header() {
     const [opacity, setOpacity] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -668,7 +668,7 @@ export default function Header() {
                                                                     <div className="relative w-16 h-16">
                                                                         <img
                                                                             src={
-                                                                                `${IMAGE_BASE_URL}${item.book.image}` ||
+                                                                                `${S3_CONFIG.BASE_URL}${item.book.image}` ||
                                                                                 "/default-image.png"
                                                                             }
                                                                             alt={

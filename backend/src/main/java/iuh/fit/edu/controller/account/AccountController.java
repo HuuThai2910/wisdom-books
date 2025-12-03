@@ -32,13 +32,9 @@ public class AccountController {
         LoginResponse cognitoResponse = this.accountService.loginUser(request);
         String token=cognitoResponse.getToken();
         int maxAge = 3600;
-        Cookie cookie = new Cookie("id_token", token);
-        cookie.setHttpOnly(true);       // Không thể đọc bằng JS
-        cookie.setSecure(false);        // false cho HTTP, true cho HTTPS
-        cookie.setPath("/");            // gửi cho toàn bộ domain
-        cookie.setMaxAge(maxAge);       // thời gian sống cookie
-        cookie.setAttribute("SameSite", "Lax");  // Cho phép gửi cookie với cross-site requests
-        response.addCookie(cookie);
+        String setCookie = String.format("id_token=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=Lax",
+                token, maxAge);
+        response.addHeader("Set-Cookie", setCookie);
         UserInfoResponse userInfoResponse=accountService.getCurrentUserInfo(token);
         email= userInfoResponse.getEmail();
         return ResponseEntity.ok(cognitoResponse);
