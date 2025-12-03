@@ -43,6 +43,8 @@ public class PaymentServiceImpl implements PaymentService {
         // Calculate amount (VNPay requires amount in VND * 100)
         long amount = (long) (order.getTotalPrice() * 100);
 
+
+
         // Build VNPay parameters - EXACTLY as per VNPay specification
         Map<String, String> vnpParams = new TreeMap<>(); // TreeMap tự động sort
         vnpParams.put("vnp_Version", vnPayConfig.getVersion());
@@ -62,6 +64,10 @@ public class PaymentServiceImpl implements PaymentService {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         String vnpCreateDate = formatter.format(cld.getTime());
         vnpParams.put("vnp_CreateDate", vnpCreateDate);
+        System.out.println("vnp_IpAddr=" + VNPayUtil.getIpAddress(request));
+        System.out.println("vnp_CreateDate=" + vnpCreateDate);
+        System.out.println("Payment URL = " + vnPayConfig.getReturnUrl());
+
 
         cld.add(Calendar.MINUTE, 10);
         String vnpExpireDate = formatter.format(cld.getTime());

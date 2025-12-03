@@ -1,5 +1,7 @@
 package iuh.fit.edu.util;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
@@ -30,18 +32,33 @@ public class VNPayUtil {
         }
     }
 
-    public static String getIpAddress(jakarta.servlet.http.HttpServletRequest request) {
-        String ipAdress;
-        try {
-            ipAdress = request.getHeader("X-FORWARDED-FOR");
-            if (ipAdress == null) {
-                ipAdress = request.getRemoteAddr();
+//    public static String getIpAddress(jakarta.servlet.http.HttpServletRequest request) {
+//        String ipAdress;
+//        try {
+//            ipAdress = request.getHeader("X-FORWARDED-FOR");
+//            if (ipAdress == null) {
+//                ipAdress = request.getRemoteAddr();
+//            }
+//        } catch (Exception e) {
+//            ipAdress = "Invalid IP:" + e.getMessage();
+//        }
+//        return ipAdress;
+//    }
+        public static String getIpAddress(HttpServletRequest request) {
+            String ip = request.getHeader("X-Forwarded-For");
+
+            if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+                // Trường hợp XFF có nhiều IP
+                return ip.split(",")[0];
             }
-        } catch (Exception e) {
-            ipAdress = "Invalid IP:" + e.getMessage();
+
+            ip = request.getHeader("X-Real-IP");
+            if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+                return ip;
+            }
+
+            return request.getRemoteAddr();
         }
-        return ipAdress;
-    }
 
     public static String getRandomNumber(int len) {
         Random rnd = new Random();
