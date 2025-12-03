@@ -18,7 +18,7 @@ import logoImg from "../../assets/img/logo.png";
 import wisbook from "../../assets/img/wisbook.png";
 import bookApi from "../../api/bookApi";
 import { Book } from "../../types";
-import { S3_CONFIG } from './../../config/s3';
+import { S3_CONFIG } from "./../../config/s3";
 export default function Header() {
     const [opacity, setOpacity] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -222,12 +222,11 @@ export default function Header() {
                 className="fixed top-0 left-0 w-full z-50 transition-all duration-500 px-8 py-1"
                 style={{
                     background: isHomePage
-                        ? `rgba(37, 99, 235, ${opacity})` // Blue-600 + opacity
-                        : `#2563eb`, // Blue-600 thuần
-                    boxShadow:
-                        opacity > 0.2 || !isHomePage
-                            ? "0 4px 15px rgba(0,0,0,0.15)"
-                            : "none",
+                        ? opacity > 0.5
+                            ? `rgba(37, 99, 235, ${opacity})` // Xanh khi cuộn
+                            : "rgba(255, 255, 255, 0.95)" // Trắng khi chưa cuộn
+                        : "#ffffff", // Trắng cho các trang khác
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
                 }}
             >
                 <div className="container mx-auto flex items-center justify-between px-6 py-2 text-gray-800">
@@ -258,20 +257,44 @@ export default function Header() {
                         <Link
                             to="/"
                             className="relative group transition-colors"
+                            style={{
+                                color:
+                                    isHomePage && opacity > 0.5
+                                        ? "white"
+                                        : "#2563eb",
+                            }}
                         >
-                            <span className="text-white font-bold text-xl">
-                                Trang chủ
-                            </span>
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                            <span className="font-bold text-xl">Trang chủ</span>
+                            <span
+                                className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
+                                style={{
+                                    backgroundColor:
+                                        isHomePage && opacity > 0.5
+                                            ? "white"
+                                            : "#2563eb",
+                                }}
+                            ></span>
                         </Link>
                         <Link
                             to="/books"
                             className="relative group transition-colors"
+                            style={{
+                                color:
+                                    isHomePage && opacity > 0.5
+                                        ? "white"
+                                        : "#2563eb",
+                            }}
                         >
-                            <span className="text-white font-bold text-xl">
-                                Sản phẩm
-                            </span>
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                            <span className="font-bold text-xl">Sản phẩm</span>
+                            <span
+                                className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
+                                style={{
+                                    backgroundColor:
+                                        isHomePage && opacity > 0.5
+                                            ? "white"
+                                            : "#2563eb",
+                                }}
+                            ></span>
                         </Link>
 
                         <div
@@ -288,8 +311,16 @@ export default function Header() {
                                 );
                             }}
                         >
-                            <button className="relative group transition-colors flex items-center gap-1">
-                                <span className="text-white font-bold text-xl">
+                            <button
+                                className="relative group transition-colors flex items-center gap-1"
+                                style={{
+                                    color:
+                                        isHomePage && opacity > 0.5
+                                            ? "white"
+                                            : "#2563eb",
+                                }}
+                            >
+                                <span className="font-bold text-xl">
                                     Thể loại
                                 </span>
                                 <svg
@@ -297,7 +328,7 @@ export default function Header() {
                                         showCategoryMenu ? "rotate-180" : ""
                                     }`}
                                     fill="none"
-                                    stroke="url(#gradient)"
+                                    stroke="currentColor"
                                     viewBox="0 0 24 24"
                                     strokeWidth={2.5}
                                 >
@@ -329,7 +360,15 @@ export default function Header() {
                                         d="M19 9l-7 7-7-7"
                                     />
                                 </svg>
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                                <span
+                                    className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
+                                    style={{
+                                        backgroundColor:
+                                            isHomePage && opacity <= 0.5
+                                                ? "white"
+                                                : "#2563eb",
+                                    }}
+                                ></span>
                             </button>
 
                             {/* Category Dropdown */}
@@ -485,20 +524,46 @@ export default function Header() {
                         <Link
                             to="/about"
                             className="relative group transition-colors"
+                            style={{
+                                color:
+                                    isHomePage && opacity > 0.5
+                                        ? "white"
+                                        : "#2563eb",
+                            }}
                         >
-                            <span className="text-white font-bold text-xl">
+                            <span className="font-bold text-xl">
                                 Về chúng tôi
                             </span>
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                            <span
+                                className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
+                                style={{
+                                    backgroundColor:
+                                        isHomePage && opacity > 0.5
+                                            ? "white"
+                                            : "#2563eb",
+                                }}
+                            ></span>
                         </Link>
                         <Link
                             to="/contact"
                             className="relative group transition-colors"
+                            style={{
+                                color:
+                                    isHomePage && opacity > 0.5
+                                        ? "white"
+                                        : "#2563eb",
+                            }}
                         >
-                            <span className="text-white font-bold text-xl">
-                                Liên hệ
-                            </span>
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                            <span className="font-bold text-xl">Liên hệ</span>
+                            <span
+                                className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
+                                style={{
+                                    backgroundColor:
+                                        isHomePage && opacity > 0.5
+                                            ? "white"
+                                            : "#2563eb",
+                                }}
+                            ></span>
                         </Link>
                     </div>
 
@@ -609,10 +674,24 @@ export default function Header() {
                             }}
                         >
                             <button
-                                className="text-white relative flex items-center p-2 rounded-full transition-all duration-500 "
+                                className="relative flex items-center p-2 rounded-full transition-all duration-500"
                                 onClick={() => navigate("/cart")}
+                                style={{
+                                    color:
+                                        isHomePage && opacity > 0.5
+                                            ? "white"
+                                            : "#2563eb",
+                                }}
                             >
-                                <ShoppingCart className="text-3xl text-white" />
+                                <ShoppingCart
+                                    className="text-3xl"
+                                    style={{
+                                        color:
+                                            isHomePage && opacity > 0.5
+                                                ? "white"
+                                                : "#2563eb",
+                                    }}
+                                />
                                 {size > 0 && (
                                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
                                         {size}
@@ -770,22 +849,50 @@ export default function Header() {
                                 onClick={() =>
                                     setShowAccountMenu(!showAccountMenu)
                                 }
-                                className="text-white relative flex items-center p-1 rounded-full transition-all duration-500 hover:ring-2 hover:ring-white/50"
+                                className="relative flex items-center p-1 rounded-full transition-all duration-500"
+                                style={{
+                                    color:
+                                        isHomePage && opacity > 0.5
+                                            ? "white"
+                                            : "#2563eb",
+                                }}
                             >
                                 {currentUser?.avatar ? (
                                     <img
                                         src={currentUser.avatar}
                                         alt={currentUser.fullName}
-                                        className="w-10 h-10 rounded-full object-cover border-2 border-white"
+                                        className="w-10 h-10 rounded-full object-cover border-2"
+                                        style={{
+                                            borderColor:
+                                                isHomePage && opacity > 0.5
+                                                    ? "white"
+                                                    : "#2563eb",
+                                        }}
                                     />
                                 ) : currentUser ? (
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold border-2 border-white">
+                                    <div
+                                        className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold border-2"
+                                        style={{
+                                            borderColor:
+                                                isHomePage && opacity > 0.5
+                                                    ? "white"
+                                                    : "#2563eb",
+                                        }}
+                                    >
                                         {currentUser.fullName
                                             ?.charAt(0)
                                             .toUpperCase() || "U"}
                                     </div>
                                 ) : (
-                                    <UserCircle className="text-3xl text-white" />
+                                    <UserCircle
+                                        className="text-3xl"
+                                        style={{
+                                            color:
+                                                isHomePage && opacity > 0.5
+                                                    ? "white"
+                                                    : "#2563eb",
+                                        }}
+                                    />
                                 )}
                             </button>
 
