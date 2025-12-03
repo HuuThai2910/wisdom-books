@@ -12,36 +12,104 @@ export default function BooksPage() {
     const [books, setBooks] = useState<Book[]>([]);
     const [loading, setLoading] = useState(true);
     const [totalPages, setTotalPages] = useState(1);
-    const [currentPage, setCurrentPage] = useState(0);
-    const [isFilterOpen, setIsFilterOpen] = useState(true);
+    const [currentPage, setCurrentPage] = useState(() => {
+        const saved = localStorage.getItem("booksPage_currentPage");
+        return saved ? parseInt(saved) : 0;
+    });
+    const [isFilterOpen, setIsFilterOpen] = useState(() => {
+        const saved = localStorage.getItem("booksPage_filterOpen");
+        return saved ? JSON.parse(saved) : true;
+    });
     const [searchParams] = useSearchParams();
     const categoryParam = searchParams.get("category");
     const searchQuery = searchParams.get("search");
+    const authorParam = searchParams.get("author");
 
     // Use useMemo to stabilize filter object reference
     const currentYear = useMemo(() => new Date().getFullYear(), []);
-    const [filters, setFilters] = useState<FilterOptions>(() => ({
-        categories: [],
-        priceRange: [0, 5000000],
-        yearRange: [1900, currentYear],
-        status: [],
-        sortBy: "createdAt,desc",
-    }));
+    const [filters, setFilters] = useState<FilterOptions>(() => {
+        // Load from localStorage if available
+        const saved = localStorage.getItem("booksPage_filters");
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                console.error("Error parsing saved filters:", e);
+            }
+        }
+        return {
+            categories: [],
+            priceRange: [0, 5000000],
+            yearRange: [1900, currentYear],
+            status: [],
+            sortBy: "createdAt,desc",
+        };
+    });
     const pageSize = 12;
 
     // Track if component has fetched data
     const hasFetched = useRef(false);
+
+    // Save filters to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem("booksPage_filters", JSON.stringify(filters));
+    }, [filters]);
+
+    // Save current page to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem("booksPage_currentPage", currentPage.toString());
+    }, [currentPage]);
+
+    // Save filter panel state to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem(
+            "booksPage_filterOpen",
+            JSON.stringify(isFilterOpen)
+        );
+    }, [isFilterOpen]);
+
+    // Clear saved state when category, search, or author params change
+    useEffect(() => {
+        if (categoryParam || searchQuery || authorParam) {
+            // Reset to default when navigating with params
+            setCurrentPage(0);
+            localStorage.removeItem("booksPage_currentPage");
+            localStorage.removeItem("booksPage_filters");
+
+            // Reset filters when navigating with URL params
+            setFilters({
+                categories: [],
+                priceRange: [0, 5000000],
+                yearRange: [1900, currentYear],
+                status: [],
+                sortBy: "createdAt,desc",
+            });
+        }
+    }, [categoryParam, searchQuery, authorParam, currentYear]);
 
     // Build filter query function
     const buildFilterQuery = useMemo(() => {
         return (): string => {
             const filterParts: string[] = [];
 
+            // Filter by author from URL (exact match using wildcard for flexibility)
+            if (authorParam) {
+                // Decode URL encoding to get actual author name
+                const decodedAuthor = decodeURIComponent(authorParam);
+                console.log("=== AUTHOR FILTER ===");
+                console.log("Author param (raw):", authorParam);
+                console.log("Author param (decoded):", decodedAuthor);
+                // Try exact match with colon instead of tilde
+                const filterStr = `author:'${decodedAuthor}'`;
+                console.log("Filter string:", filterStr);
+                filterParts.push(filterStr);
+            }
             // Filter by search query
-            if (searchQuery) {
-                const query = searchQuery.toLowerCase();
+            else if (searchQuery) {
+                // Decode search query as well
+                const decodedSearch = decodeURIComponent(searchQuery);
                 filterParts.push(
-                    `(title~'*${query}*' or author~'*${query}*' or categories.name~'*${query}*')`
+                    `(title~'*${decodedSearch}*' or author~'*${decodedSearch}*' or categories.name~'*${decodedSearch}*')`
                 );
             }
 
@@ -84,7 +152,7 @@ export default function BooksPage() {
 
             return filterParts.join(" and ");
         };
-    }, [searchQuery, categoryParam, filters]);
+    }, [searchQuery, categoryParam, authorParam, filters]);
 
     // Fetch books function - local for BooksPage only
     const fetchBooks = async (
@@ -141,6 +209,7 @@ export default function BooksPage() {
         console.log("Page:", currentPage);
         console.log("Category:", categoryParam);
         console.log("Search:", searchQuery);
+        console.log("Author:", authorParam);
         console.log("Filter Query:", filterQuery);
         console.log("Has Fetched:", hasFetched.current);
 
@@ -156,6 +225,7 @@ export default function BooksPage() {
         currentPage,
         categoryParam,
         searchQuery,
+        authorParam,
         filters.sortBy,
         filterDeps.categories,
         filterDeps.status,

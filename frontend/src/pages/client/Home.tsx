@@ -3,18 +3,41 @@ import OurProducts from "../../components/Product/OurProducts";
 import ProductBanner from "../../components/Product/ProductBanner";
 import SuggestProduct from "../../components/Product/SuggestProduct";
 import ProductOffers from "../../components/ProductOffers/ProductOffers";
-import { useBooks } from "../../contexts/BookContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Book } from "../../types";
+import bookApi from "../../api/bookApi";
 
 export default function Home() {
-    const { books, loading, fetchBooks } = useBooks();
+    const [allBooks, setAllBooks] = useState<Book[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    // Fetch books when Home page mounts to ensure we have data
+    // Fetch tất cả sách khi Home page mount
     useEffect(() => {
-        // Only fetch if we don't have enough books
-        if (books.length < 20) {
-            fetchBooks(0, 30); // Fetch 30 books for home page
-        }
+        const fetchAllBooks = async () => {
+            try {
+                setLoading(true);
+                // Fetch nhiều sách hơn để đủ cho tất cả components
+                const response = await bookApi.getAllBooks({
+                    page: 0,
+                    size: 500, // Increase to get all books
+                    sort: "createdAt,desc",
+                });
+
+                // API returns ApiResponse<PaginatedResponse<Book>>
+                // Structure: { data: { meta: {...}, result: Book[] } }
+                const booksData = response.data.result || [];
+                console.log("Books fetched:", booksData.length);
+
+                setAllBooks(booksData);
+            } catch (error) {
+                console.error("Error fetching books:", error);
+                setAllBooks([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchAllBooks();
     }, []);
 
     return (
@@ -40,12 +63,18 @@ export default function Home() {
                         </div>
                     </section>
                 ) : (
-                    <OurProducts books={books} />
+                    <>
+                        <OurProducts books={allBooks} />
+                    </>
                 )}
                 <ProductBanner />
             </main>
             <div className="wisbook-gradient-overlay">
-                {!loading && <SuggestProduct books={books} />}
+                {!loading && (
+                    <>
+                        <SuggestProduct books={allBooks} />
+                    </>
+                )}
             </div>
         </>
     );

@@ -17,6 +17,8 @@ import {
 import Carousel from "./Carousel";
 import logoImg from "../../assets/img/logo.png";
 import wisbook from "../../assets/img/wisbook.png";
+import bookApi from "../../api/bookApi";
+import { Book } from "../../types";
 export default function Header() {
     const [opacity, setOpacity] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -27,6 +29,9 @@ export default function Header() {
     const [isCategoryClosing, setIsCategoryClosing] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [currentUser, setCurrentUser] = useState<any>(null);
+    const [searchSuggestions, setSearchSuggestions] = useState<Book[]>([]);
+    const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
     const isHomePage = location.pathname === "/";
@@ -36,12 +41,12 @@ export default function Header() {
     // Lấy thông tin user từ localStorage và reload khi có thay đổi
     useEffect(() => {
         const loadUser = () => {
-            const userStr = localStorage.getItem('user');
+            const userStr = localStorage.getItem("user");
             if (userStr) {
                 try {
                     setCurrentUser(JSON.parse(userStr));
                 } catch (error) {
-                    console.error('Error parsing user data:', error);
+                    console.error("Error parsing user data:", error);
                 }
             } else {
                 setCurrentUser(null);
@@ -53,7 +58,7 @@ export default function Header() {
 
         // Listen for storage changes (khi update từ tab khác hoặc component khác)
         const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'user') {
+            if (e.key === "user") {
                 loadUser();
             }
         };
@@ -63,12 +68,12 @@ export default function Header() {
             loadUser();
         };
 
-        window.addEventListener('storage', handleStorageChange);
-        window.addEventListener('userUpdated', handleUserUpdate);
+        window.addEventListener("storage", handleStorageChange);
+        window.addEventListener("userUpdated", handleUserUpdate);
 
         return () => {
-            window.removeEventListener('storage', handleStorageChange);
-            window.removeEventListener('userUpdated', handleUserUpdate);
+            window.removeEventListener("storage", handleStorageChange);
+            window.removeEventListener("userUpdated", handleUserUpdate);
         };
     }, []);
 
@@ -97,25 +102,15 @@ export default function Header() {
         dispatch(removeItem([id]));
     };
 
-    // Danh sách thể loại sách cố định
+    // Danh sách thể loại sách - giống CategoryBook
     const bookCategories = [
-        { id: 1, name: "Văn học" },
-        { id: 2, name: "Kinh doanh" },
-        { id: 3, name: "Công nghệ thông tin" },
-        { id: 4, name: "Phát triển bản thân" },
-        { id: 5, name: "Thiếu nhi" },
-        { id: 6, name: "Giáo dục – Học tập" },
-        { id: 7, name: "Khoa học – Công nghệ" },
-        { id: 8, name: "Văn hóa – Xã hội" },
-        { id: 9, name: "Y học – Sức khỏe" },
-        { id: 10, name: "Nghệ thuật" },
-        { id: 11, name: "Tôn giáo – Tâm linh" },
-        { id: 12, name: "Ẩm thực – Nấu ăn" },
-        { id: 13, name: "Thể thao" },
-        { id: 14, name: "Kinh tế – Chính trị" },
-        { id: 15, name: "Du lịch – Địa lý" },
-        { id: 16, name: "Nông nghiệp – Thú y" },
-        { id: 17, name: "Kỹ thuật – Công nghiệp" },
+        { id: 1, name: "Ẩm thực – Nấu ăn" },
+        { id: 2, name: "Công nghệ thông tin" },
+        { id: 3, name: "Du lịch – Địa lý" },
+        { id: 4, name: "Kinh doanh" },
+        { id: 5, name: "Nghệ thuật" },
+        { id: 6, name: "Thể thao" },
+        { id: 7, name: "Thiếu nhi" },
     ];
 
     useEffect(() => {
@@ -137,11 +132,67 @@ export default function Header() {
         if (searchValue.trim()) {
             navigate(`/books?search=${encodeURIComponent(searchValue)}`);
             setSearchValue("");
+            setShowSearchSuggestions(false);
         }
     };
 
+    // Tìm kiếm gợi ý khi người dùng gõ
+    useEffect(() => {
+        const searchBooks = async () => {
+            if (searchValue.trim().length < 2) {
+                setSearchSuggestions([]);
+                setShowSearchSuggestions(false);
+                return;
+            }
+
+            setIsSearching(true);
+            try {
+                // Tìm theo tên sách
+                const titleResponse = await bookApi.getAllBooks({
+                    page: 0,
+                    size: 5,
+                    filter: `title~'*${searchValue}*'`,
+                });
+
+                // Tìm theo tác giả
+                const authorResponse = await bookApi.getAllBooks({
+                    page: 0,
+                    size: 5,
+                    filter: `author~'*${searchValue}*'`,
+                });
+
+                // Gộp kết quả và loại bỏ trùng lặp
+                const titleBooks = titleResponse.data.result || [];
+                const authorBooks = authorResponse.data.result || [];
+
+                const allBooks = [...titleBooks];
+                const bookIds = new Set(titleBooks.map((b: any) => b.id));
+
+                // Thêm sách từ kết quả tác giả nếu chưa có
+                authorBooks.forEach((book: any) => {
+                    if (!bookIds.has(book.id)) {
+                        allBooks.push(book);
+                    }
+                });
+
+                // Giới hạn 5 kết quả
+                setSearchSuggestions(allBooks.slice(0, 5));
+                setShowSearchSuggestions(true);
+            } catch (error) {
+                console.error("Error searching books:", error);
+                setSearchSuggestions([]);
+            } finally {
+                setIsSearching(false);
+            }
+        };
+
+        const debounceTimer = setTimeout(searchBooks, 300);
+        return () => clearTimeout(debounceTimer);
+    }, [searchValue]);
+
     const handleCategoryClick = (categoryName: string) => {
-        navigate(`/books?category=${encodeURIComponent(categoryName)}`);
+        // Navigate to CategoryPage with category name
+        navigate(`/category/${encodeURIComponent(categoryName)}`);
         setShowCategoryMenu(false);
     };
 
@@ -151,10 +202,12 @@ export default function Header() {
             const target = e.target as HTMLElement;
             if (
                 !target.closest(".account-menu") &&
-                !target.closest(".cart-menu")
+                !target.closest(".cart-menu") &&
+                !target.closest(".search-container")
             ) {
                 setShowAccountMenu(false);
                 setShowCartMenu(false);
+                setShowSearchSuggestions(false);
             }
         };
 
@@ -281,22 +334,39 @@ export default function Header() {
 
                             {/* Category Dropdown */}
                             {showCategoryMenu && (
-                                <div className="absolute top-full left-0 pt-4 w-[700px] z-50">
+                                <div className="absolute top-full left-0 pt-4 w-[780px] z-50">
                                     <div
-                                        className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200"
+                                        className="bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100"
                                         style={{
                                             animation: isCategoryClosing
                                                 ? "slideUp 0.1s cubic-bezier(0.4, 0, 0.2, 1) forwards"
                                                 : "slideDown 0.1s cubic-bezier(0.4, 0, 0.2, 1) forwards",
                                         }}
                                     >
-                                        <div className="p-6">
-                                            <h3 className="text-xl font-bold text-gray-800 mb-4 pb-3 border-b border-gray-200">
-                                                Danh mục sách
-                                            </h3>
-                                            <div className="grid grid-cols-3 gap-3">
+                                        {/* Header Section */}
+                                        <div className="bg-gray-600 px-5 py-3">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <h3 className="text-lg font-bold text-white">
+                                                        Danh Mục Sách
+                                                    </h3>
+                                                    <p className="text-blue-100 text-xs">
+                                                        Khám phá thế giới tri
+                                                        thức đa dạng
+                                                    </p>
+                                                </div>
+                                                <div className="text-white/90 text-xs font-medium">
+                                                    {bookCategories.length} thể
+                                                    loại
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Categories Grid */}
+                                        <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50">
+                                            <div className="grid grid-cols-3 gap-4">
                                                 {bookCategories.map(
-                                                    (category) => (
+                                                    (category, index) => (
                                                         <button
                                                             key={category.id}
                                                             onClick={() =>
@@ -304,43 +374,97 @@ export default function Header() {
                                                                     category.name
                                                                 )
                                                             }
-                                                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 transition-all duration-300 group border border-transparent hover:border-blue-200 text-left w-full"
+                                                            className="group relative p-4 rounded-xl bg-white hover:bg-gradient-to-br hover:from-blue-500 hover:to-indigo-600 border-2 border-gray-100 hover:border-transparent transition-all duration-300 text-left shadow-sm hover:shadow-xl transform hover:-translate-y-1"
                                                         >
-                                                            <div className="flex-1">
-                                                                <h4 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors text-sm">
-                                                                    {
-                                                                        category.name
-                                                                    }
-                                                                </h4>
+                                                            {/* Decorative Background Pattern */}
+                                                            <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300">
+                                                                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9IiNmZmYiLz48L3N2Zz4=')] opacity-20"></div>
                                                             </div>
-                                                            <svg
-                                                                className="w-5 h-5 text-gray-400 group-hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                viewBox="0 0 24 24"
-                                                            >
-                                                                <path
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                    strokeWidth={
-                                                                        2
-                                                                    }
-                                                                    d="M9 5l7 7-7 7"
-                                                                />
-                                                            </svg>
+
+                                                            {/* Content */}
+                                                            <div className="relative flex items-start gap-3.5">
+                                                                {/* Icon */}
+                                                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 group-hover:from-white group-hover:to-blue-50 flex items-center justify-center flex-shrink-0 shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-110">
+                                                                    <svg
+                                                                        className="w-6 h-6 text-white group-hover:text-blue-600 transition-colors duration-300"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        viewBox="0 0 24 24"
+                                                                    >
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={
+                                                                                2
+                                                                            }
+                                                                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                                                                        />
+                                                                    </svg>
+                                                                </div>
+
+                                                                {/* Text Content */}
+                                                                <div className="flex-1 min-w-0 pt-1">
+                                                                    <h4 className="font-bold text-gray-800 group-hover:text-white transition-colors duration-300 text-sm leading-tight mb-1 whitespace-nowrap">
+                                                                        {
+                                                                            category.name
+                                                                        }
+                                                                    </h4>
+                                                                    <p className="text-xs text-gray-500 group-hover:text-blue-100 transition-colors duration-300 whitespace-nowrap">
+                                                                        Khám phá
+                                                                        ngay
+                                                                    </p>
+                                                                </div>
+
+                                                                {/* Arrow Icon */}
+                                                                <svg
+                                                                    className="w-5 h-5 text-gray-300 group-hover:text-white opacity-0 group-hover:opacity-100 transition-all duration-300 flex-shrink-0 mt-1 transform group-hover:translate-x-1"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={
+                                                                            2.5
+                                                                        }
+                                                                        d="M9 5l7 7-7 7"
+                                                                    />
+                                                                </svg>
+                                                            </div>
+
+                                                            {/* Shine Effect on Hover */}
+                                                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl overflow-hidden">
+                                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                                            </div>
                                                         </button>
                                                     )
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-t border-gray-200">
+
+                                        {/* Footer Section */}
+                                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
                                             <Link
                                                 to="/books"
-                                                className="text-blue-600 hover:text-blue-700 font-semibold text-sm flex items-center justify-center gap-2 group"
+                                                className="group inline-flex items-center justify-center gap-2.5 w-full px-5 py-3.5 rounded-xl bg-white text-blue-600 font-bold text-sm hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                                             >
-                                                Xem tất cả thể loại
                                                 <svg
-                                                    className="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                                                    className="w-5 h-5 transition-transform duration-300 group-hover:rotate-12"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2.5}
+                                                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                                                    />
+                                                </svg>
+                                                <span>Xem Tất Cả Thể Loại</span>
+                                                <svg
+                                                    className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
                                                     fill="none"
                                                     stroke="currentColor"
                                                     viewBox="0 0 24 24"
@@ -363,7 +487,7 @@ export default function Header() {
                             className="relative group transition-colors"
                         >
                             <span className="text-white font-bold text-xl">
-                               Về chúng tôi
+                                Về chúng tôi
                             </span>
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
                         </Link>
@@ -381,27 +505,97 @@ export default function Header() {
                     {/* Right Section: Search, Cart, Account */}
                     <div className="flex items-center gap-4">
                         {/* Search Box */}
-                        <form
-                            onSubmit={handleSearch}
-                            className="relative hidden lg:block"
-                        >
-                            <input
-                                type="text"
-                                value={searchValue}
-                                onChange={(e) => setSearchValue(e.target.value)}
-                                placeholder="Tìm kiếm sách, tác giả, thể loại"
-                                className="w-80 px-4 py-2 pr-12 rounded-full bg-gray-100 border-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-transparent focus:ring-2 transition-all duration-300"
-                                style={{
-                                    boxShadow: "none",
-                                }}
-                            />
-                            <button
-                                type="submit"
-                                className="absolute right-2 top-1/2 -translate-y-1/2 text-white w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg bg-gray-400"
-                            >
-                                <FaSearch className="text-sm" />
-                            </button>
-                        </form>
+                        <div className="search-container relative hidden lg:block">
+                            <form onSubmit={handleSearch}>
+                                <input
+                                    type="text"
+                                    value={searchValue}
+                                    onChange={(e) =>
+                                        setSearchValue(e.target.value)
+                                    }
+                                    placeholder="Tìm kiếm tên sách, tác giả"
+                                    className="w-80 px-4 py-2 pr-12 rounded-full bg-gray-100 border-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-transparent focus:ring-2 transition-all duration-300"
+                                    style={{
+                                        boxShadow: "none",
+                                    }}
+                                />
+                                <button
+                                    type="submit"
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-white w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg bg-gray-400"
+                                >
+                                    <FaSearch className="text-sm" />
+                                </button>
+                            </form>
+
+                            {/* Search Suggestions Dropdown */}
+                            {showSearchSuggestions &&
+                                searchSuggestions.length > 0 && (
+                                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50 animate-slideDown">
+                                        {searchSuggestions.map((book) => {
+                                            const imageUrl =
+                                                book.bookImage &&
+                                                book.bookImage.length > 0
+                                                    ? `https://hai-project-images.s3.us-east-1.amazonaws.com/${book.bookImage[0].imagePath}`
+                                                    : "https://anhdephd.vn/wp-content/uploads/2022/06/hinh-anh-sach-800x457.jpg";
+
+                                            return (
+                                                <Link
+                                                    key={book.id}
+                                                    to={`/books/${book.id}`}
+                                                    onClick={() => {
+                                                        setSearchValue("");
+                                                        setShowSearchSuggestions(
+                                                            false
+                                                        );
+                                                    }}
+                                                    className="flex items-center gap-3 p-3 hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0"
+                                                >
+                                                    <img
+                                                        src={imageUrl}
+                                                        alt={book.title}
+                                                        className="w-12 h-16 object-cover rounded"
+                                                    />
+                                                    <div className="flex-1 min-w-0">
+                                                        <h4 className="text-sm font-semibold text-gray-800 truncate">
+                                                            {book.title}
+                                                        </h4>
+                                                        <p className="text-xs text-gray-500 truncate">
+                                                            {book.author}
+                                                        </p>
+                                                        <p className="text-sm font-bold text-blue-600 mt-1">
+                                                            {formatCurrency(
+                                                                book.sellingPrice
+                                                            )}
+                                                        </p>
+                                                    </div>
+                                                </Link>
+                                            );
+                                        })}
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                handleSearch(e as any);
+                                            }}
+                                            className="w-full p-3 text-center text-blue-600 hover:bg-blue-50 font-semibold text-sm transition-colors"
+                                        >
+                                            Xem tất cả kết quả cho "
+                                            {searchValue}"
+                                        </button>
+                                    </div>
+                                )}
+
+                            {/* No results message */}
+                            {showSearchSuggestions &&
+                                searchSuggestions.length === 0 &&
+                                !isSearching &&
+                                searchValue.trim().length >= 2 && (
+                                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50 animate-slideDown">
+                                        <p className="text-center text-gray-500 text-sm">
+                                            Không tìm thấy sách nào phù hợp
+                                        </p>
+                                    </div>
+                                )}
+                        </div>
                         {/* Cart Icon với Badge */}
                         <div
                             className="cart-menu relative"
@@ -451,12 +645,19 @@ export default function Header() {
                                                             cartItems.length
                                                         )
                                                         .map((item) => {
-                                                            const isOutOfStock = item.book.quantity === 0;
+                                                            const isOutOfStock =
+                                                                item.book
+                                                                    .quantity ===
+                                                                0;
                                                             return (
                                                                 <div
-                                                                    key={item.id}
+                                                                    key={
+                                                                        item.id
+                                                                    }
                                                                     className={`flex items-center gap-3 p-4 border-b border-gray-100 cursor-pointer ${
-                                                                        isOutOfStock ? "opacity-50" : ""
+                                                                        isOutOfStock
+                                                                            ? "opacity-50"
+                                                                            : ""
                                                                     }`}
                                                                     onClick={() =>
                                                                         navigate(
@@ -477,13 +678,16 @@ export default function Header() {
                                                                                 "Book"
                                                                             }
                                                                             className={`w-16 h-16 object-cover rounded ${
-                                                                                isOutOfStock ? "opacity-50" : ""
+                                                                                isOutOfStock
+                                                                                    ? "opacity-50"
+                                                                                    : ""
                                                                             }`}
                                                                         />
                                                                         {isOutOfStock && (
                                                                             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded">
                                                                                 <span className="text-white text-xs font-semibold">
-                                                                                    Hết hàng
+                                                                                    Hết
+                                                                                    hàng
                                                                                 </span>
                                                                             </div>
                                                                         )}
@@ -569,14 +773,16 @@ export default function Header() {
                                 className="text-white relative flex items-center p-1 rounded-full transition-all duration-500 hover:ring-2 hover:ring-white/50"
                             >
                                 {currentUser?.avatar ? (
-                                    <img 
-                                        src={currentUser.avatar} 
+                                    <img
+                                        src={currentUser.avatar}
                                         alt={currentUser.fullName}
                                         className="w-10 h-10 rounded-full object-cover border-2 border-white"
                                     />
                                 ) : currentUser ? (
                                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold border-2 border-white">
-                                        {currentUser.fullName?.charAt(0).toUpperCase() || 'U'}
+                                        {currentUser.fullName
+                                            ?.charAt(0)
+                                            .toUpperCase() || "U"}
                                     </div>
                                 ) : (
                                     <UserCircle className="text-3xl text-white" />
@@ -592,19 +798,28 @@ export default function Header() {
                                             <div className="px-4 py-3 border-b border-gray-200">
                                                 <div className="flex items-center gap-3">
                                                     {currentUser.avatar ? (
-                                                        <img 
-                                                            src={currentUser.avatar} 
-                                                            alt={currentUser.fullName}
+                                                        <img
+                                                            src={
+                                                                currentUser.avatar
+                                                            }
+                                                            alt={
+                                                                currentUser.fullName
+                                                            }
                                                             className="w-12 h-12 rounded-full object-cover"
                                                         />
                                                     ) : (
                                                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                                                            {currentUser.fullName?.charAt(0).toUpperCase() || 'U'}
+                                                            {currentUser.fullName
+                                                                ?.charAt(0)
+                                                                .toUpperCase() ||
+                                                                "U"}
                                                         </div>
                                                     )}
                                                     <div className="flex-1 min-w-0">
                                                         <p className="font-semibold text-gray-800 truncate">
-                                                            {currentUser.fullName}
+                                                            {
+                                                                currentUser.fullName
+                                                            }
                                                         </p>
                                                         <p className="text-xs text-gray-500 truncate">
                                                             {currentUser.email}
@@ -612,7 +827,7 @@ export default function Header() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             <Link
                                                 to="/orders"
                                                 className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-50 rounded-lg transition group"
@@ -632,13 +847,17 @@ export default function Header() {
                                                 </span>
                                             </Link>
                                             <div className="border-t border-gray-200 my-2"></div>
-                                            <button 
+                                            <button
                                                 onClick={() => {
-                                                    localStorage.removeItem('user');
-                                                    localStorage.removeItem('token');
+                                                    localStorage.removeItem(
+                                                        "user"
+                                                    );
+                                                    localStorage.removeItem(
+                                                        "token"
+                                                    );
                                                     setCurrentUser(null);
                                                     setShowAccountMenu(false);
-                                                    navigate('/');
+                                                    navigate("/");
                                                     window.location.reload();
                                                 }}
                                                 className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition group"

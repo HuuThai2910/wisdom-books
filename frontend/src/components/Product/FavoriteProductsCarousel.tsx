@@ -99,6 +99,10 @@ export default function FavoriteProductsCarousel({
         useState(false);
     const autoplayRef = useRef<number | null>(null);
 
+    // Debug: Log books received
+    console.log("=== FavoriteProductsCarousel ===");
+    console.log("Books received:", books.length);
+
     useEffect(() => {
         if (books.length === 0) return;
 

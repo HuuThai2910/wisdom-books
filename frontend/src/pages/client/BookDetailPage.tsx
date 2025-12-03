@@ -33,23 +33,102 @@ export default function BookDetailPage() {
     >("description");
     const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
     const [isZooming, setIsZooming] = useState(false);
+    const [relatedBooks, setRelatedBooks] = useState<Book[]>([]);
     const { books } = useBooks();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
-    // Random 10 suggested books (excluding current book)
+    // Get books with same categories (excluding current book)
     const suggestedBooks = useMemo(() => {
-        if (!books || books.length === 0 || !id) return [];
-        const filtered = books.filter((b) => b.id !== parseInt(id));
-        const shuffled = [...filtered].sort(() => Math.random() - 0.5);
-        return shuffled.slice(0, 10);
-    }, [books, id]);
+        if (!book || !book.category || book.category.length === 0) {
+            return relatedBooks
+                .filter((b) => b.id !== parseInt(id || "0"))
+                .slice(0, 10);
+        }
+
+        // Get category IDs from current book
+        const categoryIds = book.category.map((cat) => cat.id);
+
+        // Filter books that share at least one category
+        const booksWithSameCategory = relatedBooks.filter((b) => {
+            if (b.id === book.id) return false;
+            if (!b.category || b.category.length === 0) return false;
+
+            return b.category.some((cat) => categoryIds.includes(cat.id));
+        });
+
+        // Sort by number of matching categories (descending)
+        const sorted = booksWithSameCategory.sort((a, b) => {
+            const aMatches =
+                a.category?.filter((cat) => categoryIds.includes(cat.id))
+                    .length || 0;
+            const bMatches =
+                b.category?.filter((cat) => categoryIds.includes(cat.id))
+                    .length || 0;
+            return bMatches - aMatches;
+        });
+
+        return sorted.slice(0, 10);
+    }, [book, relatedBooks, id]);
 
     useEffect(() => {
         if (id) {
             fetchBookDetail(parseInt(id));
         }
     }, [id]);
+
+    // Fetch related books when book changes
+    useEffect(() => {
+        const fetchRelatedBooks = async () => {
+            if (!book || !book.category || book.category.length === 0) {
+                // Fallback: fetch some random books
+                try {
+                    const response = await bookApi.getAllBooks({
+                        page: 0,
+                        size: 20,
+                        sort: "createdAt,desc",
+                    });
+                    setRelatedBooks(response.data.result || []);
+                } catch (error) {
+                    console.error("Error fetching fallback books:", error);
+                }
+                return;
+            }
+
+            // Build OR filter for books with same categories
+            const categoryFilters = book.category
+                .map((cat) => `category.name:'${cat.name}'`)
+                .join(" OR ");
+
+            try {
+                const response = await bookApi.getAllBooks({
+                    page: 0,
+                    size: 100,
+                    filter: `(${categoryFilters})`,
+                });
+                console.log(
+                    "Related books fetched:",
+                    response.data.result?.length
+                );
+                setRelatedBooks(response.data.result || []);
+            } catch (error) {
+                console.error("Error fetching related books:", error);
+                // Fallback to fetching all books if filter fails
+                try {
+                    const response = await bookApi.getAllBooks({
+                        page: 0,
+                        size: 100,
+                        sort: "createdAt,desc",
+                    });
+                    setRelatedBooks(response.data.result || []);
+                } catch (fallbackError) {
+                    console.error("Fallback fetch also failed:", fallbackError);
+                }
+            }
+        };
+
+        fetchRelatedBooks();
+    }, [book]);
 
     const fetchBookDetail = async (bookId: number) => {
         try {
@@ -283,8 +362,6 @@ export default function BookDetailPage() {
                                     </button>
                                 </>
                             )}
-
-                           
                         </div>
 
                         {/* Thumbnail Images */}
@@ -321,8 +398,6 @@ export default function BookDetailPage() {
                         <h1 className="text-2xl font-bold text-gray-900 mb-2">
                             {book.title}
                         </h1>
-
-                       
 
                         <div className="mb-5">
                             <div className="flex items-baseline gap-3 mb-2">
@@ -583,7 +658,7 @@ export default function BookDetailPage() {
                         </div>
 
                         {/* Social Share */}
-                        <div>
+                        <div className="mb-5">
                             <p className="font-semibold text-gray-700 text-sm mb-2">
                                 Chia sẻ:
                             </p>
@@ -597,6 +672,119 @@ export default function BookDetailPage() {
                                 <button className="w-9 h-9 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 hover:scale-110 transition-all duration-300 shadow-md">
                                     <FaPinterest className="text-sm" />
                                 </button>
+                            </div>
+                        </div>
+
+                        {/* Services Section */}
+                        <div className="mt-6 pt-6 border-t-2 border-gray-200">
+                            <h3 className="font-bold text-gray-800 text-base mb-4">
+                                Dịch vụ của chúng tôi
+                            </h3>
+                            <div className="space-y-3">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <svg
+                                            className="w-4 h-4 text-blue-600"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                                            <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z" />
+                                        </svg>
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm text-gray-700 leading-relaxed">
+                                            Giao tận nhà trong{" "}
+                                            <span className="font-semibold text-blue-600">
+                                                3 - 7 ngày làm việc
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <svg
+                                            className="w-4 h-4 text-blue-600"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path
+                                                fillRule="evenodd"
+                                                d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z"
+                                                clipRule="evenodd"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm text-gray-700 leading-relaxed">
+                                            Miễn phí giao hàng Toàn Quốc cho đơn
+                                            hàng trên{" "}
+                                            <span className="font-semibold text-blue-600">
+                                                300k
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Promotions Section */}
+                        <div className="mt-6 pt-6 border-t-2 border-gray-200">
+                            <h3 className="font-bold text-gray-800 text-base mb-4">
+                                Dịch vụ & Khuyến mãi
+                            </h3>
+                            <div className="space-y-3">
+                                <div className="flex items-start gap-3">
+                                    <span className="text-xl flex-shrink-0 mt-0.5">
+                                        📌
+                                    </span>
+                                    <p className="text-sm text-gray-700 leading-relaxed">
+                                        Đổi với sản phẩm giảm{" "}
+                                        <span className="font-semibold text-red-600">
+                                            40% - 50% - 70%
+                                        </span>{" "}
+                                        (sản phẩm xả kho): Mỗi khách hàng được
+                                        mua tối đa 3 sản phẩm/ 1 mặt hàng/ 1 đơn
+                                        hàng
+                                    </p>
+                                </div>
+
+                                <div className="flex items-start gap-3">
+                                    <span className="text-xl flex-shrink-0 mt-0.5">
+                                        🎁
+                                    </span>
+                                    <p className="text-sm text-gray-700 leading-relaxed">
+                                        Tặng kèm Bookmark (đánh dấu trang) cho
+                                        các sách Kĩ năng sống, Kinh doanh, Mẹ và
+                                        Bé, Văn học
+                                    </p>
+                                </div>
+
+                                <div className="flex items-start gap-3">
+                                    <span className="text-xl flex-shrink-0 mt-0.5">
+                                        🎁
+                                    </span>
+                                    <p className="text-sm text-gray-700 leading-relaxed">
+                                        <span className="font-semibold text-blue-600">
+                                            FREESHIP
+                                        </span>{" "}
+                                        cho đơn hàng từ 300K trở lên
+                                    </p>
+                                </div>
+
+                                <div className="flex items-start gap-3">
+                                    <span className="text-xl flex-shrink-0 mt-0.5">
+                                        🎁
+                                    </span>
+                                    <p className="text-sm text-gray-700 leading-relaxed">
+                                        Tặng kèm 1{" "}
+                                        <span className="font-semibold text-blue-600">
+                                            VOUCHER 20K
+                                        </span>{" "}
+                                        cho đơn từ 500K trở lên
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
@@ -871,7 +1059,7 @@ export default function BookDetailPage() {
                     </div>
                 </motion.div>
 
-                {/* Suggested Books Section */}
+                {/* Related Books Section - Same Category */}
                 {suggestedBooks.length > 0 && (
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -879,9 +1067,23 @@ export default function BookDetailPage() {
                         transition={{ duration: 0.6, delay: 0.4 }}
                         className="mt-16"
                     >
-                        <h2 className="text-3xl font-bold text-gray-900 mb-8">
-                            Gợi Ý Cho Bạn
-                        </h2>
+                        <div className="flex items-center gap-3 mb-8">
+                            <h2 className="text-3xl font-bold text-gray-900">
+                                Sách Cùng Thể Loại
+                            </h2>
+                            {book?.category && book.category.length > 0 && (
+                                <div className="flex flex-wrap gap-2">
+                                    {book.category.slice(0, 3).map((cat) => (
+                                        <span
+                                            key={cat.id}
+                                            className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                                        >
+                                            {cat.name}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                             {suggestedBooks.map((suggestedBook, idx) => (
                                 <BookCard
