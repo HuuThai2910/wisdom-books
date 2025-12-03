@@ -30,7 +30,6 @@ public class ApiResponse<T> {
     private String message;
     private T data;
     private Object errors;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime timestamp = LocalDateTime.now();
 
     public ApiResponse(int status, boolean success, String message, T data, Object errors) {

@@ -29,9 +29,7 @@ public class ResUpdateBookDTO {
     private double sellingPrice;
     private double importPrice;
     private BookStatus status;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime createdAt;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime updatedAt;
     private String createdBy;
     private String updatedBy;

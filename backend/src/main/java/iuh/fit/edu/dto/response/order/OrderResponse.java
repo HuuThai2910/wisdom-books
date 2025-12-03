@@ -30,9 +30,7 @@ public class OrderResponse {
     private PaymentStatus paymentStatus;
     private String note;
     private double totalPrice;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
     private LocalDateTime orderDate;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
     private LocalDateTime expiredAt;
     private List<OrderItemResponse> orderItems;
 }
