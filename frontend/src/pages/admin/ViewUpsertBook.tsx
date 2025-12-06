@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import {
     Breadcrumb,
@@ -60,6 +60,11 @@ const ViewUpsertBook = () => {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingValues, setPendingValues] = useState<any>(null);
 
+    const handleDescriptionChange = useCallback((value: string) => {
+        console.log("Description changed to:", value);
+        setDescription(value);
+    }, []);
+
     useEffect(() => {
         const init = async () => {
             if (id) {
@@ -80,9 +85,16 @@ const ViewUpsertBook = () => {
                                     url: `https://hai-project-images.s3.us-east-1.amazonaws.com/${img.imagePath}`,
                                 }));
                             setFileList(imageList);
+                        } else {
+                            setFileList([]);
                         }
 
-                        setDescription(res.data.description || "");
+                        const descriptionValue = res.data.description || "";
+                        console.log(
+                            "Loading description from API:",
+                            descriptionValue
+                        );
+                        setDescription(descriptionValue);
 
                         // Map nested objects to IDs for form fields
                         console.log("Raw book data:", res.data);
@@ -108,6 +120,11 @@ const ViewUpsertBook = () => {
                     console.error("Error fetching book:", error);
                     toast.error("Không thể tải thông tin sách!");
                 }
+            } else {
+                // Reset khi tạo mới
+                setDataUpdate(null);
+                setFileList([]);
+                setDescription("");
             }
         };
         init();
@@ -162,6 +179,8 @@ const ViewUpsertBook = () => {
             console.log("Book data being sent:", bookData);
             console.log("Categories:", values.categories);
             console.log("Supplier:", values.supplier);
+            console.log("Description state:", description);
+            console.log("ShortDes from form:", values.shortDes);
 
             // Xử lý ảnh
             if (!dataUpdate?.id) {
@@ -775,7 +794,9 @@ const ViewUpsertBook = () => {
                                             >
                                                 <RichTextEditor
                                                     value={description}
-                                                    onChange={setDescription}
+                                                    onChange={
+                                                        handleDescriptionChange
+                                                    }
                                                     placeholder="Nhập mô tả chi tiết..."
                                                     style={{
                                                         height: "200px",

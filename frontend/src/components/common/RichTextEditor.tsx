@@ -20,6 +20,8 @@ const RichTextEditor = ({
 
     useEffect(() => {
         if (editorRef.current && !quillRef.current) {
+            console.log("Initializing Quill editor");
+            
             // Initialize Quill
             quillRef.current = new Quill(editorRef.current, {
                 theme: "snow",
@@ -38,33 +40,29 @@ const RichTextEditor = ({
 
             // Set initial value
             if (value) {
-                quillRef.current.root.innerHTML = value;
+                quillRef.current.clipboard.dangerouslyPasteHTML(value);
             }
 
             // Listen for text changes
             quillRef.current.on("text-change", () => {
                 if (quillRef.current) {
                     const html = quillRef.current.root.innerHTML;
+                    console.log("Quill text-change triggered, HTML:", html);
                     onChange(html);
                 }
             });
+            
+            console.log("Quill initialized successfully");
         }
-
-        // Update content when value changes externally
-        return () => {
-            if (quillRef.current) {
-                quillRef.current.off("text-change");
-            }
-        };
     }, []);
 
     // Update editor content when value prop changes
     useEffect(() => {
-        if (quillRef.current && value !== quillRef.current.root.innerHTML) {
-            const selection = quillRef.current.getSelection();
-            quillRef.current.root.innerHTML = value;
-            if (selection) {
-                quillRef.current.setSelection(selection);
+        if (quillRef.current) {
+            const currentHtml = quillRef.current.root.innerHTML;
+            if (value !== currentHtml) {
+                console.log("Updating Quill content with new value");
+                quillRef.current.clipboard.dangerouslyPasteHTML(value || "");
             }
         }
     }, [value]);
