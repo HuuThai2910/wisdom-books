@@ -688,7 +688,7 @@ export default function Header() {
                                 onClick={() => navigate("/cart")}
                                 style={{
                                     color:
-                                        isHomePage && opacity > 0.5
+                                        !isHomePage || opacity > 0.5
                                             ? "white"
                                             : "#2563eb",
                                 }}
@@ -697,7 +697,7 @@ export default function Header() {
                                     className="text-3xl"
                                     style={{
                                         color:
-                                            isHomePage && opacity > 0.5
+                                            !isHomePage || opacity > 0.5
                                                 ? "white"
                                                 : "#2563eb",
                                     }}
@@ -862,7 +862,7 @@ export default function Header() {
                                 className="relative flex items-center p-1 rounded-full transition-all duration-500"
                                 style={{
                                     color:
-                                        isHomePage && opacity > 0.5
+                                        !isHomePage || opacity > 0.5
                                             ? "white"
                                             : "#2563eb",
                                 }}
@@ -874,7 +874,7 @@ export default function Header() {
                                         className="w-10 h-10 rounded-full object-cover border-2"
                                         style={{
                                             borderColor:
-                                                isHomePage && opacity > 0.5
+                                                !isHomePage || opacity > 0.5
                                                     ? "white"
                                                     : "#2563eb",
                                         }}
@@ -884,7 +884,7 @@ export default function Header() {
                                         className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold border-2"
                                         style={{
                                             borderColor:
-                                                isHomePage && opacity > 0.5
+                                                !isHomePage || opacity > 0.5
                                                     ? "white"
                                                     : "#2563eb",
                                         }}
@@ -898,7 +898,7 @@ export default function Header() {
                                         className="text-3xl"
                                         style={{
                                             color:
-                                                isHomePage && opacity > 0.5
+                                                !isHomePage || opacity > 0.5
                                                     ? "white"
                                                     : "#2563eb",
                                         }}

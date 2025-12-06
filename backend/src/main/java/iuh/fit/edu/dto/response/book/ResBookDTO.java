@@ -33,9 +33,9 @@ public class ResBookDTO {
     private double sellingPrice;
     private double importPrice;
     private BookStatus status;
-    // @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private OffsetDateTime createdAt;
-    // @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private OffsetDateTime updatedAt;
     private String createdBy;
     private String updatedBy;

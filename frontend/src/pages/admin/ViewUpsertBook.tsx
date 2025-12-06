@@ -13,6 +13,7 @@ import {
     Space,
     Typography,
     Tabs,
+    Modal,
 } from "antd";
 import {
     FooterToolbar,
@@ -31,6 +32,7 @@ import {
     TagsOutlined,
     PictureOutlined,
     InfoCircleOutlined,
+    ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import type { UploadFile } from "antd/es/upload/interface";
 import RichTextEditor from "../../components/common/RichTextEditor";
@@ -55,6 +57,8 @@ const ViewUpsertBook = () => {
     const [previewImage, setPreviewImage] = useState("");
     const [isUploading, setIsUploading] = useState(false);
     const [description, setDescription] = useState<string>("");
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [pendingValues, setPendingValues] = useState<any>(null);
 
     useEffect(() => {
         const init = async () => {
@@ -110,6 +114,18 @@ const ViewUpsertBook = () => {
         return () => form.resetFields();
     }, [id]);
 
+    const handleFormSubmit = async (values: any) => {
+        setPendingValues(values);
+        setShowConfirmModal(true);
+    };
+
+    const handleConfirmSubmit = async () => {
+        setShowConfirmModal(false);
+        if (pendingValues) {
+            await onFinish(pendingValues);
+        }
+    };
+
     const onFinish = async (values: any) => {
         try {
             setIsUploading(true);
@@ -124,8 +140,6 @@ const ViewUpsertBook = () => {
                 .filter((file) => !file.originFileObj && file.name)
                 .map((file) => file.name);
 
-            const allImages = [...existingImages];
-
             const bookData: any = {
                 isbn: values.isbn,
                 title: values.title,
@@ -137,29 +151,30 @@ const ViewUpsertBook = () => {
                 importPrice: values.importPrice,
                 status: values.status || "SALE",
                 quantity: values.quantity,
-                categories: values.categories
-                    ? values.categories.map((catId: number) => ({ id: catId }))
-                    : [],
-                supplier: { id: values.supplier || 1 },
-                inventory: { id: 1 },
+                categoryIds:
+                    values.categories && values.categories.length > 0
+                        ? values.categories
+                        : [],
+                supplierId: values.supplier || null,
+                inventoryId: 1,
             };
 
-            // Only add image field if there are images
-            if (allImages.length > 0) {
-                bookData.image = allImages;
+            console.log("Book data being sent:", bookData);
+            console.log("Categories:", values.categories);
+            console.log("Supplier:", values.supplier);
+
+            // Xử lý ảnh
+            if (!dataUpdate?.id) {
+                // Tạo mới: validate frontend và gửi mảng rỗng
+                // Backend sẽ nhận lỗi validation nếu mảng rỗng
+                bookData.image = fileList.length > 0 ? ["placeholder.jpg"] : [];
+            } else {
+                // Update: chỉ gửi ảnh cũ (không gửi placeholder cho ảnh mới)
+                bookData.image = existingImages;
             }
 
-            console.log("=== BOOK DATA DEBUG ===");
-            console.log("Update mode:", !!dataUpdate?.id);
-            console.log("Book ID:", dataUpdate?.id);
-            console.log("Book data:", JSON.stringify(bookData, null, 2));
-            console.log("All images:", allImages);
-
             if (dataUpdate?.id) {
-                console.log("Calling updateBook with ID:", dataUpdate.id);
-                console.log("Book data being sent:", bookData);
                 const res = await bookApi.updateBook(dataUpdate.id, bookData);
-                console.log("Update response:", res);
 
                 if (res && res.success && res.data) {
                     // Upload new images to S3 after update
@@ -182,9 +197,7 @@ const ViewUpsertBook = () => {
                         }
                     }
                     message.success("Cập nhật sách thành công!");
-                    setTimeout(() => {
-                        navigate("/admin/books");
-                    }, 500);
+                    navigate("/admin/books");
                 } else {
                     notification.error({
                         message: "Có lỗi xảy ra",
@@ -221,9 +234,7 @@ const ViewUpsertBook = () => {
                     }
 
                     message.success("Tạo mới sách thành công!");
-                    setTimeout(() => {
-                        navigate("/admin/books");
-                    }, 500);
+                    navigate("/admin/books");
                 } else {
                     notification.error({
                         message: "Có lỗi xảy ra",
@@ -235,25 +246,63 @@ const ViewUpsertBook = () => {
             console.error("Error saving book:", error);
             console.error("Error details:", error.response);
 
-            // Xử lý validation errors từ backend (object)
+            // Xử lý validation errors từ backend (object) - ví dụ: {yearOfPublication: "...", image: "..."}
             if (
                 error.response?.data?.errors &&
                 typeof error.response.data.errors === "object"
             ) {
                 const validationErrors = error.response.data.errors;
 
+                // Map backend field names to form field names
+                const fieldNameMap: Record<string, string> = {
+                    categoryIds: "categories",
+                    supplierId: "supplier",
+                };
+
                 // Set errors directly on form fields
                 const fieldErrors = Object.entries(validationErrors).map(
                     ([field, message]) => ({
-                        name: field,
+                        name: fieldNameMap[field] || field, // Use mapped name or original
                         errors: [message as string],
                     })
                 );
+
+                console.log("Setting field errors:", fieldErrors);
                 form.setFields(fieldErrors);
 
-                // Also show notification
+                // Scroll to first error field
+                const firstErrorField = fieldErrors[0]?.name;
+                if (firstErrorField) {
+                    form.scrollToField(firstErrorField);
+                }
+
+                // Show all validation errors
                 const errorMessages = Object.entries(validationErrors)
-                    .map(([field, message]) => `• ${field}: ${message}`)
+                    .map(([field, message]) => {
+                        const fieldLabel =
+                            field === "yearOfPublication"
+                                ? "Năm xuất bản"
+                                : field === "image"
+                                ? "Hình ảnh"
+                                : field === "isbn"
+                                ? "ISBN"
+                                : field === "title"
+                                ? "Tên sách"
+                                : field === "author"
+                                ? "Tác giả"
+                                : field === "categoryIds"
+                                ? "Thể loại"
+                                : field === "supplierId"
+                                ? "Nhà cung cấp"
+                                : field === "sellingPrice"
+                                ? "Giá bán"
+                                : field === "importPrice"
+                                ? "Giá nhập"
+                                : field === "quantity"
+                                ? "Số lượng"
+                                : field;
+                        return `• ${fieldLabel}: ${message}`;
+                    })
                     .join("\n");
 
                 notification.error({
@@ -265,34 +314,61 @@ const ViewUpsertBook = () => {
                     ),
                     duration: 8,
                 });
+
+                // Also show toast for quick visibility
+                toast.error("Vui lòng kiểm tra lại thông tin!");
             }
-            // Xử lý IdInvalidException (ISBN trùng, etc.) - errors là string
+            // Xử lý error message trực tiếp từ backend (string)
             else if (error.response?.data?.message) {
+                const errorMessage = error.response.data.message;
+
                 notification.error({
-                    message: error.response.data.message.includes("ISBN")
+                    message: errorMessage.includes("ISBN")
                         ? "ISBN đã tồn tại"
+                        : errorMessage.includes("ảnh") ||
+                          errorMessage.includes("image")
+                        ? "Lỗi hình ảnh"
+                        : errorMessage.includes("năm") ||
+                          errorMessage.includes("year")
+                        ? "Lỗi năm xuất bản"
                         : "Có lỗi xảy ra",
-                    description: error.response.data.message,
+                    description: errorMessage,
                     duration: 6,
                 });
 
-                // Nếu lỗi về ISBN, highlight field ISBN
-                if (error.response.data.message.includes("ISBN")) {
+                // Highlight field tương ứng
+                if (errorMessage.includes("ISBN")) {
                     form.setFields([
                         {
                             name: "isbn",
-                            errors: [error.response.data.message],
+                            errors: [errorMessage],
+                        },
+                    ]);
+                } else if (
+                    errorMessage.includes("năm") ||
+                    errorMessage.includes("year")
+                ) {
+                    form.setFields([
+                        {
+                            name: "yearOfPublication",
+                            errors: [errorMessage],
                         },
                     ]);
                 }
+
+                toast.error(errorMessage);
             } else {
+                const errorMsg =
+                    error.response?.data?.error ||
+                    error.message ||
+                    "Có lỗi xảy ra khi lưu sách!";
+
                 notification.error({
                     message: "Có lỗi xảy ra",
-                    description:
-                        error.response?.data?.error ||
-                        error.message ||
-                        "Có lỗi xảy ra khi lưu sách!",
+                    description: errorMsg,
                 });
+
+                toast.error(errorMsg);
             }
         } finally {
             setIsUploading(false);
@@ -300,7 +376,25 @@ const ViewUpsertBook = () => {
     };
 
     const handleUploadChange = ({ fileList: newFileList }: any) => {
+        console.log("Upload change - received fileList:", newFileList);
+
+        // Validate số lượng ảnh
+        if (newFileList.length > 8) {
+            toast.error("Số lượng ảnh không được vượt quá 8!");
+            return;
+        }
+
         setFileList(newFileList);
+    };
+
+    const handleBeforeUpload = (file: File) => {
+        // Chỉ validate, không thêm file vào state
+        // Upload component sẽ tự động thêm file và trigger onChange
+        if (fileList.length >= 8) {
+            toast.error("Số lượng ảnh không được vượt quá 8!");
+            return Upload.LIST_IGNORE; // Ignore this file
+        }
+        return false; // Prevent actual upload, just add to list
     };
 
     const handlePreview = async (file: UploadFile) => {
@@ -332,7 +426,7 @@ const ViewUpsertBook = () => {
         <AdminLayout>
             <div
                 style={{
-                    padding: "20px",
+                    padding: "5px",
                     background: "#f0f2f5",
                     minHeight: "100vh",
                 }}
@@ -353,23 +447,6 @@ const ViewUpsertBook = () => {
                         }}
                     >
                         <div>
-                            <Breadcrumb
-                                separator=">"
-                                items={[
-                                    {
-                                        title: (
-                                            <Link to="/admin/books">
-                                                Quản lý sách
-                                            </Link>
-                                        ),
-                                    },
-                                    {
-                                        title: dataUpdate?.id
-                                            ? "Chỉnh sửa"
-                                            : "Thêm mới",
-                                    },
-                                ]}
-                            />
                             <Title level={4} style={{ margin: "8px 0 0 0" }}>
                                 <BookOutlined style={{ marginRight: 8 }} />
                                 {dataUpdate?.id
@@ -382,7 +459,7 @@ const ViewUpsertBook = () => {
 
                 <ProForm
                     form={form}
-                    onFinish={onFinish}
+                    onFinish={handleFormSubmit}
                     submitter={{
                         searchConfig: {
                             resetText: "Hủy",
@@ -391,13 +468,38 @@ const ViewUpsertBook = () => {
                                 : "Tạo mới sách",
                         },
                         onReset: () => navigate("/admin/books"),
-                        render: (_: any, dom: any) => (
-                            <FooterToolbar>{dom}</FooterToolbar>
-                        ),
                         submitButtonProps: {
                             icon: <CheckSquareOutlined />,
                             loading: isUploading,
+                            style: {
+                                borderRadius: "8px",
+                                height: "40px",
+                                fontSize: "15px",
+                                fontWeight: "600",
+                            },
                         },
+                        resetButtonProps: {
+                            style: {
+                                borderRadius: "8px",
+                                height: "40px",
+                                fontSize: "15px",
+                                fontWeight: "600",
+                            },
+                        },
+                        render: (_: any, dom: any) => (
+                            <div
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "flex-end",
+                                    gap: "12px",
+                                    padding: "24px 0",
+                                    marginTop: "24px",
+                                    borderTop: "1px solid #f0f0f0",
+                                }}
+                            >
+                                {dom}
+                            </div>
+                        ),
                     }}
                 >
                     <Row gutter={16}>
@@ -426,13 +528,16 @@ const ViewUpsertBook = () => {
                                 >
                                     Tải lên tối đa 8 ảnh
                                 </Text>
-                                <Form.Item style={{ marginBottom: 0 }}>
+                                <Form.Item
+                                    name="image"
+                                    style={{ marginBottom: 0 }}
+                                >
                                     <Upload
                                         listType="picture-card"
                                         fileList={fileList}
                                         onChange={handleUploadChange}
                                         onPreview={handlePreview}
-                                        beforeUpload={() => false}
+                                        beforeUpload={handleBeforeUpload}
                                         accept="image/png,image/jpeg,image/jpg"
                                         multiple
                                         className="compact-upload"
@@ -466,13 +571,6 @@ const ViewUpsertBook = () => {
                                         <ProFormText
                                             label="Tên sách"
                                             name="title"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message:
-                                                        "Vui lòng nhập tên sách!",
-                                                },
-                                            ]}
                                             placeholder="Nhập tên sách"
                                         />
                                     </Col>
@@ -480,13 +578,6 @@ const ViewUpsertBook = () => {
                                         <ProFormText
                                             label="Tác giả"
                                             name="author"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message:
-                                                        "Vui lòng nhập tên tác giả!",
-                                                },
-                                            ]}
                                             placeholder="Nhập tên tác giả"
                                         />
                                     </Col>
@@ -494,13 +585,6 @@ const ViewUpsertBook = () => {
                                         <ProFormText
                                             label="ISBN"
                                             name="isbn"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message:
-                                                        "Vui lòng nhập ISBN!",
-                                                },
-                                            ]}
                                             placeholder="978-3-16-148410-0"
                                         />
                                     </Col>
@@ -509,17 +593,6 @@ const ViewUpsertBook = () => {
                                             label="Năm xuất bản"
                                             name="yearOfPublication"
                                             placeholder="2024"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message:
-                                                        "Vui lòng nhập năm xuất bản!",
-                                                },
-                                            ]}
-                                            fieldProps={{
-                                                min: 1900,
-                                                max: new Date().getFullYear(),
-                                            }}
                                         />
                                     </Col>
                                 </Row>
@@ -544,13 +617,6 @@ const ViewUpsertBook = () => {
                                         <ProFormDigit
                                             label="Giá nhập"
                                             name="importPrice"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message:
-                                                        "Vui lòng nhập giá nhập!",
-                                                },
-                                            ]}
                                             placeholder="0"
                                             fieldProps={{
                                                 addonAfter: "₫",
@@ -564,7 +630,6 @@ const ViewUpsertBook = () => {
                                                         /\$\s?|(,*)/g,
                                                         ""
                                                     ),
-                                                min: 0,
                                             }}
                                         />
                                     </Col>
@@ -572,13 +637,6 @@ const ViewUpsertBook = () => {
                                         <ProFormDigit
                                             label="Giá bán"
                                             name="sellingPrice"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message:
-                                                        "Vui lòng nhập giá bán!",
-                                                },
-                                            ]}
                                             placeholder="0"
                                             fieldProps={{
                                                 addonAfter: "₫",
@@ -592,7 +650,6 @@ const ViewUpsertBook = () => {
                                                         /\$\s?|(,*)/g,
                                                         ""
                                                     ),
-                                                min: 0,
                                             }}
                                         />
                                     </Col>
@@ -600,18 +657,8 @@ const ViewUpsertBook = () => {
                                         <ProFormDigit
                                             label="Số lượng"
                                             name="quantity"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message:
-                                                        "Vui lòng nhập số lượng!",
-                                                },
-                                            ]}
                                             placeholder="0"
                                             disabled={!!dataUpdate?.id}
-                                            fieldProps={{
-                                                min: 0,
-                                            }}
                                         />
                                     </Col>
                                     <Col span={24} md={6}>
@@ -625,13 +672,6 @@ const ViewUpsertBook = () => {
                                                 STOP_SALE: "Ngừng bán",
                                                 OUT_STOCK: "Hết hàng",
                                             }}
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message:
-                                                        "Vui lòng chọn trạng thái!",
-                                                },
-                                            ]}
                                         />
                                     </Col>
                                 </Row>
@@ -660,13 +700,6 @@ const ViewUpsertBook = () => {
                                                 value: cat.id,
                                             }))}
                                             placeholder="Chọn thể loại sách"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message:
-                                                        "Vui lòng chọn ít nhất 1 thể loại!",
-                                                },
-                                            ]}
                                             fieldProps={{
                                                 showSearch: true,
                                                 filterOption: (input, option) =>
@@ -687,13 +720,6 @@ const ViewUpsertBook = () => {
                                                 value: sup.id,
                                             }))}
                                             placeholder="Chọn nhà cung cấp"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message:
-                                                        "Vui lòng chọn nhà cung cấp!",
-                                                },
-                                            ]}
                                             fieldProps={{
                                                 showSearch: true,
                                                 filterOption: (input, option) =>
@@ -811,6 +837,62 @@ const ViewUpsertBook = () => {
                     }
                 `}
                 </style>
+
+                {/* Confirmation Modal */}
+                <Modal
+                    open={showConfirmModal}
+                    onCancel={() => setShowConfirmModal(false)}
+                    footer={null}
+                    centered
+                    width={480}
+                    closeIcon={
+                        <span className="text-gray-400 hover:text-gray-600 text-xl">
+                            ×
+                        </span>
+                    }
+                >
+                    <div className="p-6">
+                        <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0">
+                                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <ExclamationCircleOutlined className="text-2xl text-blue-600" />
+                                </div>
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                    Xác nhận{" "}
+                                    {dataUpdate?.id ? "cập nhật" : "tạo mới"}
+                                </h3>
+                                <p className="text-gray-600 mb-6">
+                                    Bạn có chắc chắn muốn{" "}
+                                    {dataUpdate?.id ? "cập nhật" : "tạo"} cuốn
+                                    sách{" "}
+                                    <span className="font-semibold text-gray-900">
+                                        "{pendingValues?.title}"
+                                    </span>{" "}
+                                    không?
+                                </p>
+                                <div className="flex gap-3 justify-end">
+                                    <button
+                                        onClick={() =>
+                                            setShowConfirmModal(false)
+                                        }
+                                        className="px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                                    >
+                                        Hủy
+                                    </button>
+                                    <button
+                                        onClick={handleConfirmSubmit}
+                                        className="px-5 py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+                                    >
+                                        <CheckSquareOutlined />
+                                        Xác nhận
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Modal>
             </div>
         </AdminLayout>
     );

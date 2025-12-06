@@ -80,50 +80,20 @@ export default function BookDetailPage() {
     // Fetch related books when book changes
     useEffect(() => {
         const fetchRelatedBooks = async () => {
-            if (!book || !book.category || book.category.length === 0) {
-                // Fallback: fetch some random books
-                try {
-                    const response = await bookApi.getAllBooks({
-                        page: 0,
-                        size: 20,
-                        sort: "createdAt,desc",
-                    });
-                    setRelatedBooks(response.data.result || []);
-                } catch (error) {
-                    console.error("Error fetching fallback books:", error);
-                }
-                return;
-            }
-
-            // Build OR filter for books with same categories
-            const categoryFilters = book.category
-                .map((cat) => `category.name:'${cat.name}'`)
-                .join(" OR ");
-
             try {
+                // Fetch ALL books (or a large number) to ensure we get enough related books
                 const response = await bookApi.getAllBooks({
                     page: 0,
-                    size: 100,
-                    filter: `(${categoryFilters})`,
+                    size: 500, // Increased from 100 to get more books
+                    sort: "createdAt,desc",
                 });
                 console.log(
-                    "Related books fetched:",
+                    "Total books fetched for related:",
                     response.data.result?.length
                 );
                 setRelatedBooks(response.data.result || []);
             } catch (error) {
-                console.error("Error fetching related books:", error);
-                // Fallback to fetching all books if filter fails
-                try {
-                    const response = await bookApi.getAllBooks({
-                        page: 0,
-                        size: 100,
-                        sort: "createdAt,desc",
-                    });
-                    setRelatedBooks(response.data.result || []);
-                } catch (fallbackError) {
-                    console.error("Fallback fetch also failed:", fallbackError);
-                }
+                console.error("Error fetching books:", error);
             }
         };
 
@@ -718,10 +688,10 @@ export default function BookDetailPage() {
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-sm text-gray-700 leading-relaxed">
-                                            Miễn phí giao hàng Toàn Quốc cho đơn
-                                            hàng trên{" "}
+                                            Miễn phí giao hàng Toàn Quốc cho tất
+                                            cả các đơn hàng khi mua tại{"  "}
                                             <span className="font-semibold text-blue-600">
-                                                300k
+                                                Wisdom Book
                                             </span>
                                         </p>
                                     </div>
@@ -740,24 +710,8 @@ export default function BookDetailPage() {
                                         📌
                                     </span>
                                     <p className="text-sm text-gray-700 leading-relaxed">
-                                        Đổi với sản phẩm giảm{" "}
-                                        <span className="font-semibold text-red-600">
-                                            40% - 50% - 70%
-                                        </span>{" "}
-                                        (sản phẩm xả kho): Mỗi khách hàng được
-                                        mua tối đa 3 sản phẩm/ 1 mặt hàng/ 1 đơn
-                                        hàng
-                                    </p>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <span className="text-xl flex-shrink-0 mt-0.5">
-                                        🎁
-                                    </span>
-                                    <p className="text-sm text-gray-700 leading-relaxed">
                                         Tặng kèm Bookmark (đánh dấu trang) cho
-                                        các sách Kĩ năng sống, Kinh doanh, Mẹ và
-                                        Bé, Văn học
+                                        các sách Ẩm thực, Kinh doanh, Thiếu nhi, Du lịch
                                     </p>
                                 </div>
 
@@ -769,7 +723,7 @@ export default function BookDetailPage() {
                                         <span className="font-semibold text-blue-600">
                                             FREESHIP
                                         </span>{" "}
-                                        cho đơn hàng từ 300K trở lên
+                                        cho tất cả các đơn hàng khi mua tại Wisdom Book
                                     </p>
                                 </div>
 
@@ -778,11 +732,11 @@ export default function BookDetailPage() {
                                         🎁
                                     </span>
                                     <p className="text-sm text-gray-700 leading-relaxed">
-                                        Tặng kèm 1{" "}
+                                        Tặng kèm {" "}
                                         <span className="font-semibold text-blue-600">
-                                            VOUCHER 20K
+                                            VOUCHER lên đến 20K
                                         </span>{" "}
-                                        cho đơn từ 500K trở lên
+                                        cho tất cả các khách hàng tại Wisdom Book ngãu nhiên
                                     </p>
                                 </div>
                             </div>

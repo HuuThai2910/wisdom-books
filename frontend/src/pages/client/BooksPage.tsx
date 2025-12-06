@@ -8,7 +8,6 @@ import bookApi from "../../api/bookApi";
 import { Book } from "../../types";
 
 export default function BooksPage() {
-    // Local state - không dùng BookContext để tránh conflict với Home
     const [books, setBooks] = useState<Book[]>([]);
     const [loading, setLoading] = useState(true);
     const [totalPages, setTotalPages] = useState(1);
@@ -174,7 +173,6 @@ export default function BooksPage() {
                 setTotalPages(response.data.meta?.pages || 1);
             }
         } catch (err: any) {
-            console.error("Error fetching books:", err);
             setBooks([]);
         } finally {
             setLoading(false);
@@ -204,15 +202,6 @@ export default function BooksPage() {
     // Single fetch effect
     useEffect(() => {
         const filterQuery = buildFilterQuery();
-
-        console.log("=== FETCH BOOKS ===");
-        console.log("Page:", currentPage);
-        console.log("Category:", categoryParam);
-        console.log("Search:", searchQuery);
-        console.log("Author:", authorParam);
-        console.log("Filter Query:", filterQuery);
-        console.log("Has Fetched:", hasFetched.current);
-
         hasFetched.current = true;
         fetchBooks(
             currentPage,
@@ -220,7 +209,6 @@ export default function BooksPage() {
             filters.sortBy,
             filterQuery || undefined
         );
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         currentPage,
         categoryParam,

@@ -29,7 +29,7 @@ public class ResCreateBookDTO {
     private double sellingPrice;
     private double importPrice;
     private BookStatus status;
-    // @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private OffsetDateTime createdAt;
     private String createdBy;
     private int quantity;
@@ -83,6 +83,7 @@ public class ResCreateBookDTO {
             private long id;
             private int totalQuantity;
             private double totalPrice;
+            @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
             private OffsetDateTime createdAt;
         }
     }

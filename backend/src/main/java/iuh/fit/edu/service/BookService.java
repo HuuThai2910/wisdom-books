@@ -21,11 +21,7 @@ import org.springframework.data.jpa.domain.Specification;
 public interface BookService {
     Book createBook(Book book, String email);
 
-
-
     Book updateBook(Book book, String email);
-
-
 
     void deleteBook(Long id, String email);
 
@@ -38,6 +34,10 @@ public interface BookService {
     ResCreateBookDTO convertToResCreateBookDTO(Book book);
 
     ResUpdateBookDTO convertToResUpdateBookDTO(Book book);
+    
+    Book convertDTOToBook(ReqCreateBookDTO dto);
+    
+    Book convertDTOToBook(ReqUpdateBookDTO dto);
 
     boolean existsByIsbn(String isbn);
     

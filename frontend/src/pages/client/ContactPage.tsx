@@ -6,7 +6,6 @@ import {
     FaHeadset,
     FaMapMarkerAlt,
     FaSpinner,
-    FaCheckCircle,
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 import emailjs from "@emailjs/browser";
@@ -40,12 +39,9 @@ export default function ContactPage() {
         setIsSubmitting(true);
 
         try {
-            // Cấu hình EmailJS - QUAN TRỌNG: Thay đổi các giá trị này
-            const serviceId = "service_xvx17bh"; // Thay bằng Service ID của bạn
-            const templateId = "template_290k67w"; // Thay bằng Template ID của bạn
-            const publicKey = "6HQ6fxuSA9nwlH26t"; // Thay bằng Public Key của bạn
-
-            // Template parameters - Tên phải khớp với template EmailJS
+            const serviceId = "service_xvx17bh"; 
+            const templateId = "template_290k67w";
+            const publicKey = "6HQ6fxuSA9nwlH26t"; 
             const templateParams = {
                 name: formData.name,
                 email: formData.email,
@@ -53,16 +49,12 @@ export default function ContactPage() {
                 subject: formData.subject,
                 message: formData.message,
             };
-
-            // Gửi email qua EmailJS
             await emailjs.send(
                 serviceId,
                 templateId,
                 templateParams,
                 publicKey
             );
-
-            // Hiển thị thông báo thành công
             toast.success(
                 "Gửi tin nhắn thành công! Chúng tôi sẽ phản hồi sớm nhất.",
                 {
@@ -70,8 +62,6 @@ export default function ContactPage() {
                     icon: "✅",
                 }
             );
-
-            // Reset form
             setFormData({
                 name: "",
                 email: "",
@@ -80,7 +70,6 @@ export default function ContactPage() {
                 message: "",
             });
         } catch (error) {
-            console.error("Error sending email:", error);
             toast.error(
                 "Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại hoặc liên hệ trực tiếp qua email!",
                 {

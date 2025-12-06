@@ -109,16 +109,13 @@ export default function CategoryBook({
     }, []);
 
     const handleCategoryClick = (categoryName: string) => {
-        // Chuyển đến trang category để có banner đẹp - sử dụng name thay vì slug
         navigate(`/category/${encodeURIComponent(categoryName)}`);
     };
 
     return (
         <div className="bg-white rounded-xl shadow-sm relative container mx-auto px-35 pt-10 pb-10">
             {/* Header */}
-            <div
-                className="flex items-center gap-3 bg-blue-500 px-4 py-3 rounded-full mb-6 animate-headerPulse"
-            >
+            <div className="flex items-center gap-3 bg-blue-500 px-4 py-3 rounded-full mb-6 animate-headerPulse">
                 {/* ICON */}
                 <div className="w-8 h-8 text-white animate-bookFloat">
                     <svg
@@ -179,19 +176,26 @@ export default function CategoryBook({
                             </div>
                         </Atropos>
 
-                        <p
-                            className="relative text-center mt-2 font-semibold text-gray-800 text-xl transition-all duration-500 ease-out opacity-80 hover:text-blue-600 hover:opacity-100 hover:scale-[1.05] hover:tracking-wide hover:-translate-y-1 cursor-pointer"
-                            style={{ fontFamily: "Playfair Display, serif" }}
-                        >
-                            {/* Text */}
-                            {cat.name}
+                        <div className="text-center mt-3 group/text">
+                            <p
+                                className="relative inline-block font-bold text-gray-800 text-lg transition-all duration-300 cursor-pointer"
+                                style={{
+                                    fontFamily: "Playfair Display, serif",
+                                    letterSpacing: "0.5px",
+                                }}
+                            >
+                                {/* Main text with gradient on hover */}
+                                <span className="relative z-10 bg-clip-text transition-all duration-300 group-hover/text:text-transparent group-hover/text:bg-gradient-to-r group-hover/text:from-blue-600 group-hover/text:via-blue-500 group-hover/text:to-purple-600">
+                                    {cat.name}
+                                </span>
 
-                            {/* Underline animation */}
-                            <span className="absolute left-1/2 -bottom-1 w-0 h-[3px] bg-blue-600 transition-all duration-500 ease-out group-hover:w-full group-hover:left-0"></span>
+                                {/* Animated underline */}
+                                <span className="absolute left-0 -bottom-1 h-[2px] w-0 bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 group-hover/text:w-full rounded-full"></span>
 
-                            {/* Shine effect */}
-                            <span className="shine-effect"></span>
-                        </p>
+                                {/* Glow effect on hover */}
+                                <span className="absolute inset-0 opacity-0 blur-sm bg-gradient-to-r from-blue-400 to-purple-400 transition-opacity duration-300 group-hover/text:opacity-20 -z-10"></span>
+                            </p>
+                        </div>
                     </motion.div>
                 ))}
             </div>
@@ -224,34 +228,8 @@ export default function CategoryBook({
                 .scroll-smooth {
                     scroll-behavior: smooth;
                 }
-                .shine-effect {
-                    position: absolute;
-                    inset: 0;
-                    background: linear-gradient(
-                        120deg,
-                        transparent 0%,
-                        rgba(255,255,255,0.6) 50%,
-                        transparent 100%
-                    );
-                    opacity: 0;
-                    transform: translateX(-10%);
-                    transition: opacity 0.3s;
-                }
 
-                p:hover .shine-effect {
-                    opacity: 1;
-                    animation: shineMove 1s ease-out;
-                }
-
-                @keyframes shineMove {
-                    0% {
-                        transform: translateX(-120%);
-                    }
-                    100% {
-                        transform: translateX(150%);
-                    }
-                }
-                    /* Smooth pulse cho background */
+                /* Smooth pulse cho background */
                 @keyframes headerPulse {
                     0% { filter: brightness(1); }
                     50% { filter: brightness(1.08); }

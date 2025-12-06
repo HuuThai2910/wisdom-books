@@ -99,15 +99,11 @@ export default function FavoriteProductsCarousel({
         useState(false);
     const autoplayRef = useRef<number | null>(null);
 
-    // Debug: Log books received
-    console.log("=== FavoriteProductsCarousel ===");
-    console.log("Books received:", books.length);
-
     useEffect(() => {
         if (books.length === 0) return;
 
         // Chỉ lấy tối đa 20 sách để hiển thị nhanh
-        const limitedBooks = books.slice(0, 20);
+        const limitedBooks = books.slice(100, 120);
 
         // Chia sách thành groups cho carousel
         // Mỗi group có 4 columns, mỗi column có 2 sách

@@ -1,6 +1,8 @@
 package iuh.fit.edu.controller;
 
 import com.turkraft.springfilter.boot.Filter;
+import iuh.fit.edu.dto.request.book.ReqCreateBookDTO;
+import iuh.fit.edu.dto.request.book.ReqUpdateBookDTO;
 import iuh.fit.edu.dto.response.ResultPaginationDTO;
 import iuh.fit.edu.dto.response.account.UserInfoResponse;
 import iuh.fit.edu.dto.response.book.ResBookDTO;
@@ -47,23 +49,13 @@ public class BookController {
 
     @PostMapping
     @ApiMessage("Tạo sách mới")
-    public ResponseEntity<ResCreateBookDTO> createNewBook(@Valid @RequestBody Book book, HttpServletRequest request) throws IdInvalidException {
-        System.out.println("=== CREATE BOOK - Received data ===");
-        System.out.println("ISBN: " + book.getIsbn());
-        System.out.println("Title: " + book.getTitle());
-        System.out.println("Author: " + book.getAuthor());
-        System.out.println("Year: " + book.getYearOfPublication());
-        System.out.println("Selling Price: " + book.getSellingPrice());
-        System.out.println("Import Price: " + book.getImportPrice());
-        System.out.println("Status: " + book.getStatus());
-        System.out.println("Quantity: " + book.getQuantity());
-        System.out.println("Categories: " + (book.getCategories() != null ? book.getCategories().size() : "null"));
-        System.out.println("Images: " + (book.getImage() != null ? book.getImage().size() : "null"));
+    public ResponseEntity<ResCreateBookDTO> createNewBook(@Valid @RequestBody ReqCreateBookDTO reqCreateBookDTO, HttpServletRequest request) throws IdInvalidException {
         UserInfoResponse user = GetTokenRequest.getInfoUser(request);
-        if (this.bookService.existsByIsbn(book.getIsbn())) {
-            throw new IdInvalidException("ISBN: " + book.getIsbn() + " đã tồn tại!");
+        if (this.bookService.existsByIsbn(reqCreateBookDTO.getIsbn())) {
+            throw new IdInvalidException("ISBN: " + reqCreateBookDTO.getIsbn() + " đã tồn tại!");
         }
 
+        Book book = this.bookService.convertDTOToBook(reqCreateBookDTO);
         Book bookCreate = this.bookService.createBook(book, user.getEmail());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(this.bookService.convertToResCreateBookDTO(bookCreate));
@@ -91,27 +83,22 @@ public class BookController {
 
     @PutMapping
     @ApiMessage("Cập nhật book")
-    public ResponseEntity<ResUpdateBookDTO> updateBook(@Valid @RequestBody Book book, HttpServletRequest request) throws IdInvalidException {
+    public ResponseEntity<ResUpdateBookDTO> updateBook(@Valid @RequestBody ReqUpdateBookDTO reqUpdateBookDTO, HttpServletRequest request) throws IdInvalidException {
         try {
-            System.out.println("=== UPDATE BOOK - Received ISBN: " + book.getIsbn());
-
-            if (book.getId() == null) {
+            if (reqUpdateBookDTO.getId() == null) {
                 throw new IdInvalidException("ID sách không được để trống");
             }
 
             UserInfoResponse user = GetTokenRequest.getInfoUser(request);
+            Book book = this.bookService.convertDTOToBook(reqUpdateBookDTO);
             Book updatedBook = this.bookService.updateBook(book, user.getEmail());
             if (updatedBook == null) {
-                throw new IdInvalidException("Book với id: " + book.getId() + " không tồn tại hoặc ISBN đã trùng");
+                throw new IdInvalidException("Book với id: " + reqUpdateBookDTO.getId() + " không tồn tại hoặc ISBN đã trùng");
             }
-
-            System.out.println("=== UPDATE SUCCESS ===");
             return ResponseEntity.ok(this.bookService.convertToResUpdateBookDTO(updatedBook));
         } catch (IdInvalidException e) {
-            System.err.println("=== ID INVALID ERROR: " + e.getMessage());
             throw e;
         } catch (Exception e) {
-            System.err.println("=== UNEXPECTED ERROR ===");
             e.printStackTrace();
             throw new IdInvalidException("Lỗi khi cập nhật sách: " + e.getMessage());
         }
