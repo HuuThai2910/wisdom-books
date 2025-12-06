@@ -33,7 +33,7 @@ public class Order {
     private String receiverEmail;
 
     private String updateBy;
-    private LocalDateTime updateAt;
+    private OffsetDateTime updateAt;
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
     @Enumerated(EnumType.STRING)
@@ -50,6 +50,6 @@ public class Order {
 
     @PreUpdate
     public void handleBeforeUpdateAt() {
-        this.updateAt = LocalDateTime.now();
+        this.updateAt = OffsetDateTime.now();
     }
 }
