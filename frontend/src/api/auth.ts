@@ -70,3 +70,11 @@ export const verifyOTP = (params: VerifyOtpParams) => {
 export const resetPassword = (resetPasswordForm: ResetPasswordParams) => {
     return axiosClient.post<ApiResponse<null>>("/auth/reset-password", resetPasswordForm);
 }
+
+export const logout = (accessToken: string) => {
+    return axiosClient.post<ApiResponse<null>>("/auth/logout", null, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+}

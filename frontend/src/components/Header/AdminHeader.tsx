@@ -1,6 +1,9 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, ChevronDown, Home, User, LogOut } from "lucide-react";
+import { logout as logoutApi } from "../../api/auth";
+import toast from "react-hot-toast";
+import Cookies from "js-cookie";
 
 interface AdminHeaderProps {
   onMobileMenuToggle: () => void;
@@ -109,12 +112,43 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
                 </Link>
                 <button
                   className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                  onClick={() => {
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('token');
-                    setCurrentUser(null);
-                    setDropdownOpen(false);
-                    navigate('/login');
+                  onClick={async () => {
+                    try {
+                      // Lấy token từ cookie
+                      const token = Cookies.get('id_token');
+                      
+                      if (token) {
+                        // Call API để blacklist token
+                        await logoutApi(token);
+                      }
+                      
+                      // Xóa localStorage
+                      localStorage.removeItem('user');
+                      localStorage.removeItem('token');
+                      
+                      // Xóa cookie
+                      Cookies.remove('id_token', { path: '/' });
+                      
+                      // Reset state
+                      setCurrentUser(null);
+                      setDropdownOpen(false);
+                      
+                      // Redirect về login
+                      toast.success('Đăng xuất thành công!');
+                      navigate('/login');
+                      
+                      // Reload để clear tất cả state
+                      window.location.reload();
+                    } catch (error) {
+                      console.error('Logout error:', error);
+                      // Vẫn xóa local data dù API fail
+                      localStorage.removeItem('user');
+                      localStorage.removeItem('token');
+                      Cookies.remove('id_token', { path: '/' });
+                      toast.error('Đã có lỗi xảy ra, nhưng bạn đã được đăng xuất');
+                      navigate('/login');
+                      window.location.reload();
+                    }
                   }}
                 >
                   <LogOut className="w-4 h-4" />

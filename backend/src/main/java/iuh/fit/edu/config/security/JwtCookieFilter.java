@@ -1,6 +1,7 @@
 package iuh.fit.edu.config.security;
 
 
+import iuh.fit.edu.repository.BlacklistedTokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -20,10 +21,12 @@ public class JwtCookieFilter extends OncePerRequestFilter {
 
     private final JwtDecoder jwtDecoder;
     private final JwtAuthenticationConverter jwtAuthenticationConverter;
+    private final BlacklistedTokenRepository blacklistedTokenRepository;
 
-    public JwtCookieFilter(JwtDecoder jwtDecoder, JwtAuthenticationConverter jwtAuthenticationConverter) {
+    public JwtCookieFilter(JwtDecoder jwtDecoder, JwtAuthenticationConverter jwtAuthenticationConverter, BlacklistedTokenRepository blacklistedTokenRepository) {
         this.jwtDecoder = jwtDecoder;
         this.jwtAuthenticationConverter = jwtAuthenticationConverter;
+        this.blacklistedTokenRepository = blacklistedTokenRepository;
     }
 
     @Override
@@ -46,6 +49,12 @@ public class JwtCookieFilter extends OncePerRequestFilter {
                     try {
                         String token = cookie.getValue();
                         System.out.println("[JwtCookieFilter] Found id_token cookie, length: " + token.length());
+                        
+                        // Check if token is blacklisted - query repository directly
+                        if (blacklistedTokenRepository.existsByToken(token)) {
+                            System.out.println("[JwtCookieFilter] Token is blacklisted (logged out)");
+                            break;
+                        }
                         
                         Jwt jwt = jwtDecoder.decode(token);
                         System.out.println("[JwtCookieFilter] JWT decoded successfully");

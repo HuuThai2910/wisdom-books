@@ -21,6 +21,9 @@ import wisbook1 from "../../assets/img/wisbook1.png";
 import bookApi from "../../api/bookApi";
 import { Book } from "../../types";
 import { S3_CONFIG } from "./../../config/s3";
+import { logout as logoutApi } from "../../api/auth";
+import toast from "react-hot-toast";
+import Cookies from "js-cookie";
 export default function Header() {
     const [opacity, setOpacity] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -991,17 +994,43 @@ export default function Header() {
                                             </Link>
                                             <div className="border-t border-gray-200 my-2"></div>
                                             <button
-                                                onClick={() => {
-                                                    localStorage.removeItem(
-                                                        "user"
-                                                    );
-                                                    localStorage.removeItem(
-                                                        "token"
-                                                    );
-                                                    setCurrentUser(null);
-                                                    setShowAccountMenu(false);
-                                                    navigate("/");
-                                                    window.location.reload();
+                                                onClick={async () => {
+                                                    try {
+                                                        // Lấy token từ cookie
+                                                        const token = Cookies.get('id_token');
+                                                        
+                                                        if (token) {
+                                                            // Call API để blacklist token
+                                                            await logoutApi(token);
+                                                        }
+                                                        
+                                                        // Xóa localStorage
+                                                        localStorage.removeItem("user");
+                                                        localStorage.removeItem("token");
+                                                        
+                                                        // Xóa cookie
+                                                        Cookies.remove('id_token', { path: '/' });
+                                                        
+                                                        // Reset state
+                                                        setCurrentUser(null);
+                                                        setShowAccountMenu(false);
+                                                        
+                                                        // Redirect về home
+                                                        toast.success('Đăng xuất thành công!');
+                                                        navigate("/");
+                                                        
+                                                        // Reload để clear tất cả state
+                                                        window.location.reload();
+                                                    } catch (error) {
+                                                        console.error('Logout error:', error);
+                                                        // Vẫn xóa local data dù API fail
+                                                        localStorage.removeItem("user");
+                                                        localStorage.removeItem("token");
+                                                        Cookies.remove('id_token', { path: '/' });
+                                                        toast.error('Đã có lỗi xảy ra, nhưng bạn đã được đăng xuất');
+                                                        navigate("/");
+                                                        window.location.reload();
+                                                    }
                                                 }}
                                                 className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition group"
                                             >

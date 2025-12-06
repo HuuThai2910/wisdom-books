@@ -17,6 +17,7 @@ import iuh.fit.edu.repository.RoleRepository;
 import iuh.fit.edu.repository.UserRepository;
 import iuh.fit.edu.service.AccountService;
 import iuh.fit.edu.service.CognitoService;
+import iuh.fit.edu.service.TokenBlacklistService;
 import iuh.fit.edu.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     TokenService tokenService;
+
+    @Autowired
+    TokenBlacklistService tokenBlacklistService;
 
 
     @Override
@@ -105,6 +109,14 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void logout(String accessToken) {
+        // Blacklist token ngay lập tức
+        try {
+            tokenBlacklistService.blacklistToken(accessToken, "User logout");
+            System.out.println("[Logout] Token blacklisted successfully");
+        } catch (Exception e) {
+            System.err.println("[Logout] Error blacklisting token: " + e.getMessage());
+        }
+        
         // Lấy thông tin user từ token
         try {
             GetUserResult userResult = cognitoService.getUserInfo(accessToken);
