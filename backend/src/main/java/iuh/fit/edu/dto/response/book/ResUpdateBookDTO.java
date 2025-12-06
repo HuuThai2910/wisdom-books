@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /**
  * @author Nguyen Tan Nghi
@@ -29,8 +29,10 @@ public class ResUpdateBookDTO {
     private double sellingPrice;
     private double importPrice;
     private BookStatus status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    // @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
+    private OffsetDateTime createdAt;
+    // @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
+    private OffsetDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
     private int quantity;
@@ -84,7 +86,7 @@ public class ResUpdateBookDTO {
             private long id;
             private int totalQuantity;
             private double totalPrice;
-            private LocalDateTime createdAt;
+            private OffsetDateTime createdAt;
         }
     }
 }

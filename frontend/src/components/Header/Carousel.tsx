@@ -15,15 +15,15 @@ const NextArrow = (props: any) => {
     return (
         <button
             {...rest}
-            className="absolute right-8 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white flex items-center justify-center shadow-xl hover:shadow-2xl z-40 transition-all duration-300 hover:scale-110 border-2 border-white/30 backdrop-blur-sm group"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white flex items-center justify-center shadow-lg hover:shadow-xl z-40 transition-all duration-300 hover:scale-105 border-2 border-white/30 backdrop-blur-sm group"
         >
             <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <svg
-                className="w-7 h-7 relative z-10 transform group-hover:translate-x-0.5 transition-transform duration-300"
+                className="w-5 h-5 relative z-10 transform group-hover:translate-x-0.5 transition-transform duration-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="-7 0 24 24"
-                strokeWidth={3}
+                strokeWidth={2.5}
             >
                 <path
                     strokeLinecap="round"
@@ -40,15 +40,15 @@ const PrevArrow = (props: any) => {
     return (
         <button
             {...rest}
-            className="absolute left-8 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white flex items-center justify-center shadow-xl hover:shadow-2xl z-40 transition-all duration-300 hover:scale-110 border-2 border-white/30 backdrop-blur-sm group"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white flex items-center justify-center shadow-lg hover:shadow-xl z-40 transition-all duration-300 hover:scale-105 border-2 border-white/30 backdrop-blur-sm group"
         >
             <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <svg
-                className="w-7 h-7 relative z-10 transform group-hover:-translate-x-0.5 transition-transform duration-300"
+                className="w-5 h-5 relative z-10 transform group-hover:-translate-x-0.5 transition-transform duration-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="-7 0 24 24"
-                strokeWidth={3}
+                strokeWidth={2.5}
             >
                 <path
                     strokeLinecap="round"
@@ -151,7 +151,7 @@ export default function Carousel() {
     ];
 
     return (
-        <div className="relative bg-gradient-to-b from-orange-50 to-white pt-10">
+        <div className="relative bg-gradient-to-b from-orange-50 to-white pt-20 px-5">
             <Slider
                 key={start ? "started" : "waiting"}
                 ref={sliderRef}
@@ -159,20 +159,20 @@ export default function Carousel() {
             >
                 {slides.map((slide, i) => (
                     <div key={i}>
-                        <div className="container mx-auto px-8 py-16">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[600px]">
+                        <div className="container mx-auto px-6 py-8">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center min-h-[450px]">
                                 {/* Left Content */}
-                                <div className="space-y-6 animate__animated animate__fadeInLeft">
+                                <div className="space-y-4 animate__animated animate__fadeInLeft pl-10">
                                     {/* Badge */}
                                     <div className="inline-block">
-                                        <span className="bg-blue-100 text-blue-600 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">
+                                        <span className="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">
                                             {slide.badge}
                                         </span>
                                     </div>
 
                                     {/* Main Heading */}
                                     <div>
-                                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
+                                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
                                             <span className="text-gray-900">
                                                 {slide.title}
                                             </span>
@@ -188,19 +188,19 @@ export default function Carousel() {
                                     </div>
 
                                     {/* Description */}
-                                    <p className="text-gray-600 text-lg leading-relaxed max-w-xl">
+                                    <p className="text-gray-600 text-sm leading-relaxed max-w-xl">
                                         {slide.desc}
                                     </p>
 
                                     {/* CTA Buttons */}
-                                    <div className="flex flex-wrap gap-4 pt-4">
+                                    <div className="flex flex-wrap gap-3 pt-2">
                                         <Link
                                             to="/books"
-                                            className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-full font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                                            className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-5 py-2.5 rounded-full font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                                         >
                                             <span>Mua Sách Ngay</span>
                                             <svg
-                                                className="w-5 h-5"
+                                                className="w-4 h-4"
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
@@ -213,16 +213,16 @@ export default function Carousel() {
                                                 />
                                             </svg>
                                         </Link>
-                                        <button className="px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-full font-semibold hover:border-blue-500 hover:text-blue-500 transition-all duration-300">
+                                        <Link to="/about" className="px-5 py-2.5 border-2 border-gray-300 text-gray-700 rounded-full font-semibold text-sm hover:border-blue-500 hover:text-blue-500 transition-all duration-300">
                                             Xem Thêm
-                                        </button>
+                                        </Link>
                                     </div>
 
                                     {/* Awards Badge */}
-                                    <div className="flex items-center gap-4 pt-6 border-t border-gray-200">
-                                        <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                                    <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
+                                        <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
                                             <svg
-                                                className="w-8 h-8 text-white"
+                                                className="w-6 h-6 text-white"
                                                 fill="currentColor"
                                                 viewBox="0 0 20 20"
                                             >
@@ -230,19 +230,19 @@ export default function Carousel() {
                                             </svg>
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-900">
+                                            <h3 className="font-bold text-sm text-gray-900">
                                                 {slide.awards.title}
                                             </h3>
-                                            <p className="text-sm text-blue-600 font-semibold">
+                                            <p className="text-xs text-blue-600 font-semibold">
                                                 {slide.awards.year}
                                             </p>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <div className="flex items-center gap-1">
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                                <div className="flex items-center gap-0.5">
                                                     {[...Array(5)].map(
                                                         (_, idx) => (
                                                             <svg
                                                                 key={idx}
-                                                                className="w-4 h-4 text-yellow-400 fill-current"
+                                                                className="w-3 h-3 text-yellow-400 fill-current"
                                                                 viewBox="0 0 20 20"
                                                             >
                                                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -250,10 +250,10 @@ export default function Carousel() {
                                                         )
                                                     )}
                                                 </div>
-                                                <span className="text-sm text-gray-600">
+                                                <span className="text-xs text-gray-600">
                                                     {slide.awards.rating}
                                                 </span>
-                                                <span className="text-sm text-gray-400">
+                                                <span className="text-xs text-gray-400">
                                                     • {slide.awards.reviews}
                                                 </span>
                                             </div>
@@ -264,11 +264,11 @@ export default function Carousel() {
                                 {/* Right Image */}
                                 <div className="relative animate__animated animate__fadeInRight">
                                     {/* Decorative Circle */}
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-br from-blue-400 to-blue-600 rounded-full opacity-20 blur-3xl"></div>
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-gradient-to-br from-blue-400 to-blue-600 rounded-full opacity-20 blur-3xl"></div>
 
                                     {/* Main Circle with Image */}
-                                    <div className="relative w-full max-w-[550px] mx-auto">
-                                        <div className="relative w-[500px] h-[500px] mx-auto">
+                                    <div className="relative w-full max-w-[400px] mx-auto">
+                                        <div className="relative w-[350px] h-[350px] mx-auto">
                                             {/* Background Circle */}
                                             <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full"></div>
 
@@ -282,15 +282,15 @@ export default function Carousel() {
                                             </div>
 
                                             {/* Quality Badge */}
-                                            <div className="absolute -top-6 -right-6 bg-yellow-400 text-gray-900 w-24 h-24 rounded-full flex items-center justify-center shadow-xl border-4 border-white transform rotate-12 z-10">
+                                            <div className="absolute -top-4 -right-4 bg-yellow-400 text-gray-900 w-16 h-16 rounded-full flex items-center justify-center shadow-xl border-3 border-white transform rotate-12 z-10">
                                                 <div className="text-center">
-                                                    <div className="text-xs font-bold">
+                                                    <div className="text-[9px] font-bold">
                                                         🌟 Good
                                                     </div>
-                                                    <div className="text-[10px] font-semibold">
+                                                    <div className="text-[8px] font-semibold">
                                                         Quality
                                                     </div>
-                                                    <div className="text-[10px]">
+                                                    <div className="text-[7px]">
                                                         Book
                                                     </div>
                                                 </div>

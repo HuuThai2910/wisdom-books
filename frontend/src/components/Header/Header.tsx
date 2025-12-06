@@ -16,6 +16,8 @@ import {
 import Carousel from "./Carousel";
 import logoImg from "../../assets/img/logo.png";
 import wisbook from "../../assets/img/wisbook.png";
+import logoImg1 from "../../assets/img/logo1.png";
+import wisbook1 from "../../assets/img/wisbook1.png";
 import bookApi from "../../api/bookApi";
 import { Book } from "../../types";
 import { S3_CONFIG } from "./../../config/s3";
@@ -224,8 +226,8 @@ export default function Header() {
                     background: isHomePage
                         ? opacity > 0.5
                             ? `rgba(37, 99, 235, ${opacity})`
-                            : "rgba(255, 255, 255, 0.95)" 
-                        : "#ffffff", 
+                            : "rgba(255, 255, 255, 0.95)"
+                        : "#2563eb",
                     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
                 }}
             >
@@ -237,7 +239,11 @@ export default function Header() {
                     >
                         <div className="w-14 h-14 rounded-full overflow-hidden">
                             <img
-                                src={logoImg}
+                                src={
+                                    isHomePage && opacity <= 0.5
+                                        ? logoImg1
+                                        : logoImg
+                                }
                                 alt="logo"
                                 className="w-full h-full object-cover"
                             />
@@ -245,7 +251,11 @@ export default function Header() {
 
                         <div className="w-30 h-15 overflow-hidden">
                             <img
-                                src={wisbook}
+                                src={
+                                    isHomePage && opacity <= 0.5
+                                        ? wisbook1
+                                        : wisbook
+                                }
                                 alt="WisBook"
                                 className="w-full h-full object-cover scale-[1.2]"
                             />
@@ -259,7 +269,7 @@ export default function Header() {
                             className="relative group transition-colors"
                             style={{
                                 color:
-                                    isHomePage && opacity > 0.5
+                                    !isHomePage || opacity > 0.5
                                         ? "white"
                                         : "#2563eb",
                             }}
@@ -269,7 +279,7 @@ export default function Header() {
                                 className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
                                 style={{
                                     backgroundColor:
-                                        isHomePage && opacity > 0.5
+                                        !isHomePage || opacity > 0.5
                                             ? "white"
                                             : "#2563eb",
                                 }}
@@ -280,7 +290,7 @@ export default function Header() {
                             className="relative group transition-colors"
                             style={{
                                 color:
-                                    isHomePage && opacity > 0.5
+                                    !isHomePage || opacity > 0.5
                                         ? "white"
                                         : "#2563eb",
                             }}
@@ -290,7 +300,7 @@ export default function Header() {
                                 className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
                                 style={{
                                     backgroundColor:
-                                        isHomePage && opacity > 0.5
+                                        !isHomePage || opacity > 0.5
                                             ? "white"
                                             : "#2563eb",
                                 }}
@@ -315,7 +325,7 @@ export default function Header() {
                                 className="relative group transition-colors flex items-center gap-1"
                                 style={{
                                     color:
-                                        isHomePage && opacity > 0.5
+                                        !isHomePage || opacity > 0.5
                                             ? "white"
                                             : "#2563eb",
                                 }}
@@ -364,7 +374,7 @@ export default function Header() {
                                     className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
                                     style={{
                                         backgroundColor:
-                                            isHomePage && opacity <= 0.5
+                                            !isHomePage || opacity > 0.5
                                                 ? "white"
                                                 : "#2563eb",
                                     }}
@@ -526,7 +536,7 @@ export default function Header() {
                             className="relative group transition-colors"
                             style={{
                                 color:
-                                    isHomePage && opacity > 0.5
+                                    !isHomePage || opacity > 0.5
                                         ? "white"
                                         : "#2563eb",
                             }}
@@ -538,7 +548,7 @@ export default function Header() {
                                 className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
                                 style={{
                                     backgroundColor:
-                                        isHomePage && opacity > 0.5
+                                        !isHomePage || opacity > 0.5
                                             ? "white"
                                             : "#2563eb",
                                 }}
@@ -549,7 +559,7 @@ export default function Header() {
                             className="relative group transition-colors"
                             style={{
                                 color:
-                                    isHomePage && opacity > 0.5
+                                    !isHomePage || opacity > 0.5
                                         ? "white"
                                         : "#2563eb",
                             }}
@@ -559,7 +569,7 @@ export default function Header() {
                                 className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
                                 style={{
                                     backgroundColor:
-                                        isHomePage && opacity > 0.5
+                                        !isHomePage || opacity > 0.5
                                             ? "white"
                                             : "#2563eb",
                                 }}

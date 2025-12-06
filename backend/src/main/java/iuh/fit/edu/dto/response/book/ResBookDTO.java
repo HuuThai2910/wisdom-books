@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
@@ -32,10 +32,10 @@ public class ResBookDTO {
     private double sellingPrice;
     private double importPrice;
     private BookStatus status;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
-    private LocalDateTime createdAt;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
-    private LocalDateTime updatedAt;
+    // @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
+    private OffsetDateTime createdAt;
+    // @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
+    private OffsetDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
     private int quantity;
@@ -62,7 +62,7 @@ public class ResBookDTO {
         private long id;
         private String comment;
         private int rating;
-        private LocalDateTime reviewDate;
+        private OffsetDateTime reviewDate;
     }
     @Getter
     @Setter

@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -217,7 +217,7 @@ public class BookServiceImpl implements BookService {
                 int quantityDiff = newQuantity - oldQuantity;
 
                 // Cập nhật thông tin audit
-                updatedBook.setUpdatedAt(LocalDateTime.now());
+                updatedBook.setUpdatedAt(OffsetDateTime.now());
                 updatedBook.setUpdatedBy("tan nghi");
 
                 System.out.println("=== BEFORE SAVE ===");
@@ -271,7 +271,7 @@ public class BookServiceImpl implements BookService {
         if (optionalBook.isPresent()) {
             Book book = optionalBook.get();
             book.setStatus(BookStatus.STOP_SALE);
-            book.setUpdatedAt(LocalDateTime.now());
+            book.setUpdatedAt(OffsetDateTime.now());
             book.setUpdatedBy(email);
             this.bookRepository.save(book);
         }
@@ -358,7 +358,7 @@ public class BookServiceImpl implements BookService {
             EntryForm entryForm = new EntryForm();
             entryForm.setTotalQuantity(quantity);
             entryForm.setTotalPrice(quantity * unitPrice);
-            entryForm.setCreatedAt(LocalDateTime.now());
+            entryForm.setCreatedAt(OffsetDateTime.now());
             entryForm.setUser(user);
 
 

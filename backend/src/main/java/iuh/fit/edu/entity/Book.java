@@ -3,11 +3,11 @@ package iuh.fit.edu.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import iuh.fit.edu.entity.constant.BookStatus;
 import jakarta.persistence.*;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Entity
@@ -59,8 +59,8 @@ public class Book {
     private BookStatus status;
 
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
     
@@ -97,11 +97,11 @@ public class Book {
     private List<EntryFormDetail> entryFormDetails;
     @PrePersist
     public void handleBeforeCreateAt() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = OffsetDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     @PreUpdate
     public void handleBeforeUpdateAt() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = OffsetDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 }
