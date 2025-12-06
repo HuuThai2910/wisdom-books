@@ -373,7 +373,7 @@ export default function BooksPage() {
                             duration: 0.4,
                             ease: [0.4, 0, 0.2, 1],
                         }}
-                        className="flex-1 min-w-0"
+                        className="flex-1 min-w-0 mt-3"
                     >
                         {/* Books Grid */}
                         {loading ? (
