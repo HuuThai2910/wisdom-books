@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import addressData, { WardMapping } from "vietnam-address-database";
 import { updateUser, uploadAvatar, getUserById } from '../../api/userApi';
 import RoleBasedLayout from '../../components/common/RoleBasedLayout';
+import { S3_CONFIG } from './../../config/s3';
 
 const wardMappings = addressData.find(
     (x: any) => x.type === "table" && x.name === "ward_mappings"
@@ -295,26 +296,26 @@ export default function AdminProfile() {
 
     return (
         <RoleBasedLayout>
-            <div className="py-6">
-                <div className="max-w-4xl mx-auto">
-                    <div className="text-center mb-8">
-                        <h1 className="text-4xl font-bold text-gray-900 mb-2">Trang cá nhân</h1>
-                        <p className="text-gray-600">Quản lý thông tin cá nhân của bạn</p>
-                    </div>
+            <div className="py-6 px-4">
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-gray-900">Trang cá nhân</h1>
+                    <p className="text-gray-600 text-sm mt-1">Quản lý thông tin cá nhân của bạn</p>
+                </div>
 
-                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
-                            <div className="flex items-center justify-between">
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <div className="bg-white border-b border-gray-200 px-6 py-4">
+                      <div>
+                            <div className="flex items-center justify-between flex-wrap gap-4">
                                 <div className="flex items-center gap-4">
                                     <div className="relative group">
                                         {avatarPreview ? (
                                             <img 
-                                                src={avatarPreview} 
+                                                src={S3_CONFIG.BASE_URL + avatarPreview} 
                                                 alt={user.fullName}
-                                                className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+                                                className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
                                             />
                                         ) : (
-                                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-3xl border-4 border-white shadow-lg">
+                                            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-xl border-2 border-gray-200">
                                                 {user.fullName?.charAt(0).toUpperCase() || 'U'}
                                             </div>
                                         )}
@@ -342,15 +343,15 @@ export default function AdminProfile() {
                                             </>
                                         )}
                                     </div>
-                                    <div className="text-white">
-                                        <h2 className="text-2xl font-bold">{user.fullName}</h2>
-                                        <p className="text-blue-100">{user.email}</p>
+                                    <div>
+                                        <h2 className="text-lg font-semibold text-gray-900">{user.fullName}</h2>
+                                        <p className="text-sm text-gray-600">{user.email}</p>
                                     </div>
                                 </div>
                                 {!isEditing && (
                                     <button
                                         onClick={() => setIsEditing(true)}
-                                        className="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-blue-50 transition-colors duration-200 shadow-md"
+                                        className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200"
                                     >
                                         Chỉnh sửa
                                     </button>
@@ -358,16 +359,16 @@ export default function AdminProfile() {
                             </div>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="p-8">
+                        <form onSubmit={handleSubmit} className="p-6">
                             <div className="space-y-6">
                                 <div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">
+                                    <h3 className="text-base font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-200">
                                         Thông tin cá nhân
                                     </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                                <FaUser className="inline mr-2 text-blue-600" />
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                <FaUser className="inline mr-2 text-gray-400" />
                                                 Họ và tên
                                             </label>
                                             <input
@@ -376,18 +377,18 @@ export default function AdminProfile() {
                                                 value={formData.fullName}
                                                 onChange={handleInputChange}
                                                 disabled={!isEditing}
-                                                className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 ${
+                                                className={`w-full px-4 py-2.5 text-sm rounded-lg border transition-all duration-200 ${
                                                     isEditing 
-                                                        ? 'border-blue-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200' 
-                                                        : 'border-gray-200 bg-gray-50'
+                                                        ? 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500' 
+                                                        : 'border-gray-200 bg-gray-50 text-gray-600'
                                                 } outline-none`}
                                                 placeholder="Nhập họ tên"
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                                <FaEnvelope className="inline mr-2 text-blue-600" />
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                <FaEnvelope className="inline mr-2 text-gray-400" />
                                                 Email
                                             </label>
                                             <input
@@ -396,18 +397,18 @@ export default function AdminProfile() {
                                                 value={formData.email}
                                                 onChange={handleInputChange}
                                                 disabled={!isEditing}
-                                                className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 ${
+                                                className={`w-full px-4 py-2.5 text-sm rounded-lg border transition-all duration-200 ${
                                                     isEditing 
-                                                        ? 'border-blue-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200' 
-                                                        : 'border-gray-200 bg-gray-50'
+                                                        ? 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500' 
+                                                        : 'border-gray-200 bg-gray-50 text-gray-600'
                                                 } outline-none`}
                                                 placeholder="Nhập email"
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                                <FaPhone className="inline mr-2 text-blue-600" />
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                <FaPhone className="inline mr-2 text-gray-400" />
                                                 Số điện thoại
                                             </label>
                                             <input
@@ -416,17 +417,17 @@ export default function AdminProfile() {
                                                 value={formData.phone}
                                                 onChange={handleInputChange}
                                                 disabled={!isEditing}
-                                                className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 ${
+                                                className={`w-full px-4 py-2.5 text-sm rounded-lg border transition-all duration-200 ${
                                                     isEditing 
-                                                        ? 'border-blue-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200' 
-                                                        : 'border-gray-200 bg-gray-50'
+                                                        ? 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500' 
+                                                        : 'border-gray-200 bg-gray-50 text-gray-600'
                                                 } outline-none`}
                                                 placeholder="Nhập số điện thoại"
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
                                                 Giới tính
                                             </label>
                                             {isEditing ? (
@@ -434,10 +435,7 @@ export default function AdminProfile() {
                                                     name="gender"
                                                     value={formData.gender}
                                                     onChange={handleInputChange}
-                                                    className="w-full px-4 py-3 rounded-lg border-2 border-blue-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 outline-none transition-all duration-200 appearance-none bg-no-repeat bg-[right_16px_center] cursor-pointer"
-                                                    style={{
-                                                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232563eb' d='M1 4l5 5 5-5z'/%3E%3C/svg%3E")`,
-                                                    }}
+                                                    className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 cursor-pointer"
                                                 >
                                                     <option value="MALE">Nam</option>
                                                     <option value="FEMALE">Nữ</option>
@@ -447,7 +445,7 @@ export default function AdminProfile() {
                                                     type="text"
                                                     value={formData.gender === 'MALE' ? 'Nam' : 'Nữ'}
                                                     disabled
-                                                    className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 bg-gray-50 outline-none"
+                                                    className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-200 bg-gray-50 text-gray-600 outline-none"
                                                 />
                                             )}
                                         </div>
@@ -455,13 +453,13 @@ export default function AdminProfile() {
                                 </div>
 
                                 <div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">
-                                        <FaMapMarkerAlt className="inline mr-2 text-blue-600" />
+                                    <h3 className="text-base font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-200">
+                                        <FaMapMarkerAlt className="inline mr-2 text-gray-400" />
                                         Địa chỉ
                                     </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
                                                 Tỉnh/Thành phố
                                             </label>
                                             {isEditing ? (
@@ -474,10 +472,7 @@ export default function AdminProfile() {
                                                             ward: '',
                                                         });
                                                     }}
-                                                    className="w-full px-4 py-3 rounded-lg border-2 border-blue-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 outline-none transition-all duration-200 appearance-none bg-no-repeat bg-[right_16px_center] cursor-pointer"
-                                                    style={{
-                                                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232563eb' d='M1 4l5 5 5-5z'/%3E%3C/svg%3E")`,
-                                                    }}
+                                                    className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 cursor-pointer"
                                                 >
                                                     <option value="">-- Chọn Tỉnh/Thành phố --</option>
                                                     {Array.from(
@@ -495,13 +490,13 @@ export default function AdminProfile() {
                                                     type="text"
                                                     value={formData.province}
                                                     disabled
-                                                    className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 bg-gray-50 outline-none"
+                                                    className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-200 bg-gray-50 text-gray-600 outline-none"
                                                 />
                                             )}
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
                                                 Phường/Xã
                                             </label>
                                             {isEditing ? (
@@ -514,10 +509,7 @@ export default function AdminProfile() {
                                                         });
                                                     }}
                                                     disabled={!formData.province}
-                                                    className="w-full px-4 py-3 rounded-lg border-2 border-blue-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 outline-none transition-all duration-200 appearance-none bg-no-repeat bg-[right_16px_center] cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
-                                                    style={{
-                                                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232563eb' d='M1 4l5 5 5-5z'/%3E%3C/svg%3E")`,
-                                                    }}
+                                                    className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 cursor-pointer disabled:bg-gray-50 disabled:cursor-not-allowed"
                                                 >
                                                     <option value="">
                                                         {formData.province 
@@ -535,13 +527,13 @@ export default function AdminProfile() {
                                                     type="text"
                                                     value={formData.ward}
                                                     disabled
-                                                    className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 bg-gray-50 outline-none"
+                                                    className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-200 bg-gray-50 text-gray-600 outline-none"
                                                 />
                                             )}
                                         </div>
 
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
                                                 Địa chỉ chi tiết
                                             </label>
                                             <textarea
@@ -550,10 +542,10 @@ export default function AdminProfile() {
                                                 onChange={handleInputChange}
                                                 disabled={!isEditing}
                                                 rows={3}
-                                                className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 resize-none ${
+                                                className={`w-full px-4 py-2.5 text-sm rounded-lg border transition-all duration-200 resize-none ${
                                                     isEditing 
-                                                        ? 'border-blue-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200' 
-                                                        : 'border-gray-200 bg-gray-50'
+                                                        ? 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500' 
+                                                        : 'border-gray-200 bg-gray-50 text-gray-600'
                                                 } outline-none`}
                                                 placeholder="Nhập địa chỉ chi tiết"
                                             />
@@ -563,12 +555,12 @@ export default function AdminProfile() {
                             </div>
 
                             {isEditing && (
-                                <div className="mt-8 flex gap-4 justify-end pt-6 border-t border-gray-200">
+                                <div className="mt-6 flex gap-3 justify-end pt-5 border-t border-gray-200">
                                     <button
                                         type="button"
                                         onClick={handleCancel}
                                         disabled={loading}
-                                        className="px-6 py-3 rounded-lg border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200 flex items-center gap-2"
+                                        className="px-5 py-2.5 text-sm rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-all duration-200 flex items-center gap-2"
                                     >
                                         <FaTimes />
                                         Hủy
@@ -576,11 +568,11 @@ export default function AdminProfile() {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="px-6 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="px-5 py-2.5 text-sm rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {loading ? (
                                             <>
-                                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                                                 Đang lưu...
                                             </>
                                         ) : (
@@ -596,6 +588,7 @@ export default function AdminProfile() {
                     </div>
                 </div>
             </div>
+            
         </RoleBasedLayout>
     );
 }

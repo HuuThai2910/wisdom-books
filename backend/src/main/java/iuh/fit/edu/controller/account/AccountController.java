@@ -36,18 +36,22 @@ public class AccountController {
 
         LoginResponse cognitoResponse = this.accountService.loginUser(request);
         String token=cognitoResponse.getToken();
-        int maxAge = 3600 * 24; // 24 giờ
+        String refreshToken=cognitoResponse.getRefreshToken();
         
-        // Bỏ HttpOnly để frontend có thể debug được cookie
-        // SameSite=Lax cho localhost development
-        String setCookie = String.format("id_token=%s; Path=/; Max-Age=%d; SameSite=Lax",
-                token, maxAge);
-        response.addHeader("Set-Cookie", setCookie);
+        // Set access token cookie (5 phút)
+        String accessTokenCookie = String.format("id_token=%s; Path=/; Max-Age=%d; SameSite=Lax",
+                token, 300);
+        response.addHeader("Set-Cookie", accessTokenCookie);
+        
+        // Set refresh token cookie (30 ngày)
+        String refreshTokenCookie = String.format("refresh_token=%s; Path=/; Max-Age=%d; SameSite=Lax",
+                refreshToken, 30 * 24 * 3600);
+        response.addHeader("Set-Cookie", refreshTokenCookie);
         
         UserInfoResponse userInfoResponse=accountService.getCurrentUserInfo(token);
         email= userInfoResponse.getEmail();
         
-        System.out.println("[Login] Set cookie id_token for user: " + userInfoResponse.getEmail());
+        System.out.println("[Login] Set cookies (access + refresh) for user: " + userInfoResponse.getEmail());
         return ResponseEntity.ok(cognitoResponse);
     }
 
@@ -70,9 +74,11 @@ public class AccountController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logoutAccount(@RequestHeader("Authorization") String token){
+    public ResponseEntity<String> logoutAccount(
+            @RequestHeader("Authorization") String token,
+            @CookieValue(value = "refresh_token", required = false) String refreshToken){
         String accessToken = token.replace("Bearer ", "");
-        accountService.logout(accessToken);
+        accountService.logout(accessToken, refreshToken);
         return ResponseEntity.ok("Logged out successfully");
     }
 
@@ -93,26 +99,36 @@ public class AccountController {
 
     @PostMapping("/refresh-token")
     public ResponseEntity<LoginResponse> refreshToken(
-            @RequestBody Map<String, String> request,
+            @CookieValue(value = "refresh_token", required = false) String refreshTokenCookie,
+            @RequestBody(required = false) Map<String, String> request,
             HttpServletResponse response) {
-        String refreshToken = request.get("refreshToken");
-        String username = request.get("username");
+        // Ưu tiên lấy từ cookie, fallback về request body
+        String refreshToken = refreshTokenCookie != null ? refreshTokenCookie : 
+                             (request != null ? request.get("refreshToken") : null);
+        String username = request != null ? request.get("username") : null;
         
-        if (refreshToken == null || username == null) {
-            throw new RuntimeException("refreshToken and username are required");
+        if (refreshToken == null) {
+            throw new RuntimeException("refreshToken is required (from cookie or body)");
+        }
+        if (username == null) {
+            throw new RuntimeException("username is required");
         }
         
         LoginResponse loginResponse = ((AccountServiceImpl) accountService).refreshAccessToken(refreshToken, username);
         
-        // Set cookie với new access token
-        Cookie cookie = new Cookie("id_token", loginResponse.getToken());
-        cookie.setPath("/");
-        cookie.setMaxAge(300); // 5 phút
-        cookie.setHttpOnly(false); // Để debug, production nên = true
-        cookie.setAttribute("SameSite", "Lax");
-        response.addCookie(cookie);
+        // Set new access token cookie (5 phút)
+        String accessTokenCookie = String.format("id_token=%s; Path=/; Max-Age=%d; SameSite=Lax",
+                loginResponse.getToken(), 300);
+        response.addHeader("Set-Cookie", accessTokenCookie);
         
-        System.out.println("[RefreshToken] New access token set in cookie for user: " + username);
+        // Set new refresh token cookie nếu có (30 ngày)
+        if (loginResponse.getRefreshToken() != null) {
+            String newRefreshCookie = String.format("refresh_token=%s; Path=/; Max-Age=%d; SameSite=Lax",
+                    loginResponse.getRefreshToken(), 30 * 24 * 3600);
+            response.addHeader("Set-Cookie", newRefreshCookie);
+        }
+        
+        System.out.println("[RefreshToken] New tokens set in cookies for user: " + username);
         
         return ResponseEntity.ok(loginResponse);
     }

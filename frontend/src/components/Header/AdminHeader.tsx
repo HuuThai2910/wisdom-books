@@ -5,6 +5,7 @@ import { logout as logoutApi } from "../../api/auth";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
 import { tokenRefreshManager } from "../../util/tokenRefreshManager";
+import { S3_CONFIG } from './../../config/s3';
 
 interface AdminHeaderProps {
   onMobileMenuToggle: () => void;
@@ -77,7 +78,7 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
             </div>
             {currentUser?.avatar ? (
               <img
-                src={currentUser.avatar}
+                src={S3_CONFIG.BASE_URL + currentUser.avatar}
                 alt={currentUser.fullName}
                 className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
               />
@@ -122,18 +123,18 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
                       const token = Cookies.get('id_token');
                       
                       if (token) {
-                        // Call API để blacklist token
+                        // Call API để blacklist token (refresh_token được gửi tự động qua cookie)
                         await logoutApi(token);
                       }
                       
                       // Xóa localStorage
                       localStorage.removeItem('user');
                       localStorage.removeItem('token');
-                      localStorage.removeItem('refreshToken');
                       localStorage.removeItem('username');
                       
-                      // Xóa cookie
+                      // Xóa cookies
                       Cookies.remove('id_token', { path: '/' });
+                      Cookies.remove('refresh_token', { path: '/' });
                       
                       // Reset state
                       setCurrentUser(null);
@@ -151,9 +152,9 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
                       tokenRefreshManager.stopMonitoring();
                       localStorage.removeItem('user');
                       localStorage.removeItem('token');
-                      localStorage.removeItem('refreshToken');
                       localStorage.removeItem('username');
                       Cookies.remove('id_token', { path: '/' });
+                      Cookies.remove('refresh_token', { path: '/' });
                       toast.error('Đã có lỗi xảy ra, nhưng bạn đã được đăng xuất');
                       navigate('/login');
                       window.location.reload();

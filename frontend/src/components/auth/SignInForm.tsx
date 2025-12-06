@@ -86,12 +86,9 @@ const SignInForm = ({ onForgotPassword, onSuccess }: SignInFormProps) => {
     dispatch(loginUser({ loginForm }))
       .unwrap()
       .then((response) => {
-        // Lưu refreshToken và username để auto-refresh
-        if (response.data.refreshToken) {
-          localStorage.setItem('refreshToken', response.data.refreshToken);
-          localStorage.setItem('username', username.trim());
-          console.log('[SignInForm] Saved refresh token and username for auto-refresh');
-        }
+        // Lưu username để auto-refresh (refreshToken đã ở cookie)
+        localStorage.setItem('username', username.trim());
+        console.log('[SignInForm] Saved username, refresh token is in cookie');
         
         // Bắt đầu monitoring token expiry
         tokenRefreshManager.startMonitoring();

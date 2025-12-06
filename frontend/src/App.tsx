@@ -46,7 +46,7 @@ function App() {
     // Start token monitoring on app load if user is logged in
     useEffect(() => {
         const token = Cookies.get('id_token');
-        const refreshToken = localStorage.getItem('refreshToken');
+        const refreshToken = Cookies.get('refresh_token');
         
         if (token && refreshToken) {
             console.log('[App] User logged in, starting token monitoring');
@@ -235,7 +235,11 @@ function App() {
                             </ClientLayout>
                         }
                     />
-                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/settings" element={
+                        <ClientLayout>
+                            <SettingsPage />
+                        </ClientLayout>
+                        } />
 
                     {/* Admin Routes - Only for ADMIN role (1) */}
                     <Route path="/admin/books" element={

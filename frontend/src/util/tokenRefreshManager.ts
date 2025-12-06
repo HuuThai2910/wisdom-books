@@ -82,8 +82,8 @@ class TokenRefreshManager {
         try {
             this.isRefreshing = true;
             
-            // Get refresh token and username from localStorage
-            const refreshToken = localStorage.getItem('refreshToken');
+            // Get refresh token from cookie and username from localStorage
+            const refreshToken = Cookies.get('refresh_token');
             const username = localStorage.getItem('username');
             
             if (!refreshToken || !username) {
@@ -94,13 +94,13 @@ class TokenRefreshManager {
             
             console.log('[TokenRefreshManager] Refreshing access token...');
             
-            // Call refresh API
+            // Call refresh API (cookies are sent automatically)
             const response = await refreshAccessToken({ refreshToken, username });
             
             if (response.data.success && response.data.data) {
                 console.log('[TokenRefreshManager] Token refreshed successfully');
                 
-                // Cookie is automatically set by backend, just reschedule next check
+                // Cookies (id_token and refresh_token) are automatically set by backend
                 this.scheduleNextCheck();
             } else {
                 console.error('[TokenRefreshManager] Refresh failed:', response.data);
@@ -124,10 +124,10 @@ class TokenRefreshManager {
         this.stopMonitoring();
         
         // Clear all auth data
-        localStorage.removeItem('refreshToken');
         localStorage.removeItem('username');
         localStorage.removeItem('user');
         Cookies.remove('id_token');
+        Cookies.remove('refresh_token');
         
         // Redirect to login if on protected route
         const currentPath = window.location.pathname;

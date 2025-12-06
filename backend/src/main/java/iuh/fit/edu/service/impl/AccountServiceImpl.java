@@ -110,13 +110,23 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void logout(String accessToken) {
-        // Blacklist token ngay lập tức
+    public void logout(String accessToken, String refreshToken) {
+        // Blacklist access token ngay lập tức
         try {
-            tokenBlacklistService.blacklistToken(accessToken, "User logout");
-            System.out.println("[Logout] Token blacklisted successfully");
+            tokenBlacklistService.blacklistToken(accessToken, "User logout - access token");
+            System.out.println("[Logout] Access token blacklisted successfully");
         } catch (Exception e) {
-            System.err.println("[Logout] Error blacklisting token: " + e.getMessage());
+            System.err.println("[Logout] Error blacklisting access token: " + e.getMessage());
+        }
+        
+        // Blacklist refresh token nếu có
+        if (refreshToken != null && !refreshToken.isEmpty()) {
+            try {
+                tokenBlacklistService.blacklistToken(refreshToken, "User logout - refresh token");
+                System.out.println("[Logout] Refresh token blacklisted successfully");
+            } catch (Exception e) {
+                System.err.println("[Logout] Error blacklisting refresh token: " + e.getMessage());
+            }
         }
         
         // Lấy thông tin user từ token
