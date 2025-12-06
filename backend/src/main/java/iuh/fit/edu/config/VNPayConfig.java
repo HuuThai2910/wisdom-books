@@ -17,7 +17,7 @@ public class VNPayConfig {
     @Value("${vnpay.payUrl}")
     private String payUrl;
 
-    @Value("${vnpay.returnUrl}")
+    @Value("http://localhost:5173/payment-success")
     private String returnUrl;
 
     @Value("${vnpay.version:2.1.0}")
