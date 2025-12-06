@@ -223,9 +223,9 @@ export default function Header() {
                 style={{
                     background: isHomePage
                         ? opacity > 0.5
-                            ? `rgba(37, 99, 235, ${opacity})` // Xanh khi cuộn
-                            : "rgba(255, 255, 255, 0.95)" // Trắng khi chưa cuộn
-                        : "#ffffff", // Trắng cho các trang khác
+                            ? `rgba(37, 99, 235, ${opacity})`
+                            : "rgba(255, 255, 255, 0.95)" 
+                        : "#ffffff", 
                     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
                 }}
             >
