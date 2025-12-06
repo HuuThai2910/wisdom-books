@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 /*
  * @description
@@ -95,7 +96,7 @@ public class UserServiceImpl implements UserService {
             Role newRole = roleRepository.findById(Long.valueOf(request.getRole())).orElse(null);
             user.setRole(newRole);
             user.setUpdatedBy(email);
-            
+            user.setUpdatedAt(OffsetDateTime.now());
             // Map other fields first
             User updatedUser = userMapper.toUpdateUser(request, user);
             updatedUser.setAvatar(request.getAvatarURL());
@@ -127,6 +128,7 @@ public class UserServiceImpl implements UserService {
         assert user != null;
         user.setStatus(UserStatus.INACTIVE);
         user.setUpdatedBy(email);
+        user.setUpdatedAt(OffsetDateTime.now());
         userRepository.save(user);
         cognitoService.disableUser(user.getFullName());
     }

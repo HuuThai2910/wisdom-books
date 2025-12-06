@@ -9,9 +9,9 @@ interface RoleBasedRouteProps {
 const RoleBasedRoute = ({ children, allowedRoles }: RoleBasedRouteProps) => {
     const userStr = localStorage.getItem('user');
     
+    // Người dùng chưa đăng nhập -> redirect về trang 401
     if (!userStr) {
-        toast.error('Vui lòng đăng nhập để tiếp tục');
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/unauthorized" replace />;
     }
 
     try {
@@ -23,10 +23,9 @@ const RoleBasedRoute = ({ children, allowedRoles }: RoleBasedRouteProps) => {
         console.log('[RoleBasedRoute] User role (string):', userRole);
         console.log('[RoleBasedRoute] Allowed roles:', allowedRoles);
 
-        // CUSTOMER role (3) không được vào admin
+        // CUSTOMER role (3) không được vào admin/staff/warehouse
         if (userRole === '3' || userRole === 'CUSTOMER' || userRole === 'customer') {
-            toast.error('Bạn không có quyền truy cập trang này');
-            return <Navigate to="/" replace />;
+            return <Navigate to="/unauthorized" replace />;
         }
 
         // Normalize both user role and allowed roles for comparison
@@ -48,16 +47,16 @@ const RoleBasedRoute = ({ children, allowedRoles }: RoleBasedRouteProps) => {
         console.log('[RoleBasedRoute] Allowed roles normalized:', allowedRolesNormalized);
         console.log('[RoleBasedRoute] Has access:', hasAccess);
 
+        // Không có quyền truy cập -> redirect về trang 401
         if (!hasAccess) {
-            toast.error('Bạn không có quyền truy cập trang này');
             return <Navigate to="/unauthorized" replace />;
         }
 
         return <>{children}</>;
     } catch (error) {
-        console.error('Error parsing user data:', error);
-        toast.error('Phiên đăng nhập không hợp lệ');
-        return <Navigate to="/login" replace />;
+        console.error('[RoleBasedRoute] Error parsing user data:', error);
+        // Dữ liệu không hợp lệ -> redirect về trang 401
+        return <Navigate to="/unauthorized" replace />;
     }
 };
 

@@ -6,15 +6,16 @@ import iuh.fit.edu.entity.constant.UserStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "users")
 @Data
-
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,11 +43,14 @@ public class User {
     @ToString.Exclude
     private Role role;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+
+    @Column(nullable = false, updatable = false)
+    private OffsetDateTime createdAt=OffsetDateTime.now();
+    
+    private OffsetDateTime updatedAt;
+    
     private String createdBy;
     private String updatedBy;
-    private LocalDateTime updatedAt;
 
 
     @OneToMany(mappedBy = "user")
