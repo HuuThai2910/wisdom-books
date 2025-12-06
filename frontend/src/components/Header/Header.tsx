@@ -945,6 +945,27 @@ export default function Header() {
                                                 </div>
                                             </div>
 
+                                            {/* Menu Quản lý - chỉ hiển thị cho non-customer roles */}
+                                            {currentUser.role && 
+                                             currentUser.role !== '3' && 
+                                             currentUser.role !== 'CUSTOMER' && (
+                                                <Link
+                                                    to={
+                                                        currentUser.role === '1' || currentUser.role === 'ADMIN'
+                                                            ? '/admin/dashboard'
+                                                            : currentUser.role === '2' || currentUser.role === 'STAFF'
+                                                            ? '/staff/dashboard'
+                                                            : '/warehouse/dashboard'
+                                                    }
+                                                    className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition group"
+                                                >
+                                                    <FaCog className="text-lg text-indigo-600 group-hover:scale-110 transition" />
+                                                    <span className="font-medium">
+                                                        Quản lý
+                                                    </span>
+                                                </Link>
+                                            )}
+
                                             <Link
                                                 to="/orders"
                                                 className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-50 rounded-lg transition group"
@@ -997,7 +1018,8 @@ export default function Header() {
                                                 </span>
                                             </Link>
                                             <Link
-                                                to="/register"
+                                                to="/login"
+                                                state={{ mode: 'signup' }}
                                                 className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-blue-50 rounded-lg transition group"
                                             >
                                                 <FaUserPlus className="text-lg text-green-600 group-hover:scale-110 transition" />

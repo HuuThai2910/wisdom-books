@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { registerUser } from './../../features/auth/authSlice';
 import { RegisterFormData } from './../../types/index';
 import type { AppDispatch } from './../../app/store';
+import toast from 'react-hot-toast';
 
 interface SignUpFormProps {
   onSuccess: () => void;
@@ -26,6 +27,8 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [errors, setErrors] = useState<FormErrors>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -56,8 +59,14 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
     // Validate password
     if (!password) {
       newErrors.password = 'Vui lòng nhập mật khẩu';
-    } else if (password.length < 6) {
-      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+    } else if (password.length < 8) {
+      newErrors.password = 'Mật khẩu phải có ít nhất 8 ký tự';
+    } else if (!/(?=.*[A-Z])/.test(password)) {
+      newErrors.password = 'Mật khẩu phải có ít nhất 1 ký tự in hoa';
+    } else if (!/(?=.*[0-9])/.test(password)) {
+      newErrors.password = 'Mật khẩu phải có ít nhất 1 số';
+    } else if (!/(?=.*[!@#$%^&*(),.?":{}|<>])/.test(password)) {
+      newErrors.password = 'Mật khẩu phải có ít nhất 1 ký tự đặc biệt';
     } else if (password.length > 50) {
       newErrors.password = 'Mật khẩu không được quá 50 ký tự';
     }
@@ -107,10 +116,10 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
           } else if (message.toLowerCase().includes('phone') || message.toLowerCase().includes('số điện thoại')) {
             setErrors({ phone: 'Số điện thoại này đã được sử dụng' });
           } else {
-            alert(message);
+            toast.error(message);
           }
         } else {
-          alert('Đăng ký thất bại. Vui lòng thử lại!');
+          toast.error('Đăng ký thất bại. Vui lòng thử lại!');
         }
       });
   };
@@ -200,42 +209,64 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
       </div>
       
       <div className="w-full">
-        <input
-          type="password"
-          placeholder="Mật khẩu"
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            if (errors.password) setErrors({ ...errors, password: undefined });
-          }}
-          className={`bg-gray-100 border-2 my-2 px-4 py-2.5 text-sm rounded-lg w-full 
-            outline-none transition-all duration-300 focus:bg-white ${
-              errors.password 
-                ? 'border-red-500 focus:border-red-500' 
-                : 'border-transparent focus:border-[#2196F3]'
-            }`}
-        />
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Mật khẩu"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errors.password) setErrors({ ...errors, password: undefined });
+            }}
+            className={`bg-gray-100 border-2 my-2 px-4 py-2.5 ${password ? 'pr-10' : 'pr-4'} text-sm rounded-lg w-full 
+              outline-none transition-all duration-300 focus:bg-white ${
+                errors.password 
+                  ? 'border-red-500 focus:border-red-500' 
+                  : 'border-transparent focus:border-[#2196F3]'
+              }`}
+          />
+          {password && (
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+            >
+              <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+            </button>
+          )}
+        </div>
         {errors.password && (
           <p className="text-red-500 text-xs mt-1 mb-2 px-1">{errors.password}</p>
         )}
       </div>
       
       <div className="w-full">
-        <input
-          type="password"
-          placeholder="Nhập lại Mật khẩu"
-          value={confirmPassword}
-          onChange={(e) => {
-            setConfirmPassword(e.target.value);
-            if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined });
-          }}
-          className={`bg-gray-100 border-2 my-2 px-4 py-2.5 text-sm rounded-lg w-full 
-            outline-none transition-all duration-300 focus:bg-white ${
-              errors.confirmPassword 
-                ? 'border-red-500 focus:border-red-500' 
-                : 'border-transparent focus:border-[#2196F3]'
-            }`}
-        />
+        <div className="relative">
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="Nhập lại Mật khẩu"
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined });
+            }}
+            className={`bg-gray-100 border-2 my-2 px-4 py-2.5 ${confirmPassword ? 'pr-10' : 'pr-4'} text-sm rounded-lg w-full 
+              outline-none transition-all duration-300 focus:bg-white ${
+                errors.confirmPassword 
+                  ? 'border-red-500 focus:border-red-500' 
+                  : 'border-transparent focus:border-[#2196F3]'
+              }`}
+          />
+          {confirmPassword && (
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+            >
+              <i className={`fas ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+            </button>
+          )}
+        </div>
         {errors.confirmPassword && (
           <p className="text-red-500 text-xs mt-1 mb-2 px-1">{errors.confirmPassword}</p>
         )}

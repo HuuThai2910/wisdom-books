@@ -1,13 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import SignInForm from '../../components/auth/SignInForm';
 import SignUpForm from '../../components/auth/SignUpForm';
 import ForgotPasswordForm from '../../components/auth/ForgotPasswordForm';
 import OwlAnimation from '../../components/auth/OwlAnimation';
 
 const LoginPage = () => {
-  const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin');
+  const location = useLocation();
+  const initialMode = (location.state as { mode?: 'signin' | 'signup' | 'forgot' })?.mode || 'signin';
+  const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>(initialMode);
   const [isFlying, setIsFlying] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+
+  // Update mode when location state changes
+  useEffect(() => {
+    if (location.state && (location.state as { mode?: string }).mode) {
+      setMode((location.state as { mode: 'signin' | 'signup' | 'forgot' }).mode);
+    }
+  }, [location.state]);
 
   const handleSuccess = () => {
     setIsFlying(true);

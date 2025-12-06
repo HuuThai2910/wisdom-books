@@ -121,6 +121,13 @@ export default function BookDetailPage() {
         }
     };
     const handleAddToCart = async () => {
+        // Kiểm tra đăng nhập
+        const user = localStorage.getItem('user');
+        if (!user) {
+            toast.error('Đăng nhập để thêm sản phẩm vào giỏ hàng!');
+            return;
+        }
+
         if (!book) {
             toast.error("Không tìm thấy sách!");
             return;
@@ -170,6 +177,13 @@ export default function BookDetailPage() {
 
     // Hàm mua sách ngay lập tức mà không thêm vào giỏ hàng
     const handleBuyNow = () => {
+        // Kiểm tra đăng nhập
+        const user = localStorage.getItem('user');
+        if (!user) {
+            toast.error('Đăng nhập để mua sản phẩm!');
+            return;
+        }
+
         if (!book) {
             toast.error("Không tìm thấy sách!");
             return; // thoát nếu book null

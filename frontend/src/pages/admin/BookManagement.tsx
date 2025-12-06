@@ -20,7 +20,7 @@ import {
 import bookApi from "../../api/bookApi";
 import { Book } from "../../types";
 import toast from "react-hot-toast";
-import AdminLayout from "./AdminLayout";
+import RoleBasedLayout from "../../components/common/RoleBasedLayout";
 
 export default function BookManagement() {
     const navigate = useNavigate();
@@ -519,7 +519,7 @@ export default function BookManagement() {
     };
 
     return (
-        <AdminLayout>
+        <RoleBasedLayout>
             <div className="w-full">
                 {/* Header Section */}
                 <motion.div
@@ -1602,6 +1602,6 @@ export default function BookManagement() {
                     )}
                 </AnimatePresence>
             </div>
-        </AdminLayout>
+        </RoleBasedLayout>
     );
 }
