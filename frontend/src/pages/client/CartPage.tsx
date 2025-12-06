@@ -11,6 +11,7 @@ import {
 import OrderSummary from "../../components/cart/OrderSummary";
 import { useNavigate } from "react-router-dom";
 import { setCheckoutItems } from "../../features/checkout/checkoutSlice";
+import Breadcrumb from "../../components/common/Breadcrumb";
 import type { CartItem } from "../../types";
 
 export default function CartPage() {
@@ -62,12 +63,7 @@ export default function CartPage() {
     return (
         <div className="min-h-screen bg-gray-50 py-30 px-6 sm:px-8 lg:px-20 mx-auto">
             <div className="max-w-7xl mx-auto">
-                {/* Breadcrumb */}
-                <div className="flex items-center gap-2 text-sm mb-8">
-                    <span className="text-gray-600">Trang chủ</span>
-                    <span className="text-gray-400">›</span>
-                    <span className="text-gray-900 font-medium">Giỏ hàng</span>
-                </div>
+                <Breadcrumb items={[{ label: "Giỏ hàng" }]} />
 
                 <div className="grid lg:grid-cols-3 gap-8">
                     {cartItems.length === 0 ? (

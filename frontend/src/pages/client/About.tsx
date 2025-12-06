@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { FaChevronLeft, FaChevronRight, FaBookOpen } from "react-icons/fa";
+import Breadcrumb from "../../components/common/Breadcrumb";
 import {
     storyImages,
     stats,
@@ -170,8 +171,11 @@ const StoryImageCarousel = () => {
 export default function About() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 pt-20">
+            <div className="container mx-auto px-10 relative z-10 pt-5">
+                <Breadcrumb items={[{ label: "Về chúng tôi" }]} />
+            </div>
             {/* Hero Section */}
-            <section className="relative py-24 overflow-hidden">
+            <section className="relative py-15 overflow-hidden">
                 <div className="absolute inset-0 overflow-hidden">
                     <div className="absolute top-20 left-10 w-96 h-96 bg-blue-200/30 rounded-full blur-3xl animate-pulse"></div>
                     <div

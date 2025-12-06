@@ -79,6 +79,16 @@ const OrdersPage = () => {
 
     return (
         <>
+            <style>{`
+                @keyframes bounce-gentle {
+                    0%, 100% {
+                        transform: translateY(0);
+                    }
+                    50% {
+                        transform: translateY(-4px);
+                    }
+                }
+            `}</style>
             <div className="min-h-screen bg-gray-50 py-30 px-30">
                 <div className="max-w-7xl mx-auto">
                     <Breadcrumb items={[{ label: "Đơn hàng của tôi" }]} />
@@ -138,11 +148,15 @@ const OrdersPage = () => {
                                         {tab.icon}
                                         <span>{tab.label}</span>
                                         <span
-                                            className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+                                            className={`ml-1 px-2.5 py-1 rounded-full text-xs font-semibold font-bold animate-bounce-gentle ${
                                                 isActive
-                                                    ? "bg-blue-100 text-blue-600"
-                                                    : "bg-blue-100 text-blue-600"
+                                                    ? "bg-red-600 text-white"
+                                                    : "bg-gray-100 text-red-600"
                                             }`}
+                                            style={{
+                                                animation:
+                                                    "bounce-gentle 1.5s ease-in-out infinite",
+                                            }}
                                         >
                                             {count}
                                         </span>
@@ -208,7 +222,7 @@ const OrdersPage = () => {
                                                     (window.location.href =
                                                         "/books")
                                                 }
-                                                className="inline-flex items-center gap-2 px-8 py-4 bg-linear-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                                                className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
                                             >
                                                 <Package className="w-5 h-5" />
                                                 <span>Khám phá sản phẩm</span>

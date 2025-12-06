@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 import emailjs from "@emailjs/browser";
+import Breadcrumb from "../../components/common/Breadcrumb";
 
 import {
     contactInfo,
@@ -39,9 +40,9 @@ export default function ContactPage() {
         setIsSubmitting(true);
 
         try {
-            const serviceId = "service_xvx17bh"; 
+            const serviceId = "service_xvx17bh";
             const templateId = "template_290k67w";
-            const publicKey = "6HQ6fxuSA9nwlH26t"; 
+            const publicKey = "6HQ6fxuSA9nwlH26t";
             const templateParams = {
                 name: formData.name,
                 email: formData.email,
@@ -83,6 +84,9 @@ export default function ContactPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 pt-20 px-20 relative overflow-hidden">
+            <div className="container mx-auto px-6 relative z-10 pt-5">
+                <Breadcrumb items={[{ label: "Liên hệ" }]} />
+            </div>
             {/* Background Decoration */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>

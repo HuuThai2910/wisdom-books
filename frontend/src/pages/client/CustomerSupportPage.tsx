@@ -1,8 +1,6 @@
 import { motion } from "framer-motion";
 import { FaLifeRing, FaQuestionCircle, FaComments } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import Header from "../../components/Header/Header";
-import Footer from "../../components/Footer/Footer";
 
 // ⭐ IMPORT DỮ LIỆU
 import {
@@ -37,8 +35,6 @@ export default function CustomerSupportPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Header />
-
             {/* HEADER với floating animations */}
             <motion.div
                 initial={{ opacity: 0 }}
@@ -346,8 +342,6 @@ export default function CustomerSupportPage() {
                     </motion.div>
                 </motion.div>
             </div>
-
-            <Footer />
         </div>
     );
 }
