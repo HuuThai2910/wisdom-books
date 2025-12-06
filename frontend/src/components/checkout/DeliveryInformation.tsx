@@ -1,19 +1,39 @@
+/**
+ * Component form nhập thông tin giao hàng
+ * Quản lý: validate form, chọn địa chỉ mặc định, xử lý thay đổi input
+ */
 import { useState, useEffect } from "react";
 import addressData, { WardMapping } from "vietnam-address-database";
 import { DeliveryInformationProps } from "../../types";
 
+/**
+ * Lấy dữ liệu mapping phường/xã theo tỉnh/thành phố từ database địa chỉ Việt Nam
+ * Dùng để lọc danh sách phường theo tỉnh được chọn
+ */
 const wardMappings = addressData.find(
     (x: any) => x.type === "table" && x.name === "ward_mappings"
 )!.data as WardMapping[];
 
+/**
+ * Interface định nghĩa các lỗi validation cho từng trường
+ * Mỗi trường có thể có message lỗi riêng hoặc undefined nếu hợp lệ
+ */
 interface ValidationErrors {
-    fullName?: string;
-    phone?: string;
-    email?: string;
-    ward?: string;
-    address?: string;
+    fullName?: string; // Lỗi họ tên
+    phone?: string; // Lỗi số điện thoại
+    email?: string; // Lỗi email
+    ward?: string; // Lỗi phường/xã
+    address?: string; // Lỗi địa chỉ
 }
 
+/**
+ * Component DeliveryInformation
+ * @param formData - Dữ liệu form (họ tên, SĐT, email, địa chỉ...)
+ * @param onFormChange - Callback khi form thay đổi
+ * @param checkDefault - Trạng thái checkbox "Sử dụng địa chỉ mặc định"
+ * @param onCheckDefaultChange - Callback khi checkbox thay đổi
+ * @param triggerValidation - Ref để parent component trigger validation
+ */
 const DeliveryInformation: React.FC<DeliveryInformationProps> = ({
     formData,
     onFormChange,
@@ -21,17 +41,41 @@ const DeliveryInformation: React.FC<DeliveryInformationProps> = ({
     onCheckDefaultChange,
     triggerValidation,
 }) => {
+    /**
+     * State lưu danh sách phường/xã của tỉnh/thành phố được chọn
+     * Được cập nhật mỗi khi formData.province thay đổi
+     */
     const [wardsForSelectedCity, setWardsForSelectedCity] = useState<string[]>(
         []
     );
+
+    /**
+     * State lưu các lỗi validation của từng trường
+     * Chỉ hiển thị lỗi của các trường đã touched
+     */
     const [errors, setErrors] = useState<ValidationErrors>({});
+
+    /**
+     * State lưu danh sách các trường đã touched (đã focus/blur)
+     * Dùng để chỉ hiển thị lỗi của trường user đã tương tác
+     */
     const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
 
+    /**
+     * Effect: Lọc danh sách phường/xã theo tỉnh/thành phố được chọn
+     * Chạy mỗi khi formData.province thay đổi
+     *
+     * Logic:
+     * 1. Lọc wardMappings theo tỉnh được chọn
+     * 2. So sánh cả tên có prefix "Thành phố"/"Tỉnh" và không có prefix
+     * 3. Lấy danh sách tên phường unique
+     * 4. Cập nhật state wardsForSelectedCity
+     */
     useEffect(() => {
         // Lọc phường theo tỉnh/thành phố được chọn
         const filteredWards = wardMappings
             .filter((w) => {
-                // So sánh với cả tên có format và không có format
+                // Bỏ prefix "Thành phố" hoặc "Tỉnh" để so sánh
                 const provinceToMatch = formData.province.replace(
                     /^(Thành phố |Tỉnh )/i,
                     ""
@@ -40,6 +84,7 @@ const DeliveryInformation: React.FC<DeliveryInformationProps> = ({
                     /^(Thành phố |Tỉnh )/i,
                     ""
                 );
+                // So sánh cả hai cách: có và không có prefix
                 return (
                     wardProvince === provinceToMatch ||
                     w.new_province_name === formData.province
@@ -47,12 +92,22 @@ const DeliveryInformation: React.FC<DeliveryInformationProps> = ({
             })
             .map((w) => w.new_ward_name);
 
+        // Loại bỏ duplicate và cập nhật state
         setWardsForSelectedCity(Array.from(new Set(filteredWards)));
     }, [formData.province]);
 
-    // Validate individual field
+    /**
+     * Hàm validate một trường cụ thể
+     * @param name - Tên trường cần validate
+     * @param value - Giá trị của trường
+     * @returns Message lỗi nếu không hợp lệ, undefined nếu hợp lệ
+     *
+     * Quy tắc validate theo thứ tự ưu tiên:
+     * 1. Kiểm tra empty/rỗng trước
+     * 2. Kiểm tra format/độ dài sau
+     */
     const validateField = (name: string, value: string): string | undefined => {
-        // Priority 1: Check if empty first
+        // Ưu tiên 1: Kiểm tra trường rỗng trước
         if (!value || value.trim() === "") {
             switch (name) {
                 case "fullName":
@@ -70,44 +125,55 @@ const DeliveryInformation: React.FC<DeliveryInformationProps> = ({
             }
         }
 
-        // Priority 2: Check format/length requirements
+        // Ưu tiên 2: Kiểm tra format và độ dài
         switch (name) {
             case "fullName":
+                // Họ tên phải có ít nhất 3 ký tự
                 if (value.trim().length < 3) {
                     return "Họ và tên phải có ít nhất 3 ký tự";
                 }
                 break;
             case "phone":
-                // Check if contains non-digit characters
+                // Kiểm tra có chứa ký tự không phải số
                 if (/\D/.test(value.trim())) {
                     return "Số điện thoại chỉ được phép nhập số";
                 }
-                // Check if exactly 10 digits
+                // Kiểm tra đúng 10 chữ số
                 const phoneRegex = /^[0-9]{10}$/;
                 if (!phoneRegex.test(value.trim())) {
                     return "Số điện thoại phải có đúng 10 số";
                 }
                 break;
             case "email":
+                // Validate format email cơ bản
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(value.trim())) {
                     return "Email không đúng định dạng";
                 }
                 break;
             case "address":
+                // Địa chỉ phải có ít nhất 5 ký tự
                 if (value.trim().length < 5) {
                     return "Địa chỉ phải có ít nhất 5 ký tự";
                 }
                 break;
         }
 
+        // Không có lỗi
         return undefined;
     };
 
-    // Validate all fields and update errors state
+    /**
+     * Effect: Validate các trường đã touched và cập nhật errors state
+     * Chạy mỗi khi formData hoặc touchedFields thay đổi
+     *
+     * Chỉ validate và hiển thị lỗi cho các trường user đã tương tác (touched)
+     * Tránh hiển thị lỗi ngay khi vừa mở form
+     */
     useEffect(() => {
         const newErrors: ValidationErrors = {};
 
+        // Validate họ tên nếu đã touched
         if (touchedFields.has("fullName")) {
             const error = validateField("fullName", formData.fullName);
             if (error) newErrors.fullName = error;
@@ -136,6 +202,15 @@ const DeliveryInformation: React.FC<DeliveryInformationProps> = ({
         setErrors(newErrors);
     }, [formData, touchedFields]);
 
+    /**
+     * Hàm format tên tỉnh/thành phố
+     * @param name - Tên tỉnh/thành phố
+     * @returns Tên đã format với prefix phù hợp
+     *
+     * Logic:
+     * - Nếu đã có prefix "Thành phố" hoặc "Tỉnh" -> giữ nguyên
+     * - Nếu chưa có -> thêm prefix "Tỉnh "
+     */
     const formatProvinceName = (name: string): string => {
         const lower = name.toLowerCase();
         if (lower.startsWith("thành phố")) return name;
@@ -143,6 +218,15 @@ const DeliveryInformation: React.FC<DeliveryInformationProps> = ({
         return "Tỉnh " + name;
     };
 
+    /**
+     * Hàm xử lý khi user thay đổi input/select
+     * @param e - Event change
+     *
+     * Logic đặc biệt cho trường city (tỉnh/thành phố):
+     * - Khi đổi tỉnh -> lọc lại danh sách phường
+     * - Reset trường ward về rỗng
+     * - Mark ward là touched (để hiện lỗi nếu chưa chọn)
+     */
     const handleInputChange = (
         e: React.ChangeEvent<
             HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -163,11 +247,23 @@ const DeliveryInformation: React.FC<DeliveryInformationProps> = ({
         }
     };
 
+    /**
+     * Hàm xử lý khi blur ra khỏi một trường
+     * @param fieldName - Tên trường vừa blur
+     *
+     * Đánh dấu trường là touched để bắt đầu hiển thị lỗi validation
+     */
     const handleBlur = (fieldName: string) => {
         setTouchedFields((prev) => new Set(prev).add(fieldName));
     };
 
-    // Validate all fields at once (used when submit button is clicked)
+    /**
+     * Hàm validate tất cả các trường cùng lúc
+     * @returns true nếu tất cả trường hợp lệ, false nếu có lỗi
+     *
+     * Được gọi khi user click nút "Đặt hàng"
+     * Validate tất cả trường bắt buộc và hiển thị lỗi nếu có
+     */
     const validateAllFields = (): boolean => {
         const newErrors: ValidationErrors = {};
         let isValid = true;
@@ -216,20 +312,33 @@ const DeliveryInformation: React.FC<DeliveryInformationProps> = ({
         return isValid;
     };
 
-    // Expose validation function to parent
+    /**
+     * Effect: Expose hàm validateAllFields cho parent component
+     * Parent có thể gọi triggerValidation.current() để validate form
+     * Thường dùng khi submit form từ bên ngoài component này
+     */
     useEffect(() => {
         if (triggerValidation) {
             (triggerValidation as any).current = validateAllFields;
         }
     }, [formData, triggerValidation]);
 
+    /**
+     * Hàm xử lý khi checkbox "Sử dụng địa chỉ mặc định" thay đổi
+     * @param e - Event change của checkbox
+     *
+     * Logic:
+     * - Gọi callback onCheckDefaultChange để parent biết
+     * - Nếu checked = true: xóa tất cả lỗi và touched fields
+     *   (vì địa chỉ mặc định đã được validate sẵn)
+     */
     const handleUseDefaultAddress = (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
         const checked = e.target.checked;
         onCheckDefaultChange(checked);
 
-        // Clear all errors and touched fields when using default address
+        // Xóa tất cả lỗi và touched fields khi dùng địa chỉ mặc định
         if (checked) {
             setTouchedFields(new Set());
             setErrors({});

@@ -4,27 +4,65 @@ import orderApi from "../../api/orderApi";
 import paymentApi from "../../api/paymentApi";
 import toast from "react-hot-toast";
 
+// Type cho các tab trạng thái đơn hàng
 type OrderStatus = "ALL" | Order["status"];
 
+/**
+ * Custom hook quản lý logic trang đơn hàng
+ * Xử lý: lấy danh sách đơn, lọc/tìm kiếm, xem chi tiết, thanh toán lại, hủy đơn
+ * @returns Tất cả state và hàm xử lý cho trang đơn hàng
+ */
 export const useOrders = () => {
+    // === STATE QUẢN LÝ DANH SÁCH ĐƠN HÀNG ===
+
+    // Danh sách đơn hàng gốc từ API
     const [orders, setOrders] = useState<Order[]>([]);
+
+    // Danh sách đơn hàng sau khi lọc/tìm kiếm
     const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+
+    // Trạng thái loading khi fetch đơn hàng
     const [loading, setLoading] = useState(true);
+
+    // Tab trạng thái hiện tại đang xem (ALL, PENDING, PROCESSING...)
     const [activeTab, setActiveTab] = useState<OrderStatus>("ALL");
+
+    // Từ khóa tìm kiếm
     const [searchQuery, setSearchQuery] = useState<string>("");
+
+    // === STATE QUẢN LÝ CHI TIẾT ĐƠN HÀNG ===
+
+    // ID của đơn hàng đang được mở rộng (xem chi tiết)
     const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
+
+    // Cache chi tiết đơn hàng đã lấy (key: orderId, value: Order)
     const [orderDetails, setOrderDetails] = useState<{ [key: number]: Order }>(
         {}
     );
+
+    // Trạng thái loading cho từng đơn hàng khi lấy chi tiết
     const [loadingDetails, setLoadingDetails] = useState<{
         [key: number]: boolean;
     }>({});
+
+    // === STATE QUẢN LÝ MODAL ===
+
+    // Hiển thị modal thông báo đơn hàng hết hạn thanh toán
     const [showExpiredModal, setShowExpiredModal] = useState(false);
-    // State quản lý modal hủy đơn hàng
+
+    // Hiển thị modal xác nhận hủy đơn hàng
     const [showCancelModal, setShowCancelModal] = useState(false);
+
+    // Đơn hàng đang chọn để hủy
     const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
+
+    // Trạng thái đang xử lý hủy đơn
     const [isCancelling, setIsCancelling] = useState(false);
 
+    /**
+     * Hàm lấy danh sách đơn hàng từ API
+     * Gọi API fetchOrdersByUser để lấy tất cả đơn hàng của user hiện tại
+     */
     const fetchOrders = useCallback(async () => {
         try {
             setLoading(true);
@@ -37,7 +75,19 @@ export const useOrders = () => {
         }
     }, []);
 
+    /**
+     * Hàm lọc và tìm kiếm đơn hàng
+     * Lọc theo:
+     * - Tab trạng thái (ALL, PENDING, PROCESSING...)
+     * - Từ khóa tìm kiếm (mã đơn, ngày đặt, trạng thái)
+     *
+     * Hỗ trợ tìm kiếm tiếng Việt có dấu/không dấu và các từ đồng nghĩa
+     */
     const filterOrders = useCallback(() => {
+        /**
+         * Chuẩn hóa chuỗi: viết thường, bỏ dấu tiếng Việt, trim
+         * VD: "Công Nghệ" -> "cong nghe"
+         */
         const normalize = (s: string) =>
             s
                 .toLowerCase()
@@ -45,6 +95,11 @@ export const useOrders = () => {
                 .replace(/[\u0300-\u036f]/g, "")
                 .trim();
 
+        /**
+         * Format ngày theo kiểu Việt Nam: dd/mm/yyyy
+         * @param dateStr - Chuỗi ngày ISO hoặc Date string
+         * @returns Chuỗi ngày định dạng dd/mm/yyyy
+         */
         const formatDateVi = (dateStr: string) => {
             const d = new Date(dateStr);
             if (isNaN(d.getTime())) return "";
@@ -54,6 +109,11 @@ export const useOrders = () => {
             return `${dd}/${mm}/${yyyy}`;
         };
 
+        /**
+         * Bảng từ đồng nghĩa cho các trạng thái đơn hàng
+         * Cho phép tìm kiếm theo nhiều cách gọi khác nhau
+         * VD: "chờ xác nhận", "pending", "đang chuẩn bị" đều khớp với PENDING
+         */
         const statusSynonyms: Record<Order["status"], string[]> = {
             PENDING: [
                 "cho xac nhan",
@@ -91,36 +151,60 @@ export const useOrders = () => {
             ),
         };
 
+        // Chuẩn hóa từ khóa tìm kiếm
         const q = normalize(searchQuery);
 
+        /**
+         * Kiểm tra xem đơn hàng có khớp với từ khóa tìm kiếm không
+         * Kiểm tra theo:
+         * 1. Mã đơn hàng (orderCode)
+         * 2. Ngày đặt hàng (hỗ trợ tìm một phần: dd/mm/yyyy, dd/mm, mm/yyyy)
+         * 3. Trạng thái (trực tiếp hoặc từ đồng nghĩa)
+         */
         const matchesQuery = (order: Order) => {
+            // Nếu không có từ khóa, hiển tất cả
             if (!q) return true;
 
-            // Check order code
+            // Kiểm tra khớp với mã đơn hàng
             const codeMatch = normalize(order.orderCode).includes(q);
 
-            // Check date fragment (supports dd/mm/yyyy, dd/mm, mm/yyyy)
+            // Kiểm tra khớp với ngày (hỗ trợ tìm một phần: dd/mm/yyyy, dd/mm, mm/yyyy)
             const orderDateFormatted = normalize(formatDateVi(order.orderDate));
             const dateMatch = orderDateFormatted.includes(q);
 
-            // Check status (synonyms or direct key)
+            // Kiểm tra khớp với trạng thái
             const statusKey = order.status;
+            // Khớp trực tiếp với key trạng thái (PENDING, PROCESSING...)
             const directKeyMatch = normalize(statusKey).includes(q);
+            // Khớp với từ đồng nghĩa
             const synonyms = statusSynonyms[statusKey] || [];
             const synonymMatch = synonyms.includes(q);
 
+            // Khớp nếu bất kỳ điều kiện nào đúng
             return codeMatch || dateMatch || directKeyMatch || synonymMatch;
         };
 
+        // Bước 1: Lọc theo tab trạng thái
         const byTab =
             activeTab === "ALL"
-                ? orders
-                : orders.filter((o) => o.status === activeTab);
+                ? orders // Nếu tab "Tất cả", lấy hết
+                : orders.filter((o) => o.status === activeTab); // Không thì lọc theo trạng thái
 
+        // Bước 2: Lọc theo từ khóa tìm kiếm
         const result = byTab.filter((o) => matchesQuery(o));
+
+        // Cập nhật danh sách đã lọc
         setFilteredOrders(result);
     }, [activeTab, orders, searchQuery]);
 
+    /**
+     * Hàm xử lý mở/đóng chi tiết đơn hàng
+     * @param orderId - ID của đơn hàng muốn xem chi tiết
+     *
+     * Logic:
+     * - Nếu đơn đang mở -> đóng lại
+     * - Nếu đơn đang đóng -> mở và fetch chi tiết (nếu chưa có trong cache)
+     */
     const handleToggleDetail = useCallback(
         async (orderId: number) => {
             if (expandedOrderId === orderId) {
