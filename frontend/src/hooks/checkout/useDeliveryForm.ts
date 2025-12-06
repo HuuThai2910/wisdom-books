@@ -1,13 +1,27 @@
 import { useState, useEffect } from "react";
 import { UseDeliveryFormReturn, DeliveryFormData, User } from "../../types";
 
+/**
+ * Custom hook quản lý form thông tin giao hàng
+ * Xử lý: auto-fill địa chỉ mặc định, quản lý checkbox "Sử dụng địa chỉ mặc định"
+ * @param defaultAddress - Thông tin địa chỉ mặc định của user (optional)
+ * @returns Dữ liệu form và các hàm xử lý
+ */
 export const useDeliveryForm = (
     defaultAddress?: User
 ): UseDeliveryFormReturn => {
-    // Auto-check if defaultAddress exists
+    /**
+     * State quản lý checkbox "Sử dụng địa chỉ mặc định"
+     * Tự động check nếu defaultAddress tồn tại
+     */
     const [checkDefault, setCheckDefault] = useState<boolean>(!!defaultAddress);
 
-    // Auto-fill data if defaultAddress exists
+    /**
+     * State lưu dữ liệu form giao hàng
+     * Khởi tạo với lazy initialization:
+     * - Nếu có defaultAddress: tự động điền thông tin từ defaultAddress
+     * - Nếu không: khởi tạo form trống với province mặc định là "Thành phố Hồ Chí Minh"
+     */
     const [formData, setFormData] = useState<DeliveryFormData>(() => {
         if (defaultAddress) {
             const province =
@@ -37,7 +51,11 @@ export const useDeliveryForm = (
         };
     });
 
-    // Update form when defaultAddress changes (async load)
+    /**
+     * Effect: Cập nhật form khi defaultAddress thay đổi (async load)
+     * Khi defaultAddress được fetch từ API về, tự động điền vào form
+     * Chỉ chạy khi defaultAddress có giá trị và checkDefault đang false
+     */
     useEffect(() => {
         if (defaultAddress && !checkDefault) {
             setCheckDefault(true);
@@ -58,11 +76,18 @@ export const useDeliveryForm = (
         }
     }, [defaultAddress]);
 
+    /**
+     * Hàm xử lý khi user toggle checkbox "Sử dụng địa chỉ mặc định"
+     * @param checked - Trạng thái mới của checkbox (true/false)
+     *
+     * - Nếu checked = true: điền thông tin từ defaultAddress vào form
+     * - Nếu checked = false: reset form về trạng thái trống
+     */
     const handleCheckDefaultChange = (checked: boolean) => {
         setCheckDefault(checked);
 
         if (checked && defaultAddress) {
-            // Lấy dữ liệu từ cấu trúc defaultAddress.address
+            // Nhánh checked = true: Điền thông tin từ defaultAddress
             const province =
                 defaultAddress.address?.province || "Thành phố Hồ Chí Minh";
             const ward = defaultAddress.address?.ward || "";
@@ -78,7 +103,7 @@ export const useDeliveryForm = (
                 orderNote: "",
             });
         } else {
-            // Reset form khi bỏ check
+            // Nhánh checked = false: Reset form về trạng thái trống
             setFormData({
                 fullName: "",
                 phone: "",
@@ -91,6 +116,11 @@ export const useDeliveryForm = (
         }
     };
 
+    /**
+     * Hàm cập nhật dữ liệu form
+     * @param newFormData - Dữ liệu form mới
+     * Được gọi từ component DeliveryInformation khi user nhập liệu
+     */
     const handleFormChange = (newFormData: DeliveryFormData) => {
         setFormData(newFormData);
     };
