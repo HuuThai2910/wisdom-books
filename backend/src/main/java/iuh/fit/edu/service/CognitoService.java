@@ -14,4 +14,9 @@ public interface CognitoService {
     void resetPassword(ResetPasswordRequest request);
     GetUserResult getUserInfo(String accessToken);
     void disableUser(String fullName);
+    
+    // Quản lý Cognito Groups (Roles)
+    void updateUserRole(String username, String newRole);
+    void addUserToGroup(String username, String groupName);
+    void removeUserFromGroup(String username, String groupName);
 }

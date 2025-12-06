@@ -950,13 +950,18 @@ export default function Header() {
                                              currentUser.role !== '3' && 
                                              currentUser.role !== 'CUSTOMER' && (
                                                 <Link
-                                                    to={
-                                                        currentUser.role === '1' || currentUser.role === 'ADMIN'
-                                                            ? '/admin/dashboard'
-                                                            : currentUser.role === '2' || currentUser.role === 'STAFF'
-                                                            ? '/staff/dashboard'
-                                                            : '/warehouse/dashboard'
-                                                    }
+                                                    to={(() => {
+                                                        const role = currentUser.role?.toString().toUpperCase();
+                                                        console.log('[Header] Navigating with role:', currentUser.role, 'normalized:', role);
+                                                        
+                                                        if (role === '1' || role === 'ADMIN') {
+                                                            return '/admin/dashboard';
+                                                        } else if (role === '2' || role === 'STAFF') {
+                                                            return '/staff/dashboard';
+                                                        } else {
+                                                            return '/warehouse/dashboard';
+                                                        }
+                                                    })()}
                                                     className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition group"
                                                 >
                                                     <FaCog className="text-lg text-indigo-600 group-hover:scale-110 transition" />

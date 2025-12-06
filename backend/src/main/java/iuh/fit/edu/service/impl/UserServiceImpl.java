@@ -86,10 +86,16 @@ public class UserServiceImpl implements UserService {
     public void updateUser(Long id, UpdateUserRequest request,String email) {
         if (request != null) {
             User user = userRepository.findById(id).orElse(null);
-            Role role=roleRepository.findById(Long.valueOf(request.getRole())).orElse(null);
             assert user != null;
-            user.setRole(role);
+            
+            // Lưu role cũ để so sánh
+            Role oldRole = user.getRole();
+            
+            // Cập nhật role mới
+            Role newRole = roleRepository.findById(Long.valueOf(request.getRole())).orElse(null);
+            user.setRole(newRole);
             user.setUpdatedBy(email);
+            
             // Map other fields first
             User updatedUser = userMapper.toUpdateUser(request, user);
             updatedUser.setAvatar(request.getAvatarURL());
@@ -100,6 +106,18 @@ public class UserServiceImpl implements UserService {
             }
             
             userRepository.save(updatedUser);
+            
+            // Cập nhật role trên AWS Cognito nếu role thay đổi
+            if (newRole != null && !newRole.equals(oldRole)) {
+                try {
+                    String cognitoGroupName = newRole.getName().name(); // ADMIN, STAFF, CUSTOMER, WARE_HOUSE_STAFF
+                    cognitoService.updateUserRole(user.getFullName(), cognitoGroupName);
+                    System.out.println("[UserService] Updated user " + user.getFullName() + " role to " + cognitoGroupName + " in Cognito");
+                } catch (Exception e) {
+                    System.err.println("[UserService] Failed to update Cognito role: " + e.getMessage());
+                    // Không throw exception để không làm gián đoạn việc update database
+                }
+            }
         }
     }
 

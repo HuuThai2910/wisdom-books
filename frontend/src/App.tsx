@@ -34,6 +34,7 @@ import SettingsPage from "./pages/client/SettingsPage";
 import RoleBasedRoute from "./components/common/RoleBasedRoute";
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import WarehouseDashboard from "./pages/warehouse/WarehouseDashboard";
+import Unauthorized from "./pages/Unauthorized";
 
 function App() {
     const location = useLocation();
@@ -94,6 +95,7 @@ function App() {
                         }
                     />
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/unauthorized" element={<Unauthorized />} />
                     <Route
                         path="/books"
                         element={
@@ -238,8 +240,9 @@ function App() {
                         </RoleBasedRoute>
                     } />
                     <Route path="/admin/dashboard" element={
-                        <RoleBasedRoute allowedRoles={['1', 'ADMIN']}>
-                            <Dashboard />
+                        <RoleBasedRoute allowedRoles={['1', 'ADMIN', 1, 'admin']}>
+                            {/* <Dashboard /> */}
+                            <ManageUserPage />
                         </RoleBasedRoute>
                     } />
                     <Route path="/admin/profile" element={
@@ -280,7 +283,7 @@ function App() {
 
                     {/* Staff Routes - Only for STAFF role (2) */}
                     <Route path="/staff/dashboard" element={
-                        <RoleBasedRoute allowedRoles={['2', 'STAFF']}>
+                        <RoleBasedRoute allowedRoles={['2', 'STAFF', 2, 'staff']}>
                             <StaffDashboard />
                         </RoleBasedRoute>
                     } />
@@ -297,7 +300,7 @@ function App() {
 
                     {/* Warehouse Routes - Only for WARE_HOUSE_STAFF role (4) */}
                     <Route path="/warehouse/dashboard" element={
-                        <RoleBasedRoute allowedRoles={['4', 'WARE_HOUSE_STAFF']}>
+                        <RoleBasedRoute allowedRoles={['4', 'WARE_HOUSE_STAFF', 4, 'ware_house_staff']}>
                             <WarehouseDashboard />
                         </RoleBasedRoute>
                     } />

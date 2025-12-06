@@ -126,6 +126,53 @@ public class CognitoServiceImpl implements CognitoService {
         cognitoIdentityProvider.adminDisableUser(request);
     }
 
+    @Override
+    public void updateUserRole(String username, String newRole) {
+        // Xóa user khỏi tất cả các group hiện tại
+        String[] allRoles = {"ADMIN", "STAFF", "CUSTOMER", "WARE_HOUSE_STAFF"};
+        for (String role : allRoles) {
+            try {
+                removeUserFromGroup(username, role);
+            } catch (Exception e) {
+                // Ignore nếu user không có trong group này
+            }
+        }
+        
+        // Thêm user vào group mới
+        addUserToGroup(username, newRole);
+    }
+
+    @Override
+    public void addUserToGroup(String username, String groupName) {
+        AdminAddUserToGroupRequest request = new AdminAddUserToGroupRequest()
+                .withUserPoolId(userPoolId)
+                .withUsername(username)
+                .withGroupName(groupName);
+        
+        try {
+            cognitoIdentityProvider.adminAddUserToGroup(request);
+            System.out.println("[Cognito] Added user " + username + " to group " + groupName);
+        } catch (Exception e) {
+            System.err.println("[Cognito] Error adding user to group: " + e.getMessage());
+            throw new RuntimeException("Failed to add user to group: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void removeUserFromGroup(String username, String groupName) {
+        AdminRemoveUserFromGroupRequest request = new AdminRemoveUserFromGroupRequest()
+                .withUserPoolId(userPoolId)
+                .withUsername(username)
+                .withGroupName(groupName);
+        
+        try {
+            cognitoIdentityProvider.adminRemoveUserFromGroup(request);
+            System.out.println("[Cognito] Removed user " + username + " from group " + groupName);
+        } catch (Exception e) {
+            // Không cần throw exception nếu user không có trong group
+            System.out.println("[Cognito] User " + username + " not in group " + groupName);
+        }
+    }
 
     public String calculateSecretHash(String username, String clientId, String clientSecret) {
         try {

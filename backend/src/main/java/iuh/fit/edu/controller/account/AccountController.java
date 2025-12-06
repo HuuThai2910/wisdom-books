@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,12 +33,18 @@ public class AccountController {
 
         LoginResponse cognitoResponse = this.accountService.loginUser(request);
         String token=cognitoResponse.getToken();
-        int maxAge = 3600;
-        String setCookie = String.format("id_token=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=Lax",
+        int maxAge = 3600 * 24; // 24 giờ
+        
+        // Bỏ HttpOnly để frontend có thể debug được cookie
+        // SameSite=Lax cho localhost development
+        String setCookie = String.format("id_token=%s; Path=/; Max-Age=%d; SameSite=Lax",
                 token, maxAge);
         response.addHeader("Set-Cookie", setCookie);
+        
         UserInfoResponse userInfoResponse=accountService.getCurrentUserInfo(token);
         email= userInfoResponse.getEmail();
+        
+        System.out.println("[Login] Set cookie id_token for user: " + userInfoResponse.getEmail());
         return ResponseEntity.ok(cognitoResponse);
     }
 
@@ -86,5 +94,13 @@ public class AccountController {
         LoginResponse response = accountService.refreshAccessToken(refreshToken);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/api/test/roles")
+    public String testRoles(Authentication authentication) {
+        authentication.getAuthorities()
+                .forEach(a -> System.out.println(a.getAuthority()));
+        return "Check console logs";
+    }
+
 
 }
