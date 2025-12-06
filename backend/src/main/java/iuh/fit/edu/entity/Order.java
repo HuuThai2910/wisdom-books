@@ -42,7 +42,11 @@ public class Order {
     private String note;
     private double totalPrice;
     private String txnRef;
+    
+    @Column(columnDefinition = "DATETIME")
     private OffsetDateTime orderDate;
+    
+    @Column(columnDefinition = "DATETIME")
     private OffsetDateTime expiredAt;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)

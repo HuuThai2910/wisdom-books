@@ -1,6 +1,7 @@
-import React, { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, ChevronDown, Home, User, LogOut } from "lucide-react";
+import { getS3Url } from "../../config/s3";
 
 interface AdminHeaderProps {
   onMobileMenuToggle: () => void;
@@ -8,7 +9,24 @@ interface AdminHeaderProps {
 
 export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [userName, setUserName] = useState("Admin");
+  const [userAvatar, setUserAvatar] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setUserName(user.fullName || "Admin");
+        const avatarUrl = getS3Url(user.avatar);
+        setUserAvatar(avatarUrl || "");
+      } catch (error) {
+        setUserName("Admin");
+        setUserAvatar("");
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -45,11 +63,19 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
           >
             <div className="text-right hidden sm:block">
               <p className="text-sm text-gray-500">Hi,</p>
-              <p className="text-sm font-semibold text-gray-700">Admin</p>
+              <p className="text-sm font-semibold text-gray-700">{userName}</p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
-              A
-            </div>
+            {userAvatar ? (
+              <img
+                src={userAvatar}
+                alt={userName}
+                className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-lg"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                {userName.charAt(0).toUpperCase()}
+              </div>
+            )}
             <ChevronDown
               className={`w-4 h-4 text-gray-500 transition-transform ${
                 dropdownOpen ? "rotate-180" : ""

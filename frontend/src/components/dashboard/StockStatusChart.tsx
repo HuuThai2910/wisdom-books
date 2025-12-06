@@ -1,88 +1,123 @@
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import { DashboardStats } from "../../types";
+import { Package } from "lucide-react";
+import { DashboardOverview } from "../../types";
 
 interface StockStatusChartProps {
-  stats: DashboardStats;
+  overview: DashboardOverview;
 }
 
-export default function StockStatusChart({ stats }: StockStatusChartProps) {
-  // Đảm bảo các giá trị nhỏ vẫn hiển thị bằng cách thêm minimum value
+export default function StockStatusChart({ overview }: StockStatusChartProps) {
   const availableBooks = Math.max(
-    (stats?.totalBooks ?? 0) -
-      (stats?.lowStockBooks ?? 0) -
-      (stats?.outOfStockBooks ?? 0),
+    (overview?.totalBooks ?? 0) -
+      (overview?.lowStockBooks ?? 0) -
+      (overview?.outOfStockBooks ?? 0),
     0
   );
-  const lowStockBooks = stats?.lowStockBooks ?? 0;
-  const outOfStockBooks = stats?.outOfStockBooks ?? 0;
+  const lowStockBooks = overview?.lowStockBooks ?? 0;
+  const outOfStockBooks = overview?.outOfStockBooks ?? 0;
+  const totalBooks = overview?.totalBooks ?? 1;
 
-  const stockStatusData = [
-    {
-      name: "Còn hàng",
-      value: availableBooks,
-      displayValue: availableBooks,
-      color: "#3B82F6",
-    },
-    {
-      name: "Sắp hết",
-      value: lowStockBooks > 0 ? Math.max(lowStockBooks, 1) : 0,
-      displayValue: lowStockBooks,
-      color: "#F59E0B",
-    },
-    {
-      name: "Hết hàng",
-      value: outOfStockBooks > 0 ? Math.max(outOfStockBooks, 1) : 0,
-      displayValue: outOfStockBooks,
-      color: "#EF4444",
-    },
-  ].filter((item) => item.value > 0);
+  const inStockPercentage = ((availableBooks / totalBooks) * 100).toFixed(1);
+  const lowStockPercentage = ((lowStockBooks / totalBooks) * 100).toFixed(1);
+  const outOfStockPercentage = ((outOfStockBooks / totalBooks) * 100).toFixed(
+    1
+  );
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-lg font-semibold mb-4">Tỷ lệ tồn kho</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
-          <Pie
-            data={stockStatusData}
-            cx="50%"
-            cy="50%"
-            innerRadius={70}
-            outerRadius={100}
-            paddingAngle={2}
-            dataKey="value"
-          >
-            {stockStatusData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          <Tooltip
-            formatter={(_value: any, name: any, props: any) => [
-              props.payload.displayValue,
-              name,
-            ]}
-          />
-          <Legend />
-        </PieChart>
-      </ResponsiveContainer>
-      <div className="mt-6 flex justify-center gap-6 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-blue-500 rounded-full shrink-0"></div>
-          <span className="whitespace-nowrap">Còn hàng: {availableBooks}</span>
+    <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2.5 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl">
+          <Package className="w-5 h-5 text-white" />
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-amber-500 rounded-full shrink-0"></div>
-          <span className="whitespace-nowrap">Sắp hết: {lowStockBooks}</span>
+        <div>
+          <h3 className="text-lg font-bold text-gray-900">Trạng Thái Kho</h3>
+          <p className="text-sm text-gray-500">Phân bổ tồn kho</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-red-500 rounded-full shrink-0"></div>
-          <span className="whitespace-nowrap">Hết hàng: {outOfStockBooks}</span>
+      </div>
+
+      <div className="space-y-5">
+        {/* In Stock */}
+        <div className="group">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+              <span className="text-sm font-medium text-gray-700">
+                Còn hàng
+              </span>
+            </div>
+            <div className="text-right">
+              <span className="text-sm font-bold text-gray-900">
+                {availableBooks}
+              </span>
+              <span className="text-xs text-gray-500 ml-1">
+                ({inStockPercentage}%)
+              </span>
+            </div>
+          </div>
+          <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full transition-all duration-500 group-hover:from-emerald-600 group-hover:to-emerald-700"
+              style={{ width: `${inStockPercentage}%` }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Low Stock */}
+        <div className="group">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+              <span className="text-sm font-medium text-gray-700">
+                Sắp hết (≤10)
+              </span>
+            </div>
+            <div className="text-right">
+              <span className="text-sm font-bold text-gray-900">
+                {lowStockBooks}
+              </span>
+              <span className="text-xs text-gray-500 ml-1">
+                ({lowStockPercentage}%)
+              </span>
+            </div>
+          </div>
+          <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-orange-500 to-orange-600 rounded-full transition-all duration-500 group-hover:from-orange-600 group-hover:to-orange-700"
+              style={{ width: `${lowStockPercentage}%` }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Out of Stock */}
+        <div className="group">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              <span className="text-sm font-medium text-gray-700">
+                Hết hàng
+              </span>
+            </div>
+            <div className="text-right">
+              <span className="text-sm font-bold text-gray-900">
+                {outOfStockBooks}
+              </span>
+              <span className="text-xs text-gray-500 ml-1">
+                ({outOfStockPercentage}%)
+              </span>
+            </div>
+          </div>
+          <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full transition-all duration-500 group-hover:from-red-600 group-hover:to-red-700"
+              style={{ width: `${outOfStockPercentage}%` }}
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 pt-5 border-t border-gray-100">
+        <div className="flex items-center justify-between text-sm">
+          <span className="font-medium text-gray-600">Tổng số sách</span>
+          <span className="font-bold text-gray-900">{totalBooks} cuốn</span>
         </div>
       </div>
     </div>
