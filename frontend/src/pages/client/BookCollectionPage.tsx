@@ -1,8 +1,6 @@
 import { motion } from "framer-motion";
 import { FaBook, FaStar, FaFire, FaBookOpen, FaGlobe } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import Header from "../../components/Header/Header";
-import Footer from "../../components/Footer/Footer";
 
 // IMPORT DATA
 import {
@@ -26,8 +24,6 @@ export default function BookCollectionPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Header />
-
             {/* HEADER với floating animations */}
             <motion.div
                 initial={{ opacity: 0 }}
@@ -645,7 +641,6 @@ export default function BookCollectionPage() {
                     </Link>
                 </motion.div>
             </div>
-            <Footer />
         </div>
     );
 }

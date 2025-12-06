@@ -181,30 +181,53 @@ const ViewUpsertBook = () => {
             console.log("Supplier:", values.supplier);
             console.log("Description state:", description);
             console.log("ShortDes from form:", values.shortDes);
+            console.log("FileList:", fileList);
+            console.log("Existing images:", existingImages);
+            console.log("New files:", newFiles);
+            console.log("New file objects:", newFileObjects);
 
             // Xử lý ảnh
             if (!dataUpdate?.id) {
-                // Tạo mới: validate frontend và gửi mảng rỗng
+                // Tạo mới: validate frontend và gửi placeholder
                 // Backend sẽ nhận lỗi validation nếu mảng rỗng
                 bookData.image = fileList.length > 0 ? ["placeholder.jpg"] : [];
             } else {
-                // Update: chỉ gửi ảnh cũ (không gửi placeholder cho ảnh mới)
-                bookData.image = existingImages;
+                // Update:
+                // - Nếu có ảnh cũ: gửi ảnh cũ
+                // - Nếu không có ảnh cũ nhưng có ảnh mới: gửi placeholder
+                // - Ảnh mới sẽ được upload sau và thay thế placeholder
+                if (existingImages.length > 0) {
+                    bookData.image = existingImages;
+                } else if (newFileObjects.length > 0) {
+                    // Gửi placeholder để pass validation, sẽ được thay thế bằng ảnh thật
+                    bookData.image = ["placeholder.jpg"];
+                } else {
+                    // Không có ảnh nào
+                    bookData.image = [];
+                }
             }
 
             if (dataUpdate?.id) {
                 const res = await bookApi.updateBook(dataUpdate.id, bookData);
 
                 if (res && res.success && res.data) {
+                    console.log(
+                        "Book updated successfully, now uploading new images..."
+                    );
+
                     // Upload new images to S3 after update
                     if (newFileObjects.length > 0) {
                         try {
-                            await bookApi.uploadBookImages(
+                            console.log(
+                                `Uploading ${newFileObjects.length} new images to S3...`
+                            );
+                            const uploadResult = await bookApi.uploadBookImages(
                                 dataUpdate.id,
                                 newFileObjects
                             );
+                            console.log("Upload result:", uploadResult);
                             console.log(
-                                `Uploaded ${newFileObjects.length} images to S3`
+                                `Successfully uploaded ${newFileObjects.length} images to S3`
                             );
                         } catch (uploadError) {
                             console.error("Upload error:", uploadError);
@@ -213,7 +236,10 @@ const ViewUpsertBook = () => {
                                     "Cập nhật sách thành công nhưng upload ảnh thất bại",
                                 description: "Vui lòng thử upload lại sau.",
                             });
+                            return; // Dừng lại, không navigate
                         }
+                    } else {
+                        console.log("No new images to upload");
                     }
                     message.success("Cập nhật sách thành công!");
                     navigate("/admin/books");

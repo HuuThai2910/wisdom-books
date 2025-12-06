@@ -17,6 +17,7 @@ import bookApi from "../../api/bookApi";
 import { Book } from "../../types";
 import { useBooks } from "../../contexts/BookContext";
 import BookCard from "../../components/common/BookCard";
+import Breadcrumb from "../../components/common/Breadcrumb";
 import toast from "react-hot-toast";
 import { useAppDispatch } from "../../app/store";
 import { addItem } from "../../features/cart/cartSlice";
@@ -279,6 +280,12 @@ export default function BookDetailPage() {
     return (
         <div className="min-h-screen wisbook-gradient-overlay pt-15 px-35">
             <div className="container mx-auto px-6 py-8">
+                <Breadcrumb
+                    items={[
+                        { label: "Sản phẩm", path: "/books" },
+                        { label: book?.title || "Chi tiết sách" },
+                    ]}
+                />
                 <div className="grid lg:grid-cols-12 gap-8 mb-16">
                     {/* Image Gallery */}
                     <motion.div
@@ -711,7 +718,8 @@ export default function BookDetailPage() {
                                     </span>
                                     <p className="text-sm text-gray-700 leading-relaxed">
                                         Tặng kèm Bookmark (đánh dấu trang) cho
-                                        các sách Ẩm thực, Kinh doanh, Thiếu nhi, Du lịch
+                                        các sách Ẩm thực, Kinh doanh, Thiếu nhi,
+                                        Du lịch
                                     </p>
                                 </div>
 
@@ -723,7 +731,8 @@ export default function BookDetailPage() {
                                         <span className="font-semibold text-blue-600">
                                             FREESHIP
                                         </span>{" "}
-                                        cho tất cả các đơn hàng khi mua tại Wisdom Book
+                                        cho tất cả các đơn hàng khi mua tại
+                                        Wisdom Book
                                     </p>
                                 </div>
 
@@ -732,11 +741,12 @@ export default function BookDetailPage() {
                                         🎁
                                     </span>
                                     <p className="text-sm text-gray-700 leading-relaxed">
-                                        Tặng kèm {" "}
+                                        Tặng kèm{" "}
                                         <span className="font-semibold text-blue-600">
                                             VOUCHER lên đến 20K
                                         </span>{" "}
-                                        cho tất cả các khách hàng tại Wisdom Book ngãu nhiên
+                                        cho tất cả các khách hàng tại Wisdom
+                                        Book ngãu nhiên
                                     </p>
                                 </div>
                             </div>

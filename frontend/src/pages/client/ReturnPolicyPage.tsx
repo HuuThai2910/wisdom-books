@@ -1,8 +1,6 @@
 import { motion } from "framer-motion";
 import { FaSyncAlt, FaCheckCircle, FaUndo } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import Header from "../../components/Header/Header";
-import Footer from "../../components/Footer/Footer";
 
 // 📌 IMPORT DỮ LIỆU TỪ FILE RIÊNG
 import {
@@ -37,8 +35,6 @@ export default function ReturnPolicyPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Header />
-
             {/* Hero Section với floating books */}
             <motion.div
                 initial={{ opacity: 0 }}
@@ -404,8 +400,6 @@ export default function ReturnPolicyPage() {
                     </motion.div>
                 </div>
             </div>
-
-            <Footer />
         </div>
     );
 }

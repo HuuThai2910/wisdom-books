@@ -131,14 +131,7 @@ function App() {
                             </ClientLayout>
                         }
                     />
-                    <Route
-                        path="/payment-success"
-                        element={
-                            <ClientLayout>
-                                <PaymentSuccessPage />
-                            </ClientLayout>
-                        }
-                    />
+
                     <Route
                         path="/about"
                         element={
@@ -147,6 +140,15 @@ function App() {
                             </ClientLayout>
                         }
                     />
+                    <Route
+                        path="/payment-success"
+                        element={
+                            <ClientLayout>
+                                <PaymentSuccessPage />
+                            </ClientLayout>
+                        }
+                    />
+
                     <Route
                         path="/shipping"
                         element={

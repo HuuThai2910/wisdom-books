@@ -4,6 +4,7 @@ import { FaChevronLeft, FaChevronRight, FaFilter } from "react-icons/fa";
 import { useSearchParams } from "react-router-dom";
 import FilterModal, { FilterOptions } from "../../components/Books/FilterModal";
 import BookCard from "../../components/common/BookCard";
+import Breadcrumb from "../../components/common/Breadcrumb";
 import bookApi from "../../api/bookApi";
 import { Book } from "../../types";
 
@@ -317,6 +318,7 @@ export default function BooksPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 pt-15 px-20">
             <div className="container mx-auto px-6 py-8">
+                <Breadcrumb items={[{ label: "Sản phẩm" }]} />
                 {/* Page Header */}
 
                 {/* Main Content - Flex Layout */}
@@ -373,7 +375,7 @@ export default function BooksPage() {
                             duration: 0.4,
                             ease: [0.4, 0, 0.2, 1],
                         }}
-                        className="flex-1 min-w-0"
+                        className="flex-1 min-w-0 mt-3"
                     >
                         {/* Books Grid */}
                         {loading ? (
