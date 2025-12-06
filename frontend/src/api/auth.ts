@@ -78,3 +78,12 @@ export const logout = (accessToken: string) => {
         },
     });
 }
+
+interface RefreshTokenParams {
+    refreshToken: string;
+    username: string;
+}
+
+export const refreshAccessToken = (params: RefreshTokenParams) => {
+    return axiosClient.post<ApiResponse<{ token: string; expiresIn: number }>>("/auth/refresh-token", params);
+}

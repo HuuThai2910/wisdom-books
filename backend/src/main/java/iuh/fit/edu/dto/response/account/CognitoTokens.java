@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class LoginResponse {
-    private String token; // access token
+public class CognitoTokens {
+    private String accessToken;
+    private String idToken;
     private String refreshToken;
-    private boolean success;
-    private long expiresIn; // seconds until expiration
+    private int expiresIn; // seconds
 }

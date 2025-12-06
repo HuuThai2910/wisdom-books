@@ -4,6 +4,7 @@ import { Menu, ChevronDown, Home, User, LogOut } from "lucide-react";
 import { logout as logoutApi } from "../../api/auth";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
+import { tokenRefreshManager } from "../../util/tokenRefreshManager";
 
 interface AdminHeaderProps {
   onMobileMenuToggle: () => void;
@@ -114,6 +115,9 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
                   className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                   onClick={async () => {
                     try {
+                      // Stop token monitoring
+                      tokenRefreshManager.stopMonitoring();
+                      
                       // Lấy token từ cookie
                       const token = Cookies.get('id_token');
                       
@@ -125,6 +129,8 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
                       // Xóa localStorage
                       localStorage.removeItem('user');
                       localStorage.removeItem('token');
+                      localStorage.removeItem('refreshToken');
+                      localStorage.removeItem('username');
                       
                       // Xóa cookie
                       Cookies.remove('id_token', { path: '/' });
@@ -142,8 +148,11 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
                     } catch (error) {
                       console.error('Logout error:', error);
                       // Vẫn xóa local data dù API fail
+                      tokenRefreshManager.stopMonitoring();
                       localStorage.removeItem('user');
                       localStorage.removeItem('token');
+                      localStorage.removeItem('refreshToken');
+                      localStorage.removeItem('username');
                       Cookies.remove('id_token', { path: '/' });
                       toast.error('Đã có lỗi xảy ra, nhưng bạn đã được đăng xuất');
                       navigate('/login');

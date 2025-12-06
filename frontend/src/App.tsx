@@ -35,10 +35,29 @@ import RoleBasedRoute from "./components/common/RoleBasedRoute";
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import WarehouseDashboard from "./pages/warehouse/WarehouseDashboard";
 import Unauthorized from "./pages/Unauthorized";
+import { useEffect } from "react";
+import { tokenRefreshManager } from "./util/tokenRefreshManager";
+import Cookies from "js-cookie";
 
 function App() {
     const location = useLocation();
     const isAdminRoute = location.pathname.startsWith("/admin");
+    
+    // Start token monitoring on app load if user is logged in
+    useEffect(() => {
+        const token = Cookies.get('id_token');
+        const refreshToken = localStorage.getItem('refreshToken');
+        
+        if (token && refreshToken) {
+            console.log('[App] User logged in, starting token monitoring');
+            tokenRefreshManager.startMonitoring();
+        }
+        
+        // Cleanup on unmount
+        return () => {
+            tokenRefreshManager.stopMonitoring();
+        };
+    }, []);
 
     return (
         <>

@@ -3,6 +3,7 @@ package iuh.fit.edu.controller.account;
 import iuh.fit.edu.dto.request.account.*;
 import iuh.fit.edu.dto.response.account.*;
 import iuh.fit.edu.service.AccountService;
+import iuh.fit.edu.service.impl.AccountServiceImpl;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -13,6 +14,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -89,10 +92,29 @@ public class AccountController {
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<LoginResponse> refreshToken(@RequestHeader("Authorization") String token){
-        String refreshToken = token.replace("Bearer ", "");
-        LoginResponse response = accountService.refreshAccessToken(refreshToken);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<LoginResponse> refreshToken(
+            @RequestBody Map<String, String> request,
+            HttpServletResponse response) {
+        String refreshToken = request.get("refreshToken");
+        String username = request.get("username");
+        
+        if (refreshToken == null || username == null) {
+            throw new RuntimeException("refreshToken and username are required");
+        }
+        
+        LoginResponse loginResponse = ((AccountServiceImpl) accountService).refreshAccessToken(refreshToken, username);
+        
+        // Set cookie với new access token
+        Cookie cookie = new Cookie("id_token", loginResponse.getToken());
+        cookie.setPath("/");
+        cookie.setMaxAge(300); // 5 phút
+        cookie.setHttpOnly(false); // Để debug, production nên = true
+        cookie.setAttribute("SameSite", "Lax");
+        response.addCookie(cookie);
+        
+        System.out.println("[RefreshToken] New access token set in cookie for user: " + username);
+        
+        return ResponseEntity.ok(loginResponse);
     }
 
     @GetMapping("/api/test/roles")

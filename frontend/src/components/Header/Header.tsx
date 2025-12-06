@@ -24,6 +24,7 @@ import { S3_CONFIG } from "./../../config/s3";
 import { logout as logoutApi } from "../../api/auth";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
+import { tokenRefreshManager } from "../../util/tokenRefreshManager";
 export default function Header() {
     const [opacity, setOpacity] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -996,6 +997,9 @@ export default function Header() {
                                             <button
                                                 onClick={async () => {
                                                     try {
+                                                        // Stop token monitoring
+                                                        tokenRefreshManager.stopMonitoring();
+                                                        
                                                         // Lấy token từ cookie
                                                         const token = Cookies.get('id_token');
                                                         
@@ -1007,6 +1011,8 @@ export default function Header() {
                                                         // Xóa localStorage
                                                         localStorage.removeItem("user");
                                                         localStorage.removeItem("token");
+                                                        localStorage.removeItem("refreshToken");
+                                                        localStorage.removeItem("username");
                                                         
                                                         // Xóa cookie
                                                         Cookies.remove('id_token', { path: '/' });
@@ -1024,8 +1030,11 @@ export default function Header() {
                                                     } catch (error) {
                                                         console.error('Logout error:', error);
                                                         // Vẫn xóa local data dù API fail
+                                                        tokenRefreshManager.stopMonitoring();
                                                         localStorage.removeItem("user");
                                                         localStorage.removeItem("token");
+                                                        localStorage.removeItem("refreshToken");
+                                                        localStorage.removeItem("username");
                                                         Cookies.remove('id_token', { path: '/' });
                                                         toast.error('Đã có lỗi xảy ra, nhưng bạn đã được đăng xuất');
                                                         navigate("/");

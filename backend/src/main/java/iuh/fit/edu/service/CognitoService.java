@@ -5,15 +5,19 @@ import iuh.fit.edu.dto.request.account.ForgotPasswordRequest;
 import iuh.fit.edu.dto.request.account.LoginRequest;
 import iuh.fit.edu.dto.request.account.RegisterRequest;
 import iuh.fit.edu.dto.request.account.ResetPasswordRequest;
+import iuh.fit.edu.dto.response.account.CognitoTokens;
 
 public interface CognitoService {
     String registerUser(RegisterRequest request);
-    String loginUser(LoginRequest request);
+    CognitoTokens loginUser(LoginRequest request);
     void logout(String accessToken);
     void forgotPassword(ForgotPasswordRequest request);
     void resetPassword(ResetPasswordRequest request);
     GetUserResult getUserInfo(String accessToken);
     void disableUser(String fullName);
+    
+    // Refresh token
+    String refreshToken(String refreshToken, String username);
     
     // Quản lý Cognito Groups (Roles)
     void updateUserRole(String username, String newRole);

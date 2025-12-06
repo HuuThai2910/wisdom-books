@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchCurrentUser, loginUser } from '../../features/auth/authSlice';
 import { User } from '@/types';
 import toast from 'react-hot-toast';
+import { tokenRefreshManager } from '../../util/tokenRefreshManager';
 
 interface SignInFormProps {
   onForgotPassword: () => void;
@@ -85,6 +86,16 @@ const SignInForm = ({ onForgotPassword, onSuccess }: SignInFormProps) => {
     dispatch(loginUser({ loginForm }))
       .unwrap()
       .then((response) => {
+        // Lưu refreshToken và username để auto-refresh
+        if (response.data.refreshToken) {
+          localStorage.setItem('refreshToken', response.data.refreshToken);
+          localStorage.setItem('username', username.trim());
+          console.log('[SignInForm] Saved refresh token and username for auto-refresh');
+        }
+        
+        // Bắt đầu monitoring token expiry
+        tokenRefreshManager.startMonitoring();
+        
         dispatch(fetchCurrentUser({ accessToken: response.data.token }))
           .unwrap()
           .then((user) => {
