@@ -15,7 +15,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -112,7 +112,7 @@ public class EntryFormServiceImpl implements EntryFormService {
         entryForm.setTotalPrice(dto.getBooks().stream()
                 .mapToDouble(BookItemDTO::getAmount)
                 .sum());
-        entryForm.setCreatedAt(LocalDateTime.now());
+        entryForm.setCreatedAt(OffsetDateTime.now());
         entryForm.setUser(user);
         
         // TODO: Set current user - you need to implement SecurityUtil or get user from context

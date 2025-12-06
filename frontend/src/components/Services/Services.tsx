@@ -15,7 +15,7 @@ export default function Services() {
     const duplicatedItems = [...serviceItems, ...serviceItems];
 
     return (
-        <section className="bg-white py-10 relative overflow-hidden">
+        <section className="bg-white py-8 relative overflow-hidden">
             <style>{`
     @keyframes scroll-services {
         0% {

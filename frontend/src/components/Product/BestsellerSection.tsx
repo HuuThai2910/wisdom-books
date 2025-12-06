@@ -27,11 +27,7 @@ interface AuthorStats {
 
 export default function BestsellerSection({ books }: BestsellerSectionProps) {
     const navigate = useNavigate();
-
-    // Tính toán top 8 tác giả có nhiều sách nhất
     const topAuthors = useMemo(() => {
-        console.log("=== BestsellerSection - Processing Authors ===");
-        console.log("Total books received:", books.length);
 
         const authorMap = new Map<string, AuthorStats>();
 
@@ -52,35 +48,24 @@ export default function BestsellerSection({ books }: BestsellerSectionProps) {
         const sortedAuthors = Array.from(authorMap.values())
             .sort((a, b) => b.bookCount - a.bookCount)
             .slice(0, 8);
-
-        console.log("Top authors:");
-        sortedAuthors.forEach((a) => {
-            console.log(`${a.author}: ${a.bookCount} books`);
-        });
-
         return sortedAuthors;
     }, [books]);
 
     const handleAuthorClick = (author: string) => {
-        // Navigate with author filter parameter instead of search
         const trimmedAuthor = author.trim();
         navigate(`/books?author=${encodeURIComponent(trimmedAuthor)}`);
     };
 
-    // Function to get author image from imported assets
     const getAuthorImage = (authorName: string): string => {
-        // Normalize author name for comparison (remove accents, lowercase, trim)
         const normalizeString = (str: string) => {
             return str
                 .toLowerCase()
                 .trim()
                 .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, ""); // Remove accents
+                .replace(/[\u0300-\u036f]/g, "");
         };
 
         const normalizedName = normalizeString(authorName);
-
-        // Map normalized author names to imported images
         const authorImageMap: { [key: string]: string } = {
             // Frank Lampard
             "frank lampard": frankLampardImg,
@@ -115,8 +100,6 @@ export default function BestsellerSection({ books }: BestsellerSectionProps) {
             // Karen M McManus
             "karen m mcmanus": karenMMcManusImg,
         };
-
-        // Return matched image or empty string for gradient fallback
         return authorImageMap[normalizedName] || "";
     };
 

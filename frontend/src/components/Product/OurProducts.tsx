@@ -9,7 +9,7 @@ const tabs = [
     { id: "all", label: "Tất Cả Sách" },
     { id: "new", label: "Sách Mới" },
     { id: "featured", label: "Nổi Bật" },
-    { id: "top", label: "Bán Chạy" },
+    { id: "top", label: "Sách VIP" },
 ] as const;
 
 type TabType = "all" | "new" | "featured" | "top";
@@ -21,11 +21,10 @@ interface OurProductsProps {
 export default function OurProducts({ books }: OurProductsProps) {
     const [activeTab, setActiveTab] = useState<TabType>("all");
 
-    // Filter books based on active tab
     const getFilteredBooks = () => {
-        const limit = 8; // Show only 8 books per tab
+        const limit = 8; //Lấy ra 8 cuốn ở mỗi tab
         switch (activeTab) {
-            case "new":
+            case "new"://Sắp xếp theo ngày tạo và lấy ra 8 cuốn mới nhất
                 return books
                     .slice()
                     .sort(
@@ -34,19 +33,19 @@ export default function OurProducts({ books }: OurProductsProps) {
                             new Date(a.createdAt || "").getTime()
                     )
                     .slice(0, limit);
-            case "featured":
+            case "featured"://Lấy ra 8 cuốn có trạng thái SALE
                 return books
                     .filter((book) => book.status === "SALE")
                     .slice(0, limit);
-            case "top":
+            case "top"://Sắp xếp theo giá bán giảm dần và lấy ra 8 cuốn đắt nhất
                 return books
                     .slice()
                     .sort(
                         (a, b) => (b.sellingPrice || 0) - (a.sellingPrice || 0)
                     )
                     .slice(0, limit);
-            default:
-                return books.slice(12, 20);
+            default://Lấy ra 8 cuốn đầu tiên
+                return books.slice(20, 28);
         }
     };
 
@@ -66,7 +65,24 @@ export default function OurProducts({ books }: OurProductsProps) {
                         <h1 className="text-4xl font-bold text-gray-900 mb-2">
                             Sách Của Chúng Tôi
                         </h1>
-                        <div className="h-1 w-24 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full" />
+                        <motion.div
+                            initial={{ width: "0%" }}
+                            animate={{
+                                width:
+                                    activeTab === "all"
+                                        ? "25%"
+                                        : activeTab === "new"
+                                        ? "50%"
+                                        : activeTab === "featured"
+                                        ? "75%"
+                                        : "100%",
+                            }}
+                            transition={{
+                                duration: 0.5,
+                                ease: "easeInOut",
+                            }}
+                            className="h-1 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full"
+                        />
                     </motion.div>
 
                     <motion.div

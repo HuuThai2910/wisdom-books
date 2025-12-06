@@ -555,13 +555,6 @@ export default function About() {
                             Khám phá hàng ngàn đầu sách hay, ưu đãi hấp dẫn và
                             trải nghiệm mua sắm tuyệt vời tại Wisdom Books
                         </p>
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-10 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
-                        >
-                            Khám phá ngay
-                        </motion.button>
                     </motion.div>
                 </div>
             </section>

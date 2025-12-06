@@ -3,11 +3,11 @@ package iuh.fit.edu.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import iuh.fit.edu.entity.constant.BookStatus;
 import jakarta.persistence.*;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Entity
@@ -32,7 +32,7 @@ public class Book {
     private String author;
     
     @Min(value = 1900, message = "Năm xuất bản phải từ 1900 trở lên")
-    @Max(value = 2100, message = "Năm xuất bản không hợp lệ")
+    @Max(value = 2025, message = "Năm xuất bản không được vượt quá năm hiện tại")
     private int yearOfPublication;
 
     @Size(max = 1000, message = "Mô tả ngắn không quá 1000 ký tự")
@@ -41,11 +41,11 @@ public class Book {
     @Column(columnDefinition = "MEDIUMTEXT")
     private String description;
 
-    @Min(value = 0, message = "Giá bán phải lớn hơn hoặc bằng 0")
+    @Min(value = 1, message = "Giá bán phải lớn hơn 0")
     @NotNull(message = "Giá bán không được để trống")
     private double sellingPrice;
     
-    @Min(value = 0, message = "Giá nhập phải lớn hơn hoặc bằng 0")
+    @Min(value = 1, message = "Giá nhập phải lớn hơn 0")
     @NotNull(message = "Giá nhập không được để trống")
     private double importPrice;
     
@@ -59,12 +59,12 @@ public class Book {
     private BookStatus status;
 
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
     
-    @Min(value = 0, message = "Số lượng phải lớn hơn hoặc bằng 0")
+    @Min(value = 1, message = "Số lượng phải lớn hơn 0")
     private int quantity;
 
     @OneToMany(mappedBy = "book")
@@ -97,11 +97,11 @@ public class Book {
     private List<EntryFormDetail> entryFormDetails;
     @PrePersist
     public void handleBeforeCreateAt() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = OffsetDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     @PreUpdate
     public void handleBeforeUpdateAt() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = OffsetDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 }
