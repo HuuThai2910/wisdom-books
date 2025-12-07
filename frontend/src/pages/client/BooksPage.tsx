@@ -316,7 +316,7 @@ export default function BooksPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 pt-15 px-20">
+        <div className="min-h-screen bg-blue-50 pt-15 px-20">
             <div className="container mx-auto px-6 py-8">
                 <Breadcrumb items={[{ label: "Sản phẩm" }]} />
                 {/* Page Header */}
@@ -336,7 +336,7 @@ export default function BooksPage() {
                             ease: [0.4, 0, 0.2, 1],
                         }}
                         onClick={() => setIsFilterOpen(true)}
-                        className="fixed left-6 top-32 z-50 w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-full shadow-2xl hover:shadow-blue-500/50 hover:scale-110 transition-all duration-300 flex items-center justify-center group"
+                        className="fixed left-6 top-32 z-50 w-14 h-14 bg-blue-700 text-white rounded-full shadow-2xl hover:shadow-blue-500/50 hover:scale-110 transition-all duration-300 flex items-center justify-center group"
                         title="Mở bộ lọc"
                     >
                         <FaFilter className="text-xl group-hover:rotate-12 transition-transform duration-300" />

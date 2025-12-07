@@ -18,8 +18,6 @@ import banner_kinhdoanh from "../../assets/img/book/banner/banner_kinhdoanh.png"
 import banner_nghethuat from "../../assets/img/book/banner/banner_nghethuat.png";
 import banner_thethao from "../../assets/img/book/banner/banner_thethao.png";
 import banner_thieunhi from "../../assets/img/book/banner/banner_thieunhi.png";
-import left from "../../assets/img/book/banner/left.png";
-import right from "../../assets/img/book/banner/right.png";
 const categoryBanners: { [key: string]: string } = {
     "Ẩm thực – Nấu ăn": banner_amthuc,
     "Công nghệ thông tin": banner_cntt,
@@ -200,7 +198,7 @@ export default function CategoryPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 pt-20">
+        <div className="min-h-screen bg-white to-gray-100 pt-20">
             {/* Banner Section with Image Background */}
             <div className="relative w-full overflow-hidden py-20">
                 {/* Blurred background image - full opacity */}
@@ -214,7 +212,7 @@ export default function CategoryPage() {
                 />
 
                 {/* Dark overlay for better text readability */}
-                <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/50" />
+                <div className="absolute inset-0 bg-black/60" />
 
                 {/* Subtle animated overlay */}
                 <motion.div
@@ -324,7 +322,7 @@ export default function CategoryPage() {
                                     alt={decodedCategoryName}
                                     className="w-full h-full object-cover rounded-2xl shadow-2xl border-4 border-white/20"
                                 />
-                                <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/20 to-transparent" />
+                                <div className="absolute inset-0 rounded-2xl bg-black/20" />
                             </motion.div>
                         </motion.div>
                     </div>

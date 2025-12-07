@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { FaBook, FaStar, FaFire, FaBookOpen, FaGlobe } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
@@ -12,13 +12,15 @@ import {
 } from "../../data/service/bookCollection";
 
 export default function BookCollectionPage() {
-    const floatAnimation = {
-        y: [-10, 10],
-        transition: {
-            duration: 2,
-            repeat: Infinity,
-            repeatType: "reverse" as const,
-            ease: "easeInOut",
+    const floatAnimation: Variants = {
+        float: {
+            y: [-10, 10],
+            transition: {
+                duration: 2,
+                repeat: Infinity,
+                repeatType: "reverse" as const,
+                ease: "easeInOut",
+            },
         },
     };
 
@@ -34,16 +36,20 @@ export default function BookCollectionPage() {
                 {/* Floating decorations */}
                 <motion.div
                     className="absolute top-10 left-10 text-9xl opacity-30"
-                    animate={floatAnimation}
+                    variants={floatAnimation}
+                    animate="float"
                 >
                     📚
                 </motion.div>
                 <motion.div
                     className="absolute top-20 right-20 text-8xl opacity-20"
                     animate={{
-                        ...floatAnimation,
+                        y: [-10, 10],
                         transition: {
-                            ...floatAnimation.transition,
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: "reverse" as const,
+                            ease: "easeInOut",
                             delay: 0.3,
                         },
                     }}
@@ -53,9 +59,12 @@ export default function BookCollectionPage() {
                 <motion.div
                     className="absolute bottom-10 left-1/4 text-7xl opacity-25"
                     animate={{
-                        ...floatAnimation,
+                        y: [-10, 10],
                         transition: {
-                            ...floatAnimation.transition,
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: "reverse" as const,
+                            ease: "easeInOut",
                             delay: 0.6,
                         },
                     }}
@@ -65,9 +74,12 @@ export default function BookCollectionPage() {
                 <motion.div
                     className="absolute bottom-20 right-1/3 text-6xl opacity-15"
                     animate={{
-                        ...floatAnimation,
+                        y: [-10, 10],
                         transition: {
-                            ...floatAnimation.transition,
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: "reverse" as const,
+                            ease: "easeInOut",
                             delay: 0.9,
                         },
                     }}
@@ -251,7 +263,7 @@ export default function BookCollectionPage() {
                                     </motion.div>
 
                                     <div className="bg-blue-600 p-8 text-white relative overflow-hidden">
-                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 opacity-50" />
+                                        <div className="absolute inset-0 bg-blue-600 opacity-50" />
 
                                         <div className="flex items-center gap-4 mb-4 relative z-10">
                                             <motion.div
@@ -317,19 +329,22 @@ export default function BookCollectionPage() {
                     {/* Floating decorations */}
                     <motion.div
                         className="absolute top-8 right-8 text-6xl opacity-10"
-                        animate={floatAnimation}
+                        variants={floatAnimation}
+                        animate="float"
                     >
                         🔥
                     </motion.div>
                     <motion.div
                         className="absolute bottom-8 left-8 text-5xl opacity-10"
-                        animate={floatAnimation}
-                        transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            repeatType: "reverse",
-                            ease: "easeInOut",
-                            delay: 0.5,
+                        animate={{
+                            y: [-10, 10],
+                            transition: {
+                                duration: 2,
+                                repeat: Infinity,
+                                repeatType: "reverse" as const,
+                                ease: "easeInOut",
+                                delay: 0.5,
+                            },
                         }}
                     >
                         ⭐
@@ -416,7 +431,8 @@ export default function BookCollectionPage() {
                 <motion.div className="bg-white border-2 border-blue-100 rounded-xl p-8 mb-16 relative overflow-hidden">
                     <motion.div
                         className="absolute top-6 right-6 text-5xl opacity-10"
-                        animate={floatAnimation}
+                        variants={floatAnimation}
+                        animate="float"
                     >
                         🏢
                     </motion.div>
@@ -475,23 +491,26 @@ export default function BookCollectionPage() {
 
                 {/* New Arrivals Banner */}
                 <motion.div className="bg-blue-600 text-white rounded-xl p-8 text-center mb-16 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 opacity-50" />
+                    <div className="absolute inset-0 bg-blue-600 opacity-50" />
 
                     <motion.div
                         className="absolute top-4 left-4 text-4xl"
-                        animate={floatAnimation}
+                        variants={floatAnimation}
+                        animate="float"
                     >
                         🔥
                     </motion.div>
                     <motion.div
                         className="absolute bottom-4 right-4 text-4xl"
-                        animate={floatAnimation}
-                        transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            repeatType: "reverse",
-                            ease: "easeInOut",
-                            delay: 0.3,
+                        animate={{
+                            y: [-10, 10],
+                            transition: {
+                                duration: 2,
+                                repeat: Infinity,
+                                repeatType: "reverse" as const,
+                                ease: "easeInOut",
+                                delay: 0.3,
+                            },
                         }}
                     >
                         📚

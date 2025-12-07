@@ -170,7 +170,7 @@ const StoryImageCarousel = () => {
 
 export default function About() {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 pt-20">
+        <div className="min-h-screen bg--white to-blue-50 pt-20">
             <div className="container mx-auto px-10 relative z-10 pt-5">
                 <Breadcrumb items={[{ label: "Về chúng tôi" }]} />
             </div>
@@ -197,11 +197,11 @@ export default function About() {
                             transition={{ duration: 0.5, delay: 0.2 }}
                             className="inline-block mb-6"
                         >
-                            <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl flex items-center justify-center shadow-2xl transform rotate-6 hover:rotate-12 transition-transform">
+                            <div className="w-24 h-24 bg-blue-600 rounded-3xl flex items-center justify-center shadow-2xl transform rotate-6 hover:rotate-12 transition-transform">
                                 <FaBookOpen className="text-5xl text-white -rotate-6" />
                             </div>
                         </motion.div>
-                        <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 bg-clip-text text-transparent">
+                        <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-blue-500 to-blue-600 bg-clip-text text-transparent">
                             Về Wisdom Books
                         </h1>
                         <p className="text-2xl text-gray-700 leading-relaxed font-medium">
@@ -266,7 +266,7 @@ export default function About() {
             </section>
 
             {/* Stats Section */}
-            <section className="py-20 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-600 relative overflow-hidden">
+            <section className="py-20 bg-blue-500 to-blue-600 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
                     <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
@@ -304,7 +304,7 @@ export default function About() {
             </section>
 
             {/* Timeline Section */}
-            <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+            <section className="py-20 bg-blue-50">
                 <div className="container mx-auto px-6 max-w-6xl">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -328,7 +328,7 @@ export default function About() {
                     </motion.div>
 
                     <div className="relative">
-                        <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600"></div>
+                        <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-blue-400"></div>
                         {milestones.map((milestone, index) => (
                             <motion.div
                                 key={index}
@@ -412,7 +412,7 @@ export default function About() {
                                         alt={category.name}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                                    <div className="absolute inset-0 bg-black/80 to-transparent"></div>
                                 </div>
                                 <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                                     <h3 className="text-2xl font-bold mb-2">
@@ -457,7 +457,7 @@ export default function About() {
                                     delay: index * 0.2,
                                 }}
                                 viewport={{ once: true }}
-                                className="bg-gradient-to-br from-blue-50 to-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
+                                className="bg-blue-50 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
                             >
                                 <div className="flex items-center mb-4">
                                     <img
@@ -543,7 +543,7 @@ export default function About() {
             </section>
 
             {/* CTA Section */}
-            <section className="py-20 bg-gradient-to-br from-blue-50 to-white">
+            <section className="py-20 bg-white">
                 <div className="container mx-auto px-6 text-center">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}

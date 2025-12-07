@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
-    Breadcrumb,
     Col,
     Row,
     message,
@@ -10,13 +9,10 @@ import {
     Image,
     Form,
     Card,
-    Space,
     Typography,
-    Tabs,
     Modal,
 } from "antd";
 import {
-    FooterToolbar,
     ProForm,
     ProFormText,
     ProFormDigit,
@@ -637,7 +633,7 @@ const ViewUpsertBook = () => {
                                         <ProFormDigit
                                             label="Năm xuất bản"
                                             name="yearOfPublication"
-                                            placeholder="2024"
+                                            placeholder="2025"
                                         />
                                     </Col>
                                 </Row>
@@ -900,7 +896,7 @@ const ViewUpsertBook = () => {
                 >
                     <div className="p-6">
                         <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0">
+                            <div className="shrink-0">
                                 <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
                                     <ExclamationCircleOutlined className="text-2xl text-blue-600" />
                                 </div>

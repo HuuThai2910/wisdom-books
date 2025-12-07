@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import {
     FaCheckCircle,
     FaCreditCard,
@@ -17,13 +17,15 @@ import {
 } from "../../data/service/payment";
 
 export default function PaymentMethodsPage() {
-    const floatAnimation = {
-        y: [-10, 10],
-        transition: {
-            duration: 2,
-            repeat: Infinity,
-            repeatType: "reverse" as const,
-            ease: "easeInOut",
+    const floatAnimation: Variants = {
+        float: {
+            y: [-10, 10],
+            transition: {
+                duration: 2,
+                repeat: Infinity,
+                repeatType: "reverse" as const,
+                ease: "easeInOut",
+            },
         },
     };
 
@@ -39,16 +41,20 @@ export default function PaymentMethodsPage() {
                 {/* Floating decorations */}
                 <motion.div
                     className="absolute top-10 left-10 text-7xl opacity-30"
-                    animate={floatAnimation}
+                    variants={floatAnimation}
+                    animate="float"
                 >
                     💳
                 </motion.div>
                 <motion.div
                     className="absolute top-20 right-20 text-6xl opacity-20"
                     animate={{
-                        ...floatAnimation,
+                        y: [-10, 10],
                         transition: {
-                            ...floatAnimation.transition,
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: "reverse" as const,
+                            ease: "easeInOut",
                             delay: 0.3,
                         },
                     }}
@@ -58,9 +64,12 @@ export default function PaymentMethodsPage() {
                 <motion.div
                     className="absolute bottom-10 left-1/4 text-5xl opacity-25"
                     animate={{
-                        ...floatAnimation,
+                        y: [-10, 10],
                         transition: {
-                            ...floatAnimation.transition,
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: "reverse" as const,
+                            ease: "easeInOut",
                             delay: 0.6,
                         },
                     }}
@@ -70,9 +79,12 @@ export default function PaymentMethodsPage() {
                 <motion.div
                     className="absolute bottom-20 right-1/3 text-8xl opacity-15"
                     animate={{
-                        ...floatAnimation,
+                        y: [-10, 10],
                         transition: {
-                            ...floatAnimation.transition,
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: "reverse" as const,
+                            ease: "easeInOut",
                             delay: 0.9,
                         },
                     }}
