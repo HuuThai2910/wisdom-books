@@ -52,6 +52,7 @@ const bookApi = {
         id: number | string,
         bookData: Partial<Book>
     ): Promise<ApiResponse<Book>> => {
+        console.log("Updating book with ID:", id, "Data:", bookData);
         const response = await axiosClient.put<ApiResponse<Book>>(`/books`, {
             ...bookData,
             id,

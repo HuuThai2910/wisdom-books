@@ -23,10 +23,13 @@ public class ReqUpdateBookDTO {
     @NotNull(message = "ID không được để trống")
     private Long id;
 
+    @NotBlank(message = "ISBN không được để trống")
     private String isbn;
 
+    @NotBlank(message = "Tiêu đề không được để trống")
     private String title;
 
+    @NotBlank(message = "Tác giả không được để trống")
     private String author;
 
     @NotNull(message = "Năm xuất bản không được để trống")

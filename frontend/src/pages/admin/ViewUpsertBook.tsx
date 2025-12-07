@@ -67,6 +67,7 @@ const ViewUpsertBook = () => {
                 try {
                     const res = await bookApi.getBookById(id);
                     if (res && res.data) {
+                       
                         setDataUpdate(res.data);
 
                         if (
@@ -204,8 +205,10 @@ const ViewUpsertBook = () => {
             }
 
             if (dataUpdate?.id) {
+            
+                
                 const res = await bookApi.updateBook(dataUpdate.id, bookData);
-
+                
                 if (res && res.success && res.data) {
                     console.log(
                         "Book updated successfully, now uploading new images..."
@@ -285,14 +288,18 @@ const ViewUpsertBook = () => {
             }
         } catch (error: any) {
             console.error("Error saving book:", error);
-            console.error("Error details:", error.response);
+            console.error("Error.errors:", error.errors);
 
-            // Xử lý validation errors từ backend (object) - ví dụ: {yearOfPublication: "...", image: "..."}
+            // AxiosClient interceptor trả về err.response.data thay vì err
+            // Nên validation errors nằm trực tiếp trong error.errors
+            const validationErrors = error.errors;
+
             if (
-                error.response?.data?.errors &&
-                typeof error.response.data.errors === "object"
+                validationErrors &&
+                typeof validationErrors === "object" &&
+                Object.keys(validationErrors).length > 0
             ) {
-                const validationErrors = error.response.data.errors;
+                console.log("Found validation errors:", validationErrors);
 
                 // Map backend field names to form field names
                 const fieldNameMap: Record<string, string> = {
@@ -358,10 +365,13 @@ const ViewUpsertBook = () => {
 
                 // Also show toast for quick visibility
                 toast.error("Vui lòng kiểm tra lại thông tin!");
+
+                // Don't continue to other error handlers
+                return;
             }
             // Xử lý error message trực tiếp từ backend (string)
-            else if (error.response?.data?.message) {
-                const errorMessage = error.response.data.message;
+            else if (error.message) {
+                const errorMessage = error.message;
 
                 notification.error({
                     message: errorMessage.includes("ISBN")
@@ -400,7 +410,7 @@ const ViewUpsertBook = () => {
                 toast.error(errorMessage);
             } else {
                 const errorMsg =
-                    error.response?.data?.error ||
+                    error.error ||
                     error.message ||
                     "Có lỗi xảy ra khi lưu sách!";
 
