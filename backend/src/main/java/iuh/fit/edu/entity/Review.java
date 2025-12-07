@@ -4,7 +4,7 @@ package iuh.fit.edu.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "reviews")
@@ -24,5 +24,5 @@ public class Review {
 
     @Column(columnDefinition = "MEDIUMTEXT")
     private String comment;
-    private LocalDateTime reviewDate;
+    private OffsetDateTime reviewDate;
 }

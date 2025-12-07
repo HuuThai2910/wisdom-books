@@ -4,6 +4,7 @@ import { Minus, Plus } from "lucide-react";
 interface CartItemQuantityControlProps {
     localQuantity: string | number;
     isOutOfStock: boolean;
+    maxQuantity: number;
     onIncrement: () => void;
     onDecrement: () => void;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -14,6 +15,7 @@ interface CartItemQuantityControlProps {
 export default function CartItemQuantityControl({
     localQuantity,
     isOutOfStock,
+    maxQuantity,
     onIncrement,
     onDecrement,
     onChange,
@@ -52,9 +54,17 @@ export default function CartItemQuantityControl({
             />
             <button
                 onClick={onIncrement}
-                disabled={isOutOfStock}
+                disabled={
+                    isOutOfStock ||
+                    (typeof localQuantity === "number"
+                        ? localQuantity
+                        : parseInt(localQuantity as string) || 0) >= maxQuantity
+                }
                 className={`w-8 h-8 flex items-center justify-center transition-colors ${
-                    isOutOfStock
+                    isOutOfStock ||
+                    (typeof localQuantity === "number"
+                        ? localQuantity
+                        : parseInt(localQuantity as string) || 0) >= maxQuantity
                         ? "bg-gray-100 cursor-not-allowed opacity-50"
                         : "hover:bg-gray-200 cursor-pointer"
                 }`}

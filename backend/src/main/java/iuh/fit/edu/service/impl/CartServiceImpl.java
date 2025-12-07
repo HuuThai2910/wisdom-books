@@ -4,9 +4,9 @@
  */
 package iuh.fit.edu.service.impl;
 
-import iuh.fit.edu.dto.request.AddCartItemRequest;
-import iuh.fit.edu.dto.request.UpdateCartItemRequest;
-import iuh.fit.edu.dto.request.UpdateCartSelectRequest;
+import iuh.fit.edu.dto.request.cart.AddCartItemRequest;
+import iuh.fit.edu.dto.request.cart.UpdateCartItemRequest;
+import iuh.fit.edu.dto.request.cart.UpdateCartSelectRequest;
 import iuh.fit.edu.dto.response.cart.CartItemResponse;
 import iuh.fit.edu.dto.response.cart.CartResponse;
 import iuh.fit.edu.entity.Book;
@@ -126,10 +126,15 @@ public class CartServiceImpl implements iuh.fit.edu.service.CartService {
     }
 
     @Override
-    public void removeItem(String emal, Long id) {
-        Cart cart = this.cartRepository.findByUser_Email(emal);
-        cart.getCartItems().removeIf(cartItem -> cartItem.getId().equals(id));
-        cart.setSum(cart.getSum() - 1);
+    @Transactional
+    public void removeItem(String email, List<Long> ids) {
+        Cart cart = this.cartRepository.findByUser_Email(email);
+        if (cart == null) {
+            throw new RuntimeException("Cart not found for user: " + email);
+        }
+        boolean check = cart.getCartItems().removeIf(cartItem -> ids.contains(cartItem.getId()));
+        System.out.println(check);
+        cart.setSum(cart.getSum() - ids.size());
         this.cartRepository.save(cart);
     }
 

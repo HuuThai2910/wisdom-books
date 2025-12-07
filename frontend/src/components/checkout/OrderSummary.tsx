@@ -1,7 +1,7 @@
 import { formatCurrency } from "../../util/formatting";
 import { OrderSummaryProps } from "../../types";
+import { S3_CONFIG } from "../../config/s3";
 
-const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({
     checkoutItems,
@@ -22,7 +22,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                     >
                         <div className="w-16 h-16 rounded-lg flex items-center">
                             <img
-                                src={`${IMAGE_BASE_URL}${item.book.image}`}
+                                src={`${S3_CONFIG.BASE_URL}${item.book.image}`}
                                 alt={item.book.title}
                             />
                         </div>
@@ -70,7 +70,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 
             <button
                 onClick={onSubmit}
-                className="w-full bg-black text-white py-3 rounded-full font-medium hover:bg-gray-800 transition-colors"
+                className="w-full bg-blue-700 text-white py-3 rounded-full font-medium hover:bg-gray-800 transition-colors"
             >
                 Đặt hàng
             </button>

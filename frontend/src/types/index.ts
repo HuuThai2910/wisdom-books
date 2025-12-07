@@ -1,24 +1,72 @@
 // Core Types
-export interface Book {
+export interface Category {
     id: number;
-    title: string;
-    author: string;
-    price: number;
-    image: string;
-    description?: string;
-    categoryId?: number;
-    stock?: number;
-    quantity?: number;
-    publishedYear?: number;
-    publisher?: string;
+    name: string;
+    description: string;
 }
 
+export interface Supplier {
+    id: number;
+    companyName: string;
+    address: string;
+    phone: string;
+    email: string;
+}
+
+export interface Review {
+    id: number;
+    comment: string;
+    rating: number;
+    reviewDate: string;
+}
+
+export interface BookImage {
+    bookId: number;
+    imagePath: string;
+}
+
+export interface Book {
+    id: number;
+    isbn: string;
+    title: string;
+    author: string;
+    yearOfPublication: number;
+    shortDes?: string;
+    description?: string;
+    sellingPrice: number;
+    importPrice: number;
+    image?: string[];
+    status: "SALE" | "STOP_SALE" | "OUT_STOCK";
+    createdAt?: string;
+    updatedAt?: string;
+    createdBy?: string;
+    updatedBy?: string;
+    quantity: number;
+    review?: Review[];
+    bookImage?: BookImage[];
+    category?: Category[];
+    supplier?: Supplier;
+    // Compatibility fields
+    price?: number;
+    stock?: number;
+    publishedYear?: number;
+    publisher?: string;
+    originalPrice?: number;
+    categories?: string[];
+}
+export interface BookSummary {
+    id: number;
+    title: string;
+    price: number;
+    image: string;
+    quantity: number;
+}
 export interface CartItem {
     id: number;
     bookId: number;
     quantity: number;
     selected: boolean;
-    book: Book;
+    book: BookSummary;
 }
 
 export interface Address {
@@ -49,10 +97,59 @@ export interface Voucher {
     isActive?: boolean;
 }
 
+export interface OrderItem {
+    id: number;
+    quantity: number;
+    price: number;
+    book: BookSummary;
+}
+
+export interface Order {
+    id: number;
+    userId: number;
+    userName: string;
+    orderCode: string;
+    orderDate: string;
+    expiredAt: string;
+    status: "PENDING" | "PROCESSING" | "SHIPPING" | "DELIVERED" | "CANCELLED";
+    totalPrice: number;
+    orderItems: OrderItem[];
+    receiverName: string;
+    receiverPhone: string;
+    receiverEmail: string;
+    receiverAddress: string;
+    paymentMethod: "COD" | "VNPAY";
+    paymentStatus: "UNPAID" | "PAID";
+    note?: string;
+    updateBy: string;
+    updateAt: string;
+}
+
+export interface UpdatedOrderResponse {
+    id: number;
+    status: "PENDING" | "PROCESSING" | "SHIPPING" | "DELIVERED" | "CANCELLED";
+}
+
+export interface Payment {
+    code: String;
+    message: String;
+    paymentUrl: String;
+    orderCode: String;
+}
+
+export interface PaymentReturnResponse {
+    code: string;
+    message: string;
+    orderCode: string;
+    totalPrice: number;
+    orderDate: string;
+    status: string;
+}
+
 export interface CheckoutItem {
     id: number;
     quantity: number;
-    book: Book;
+    book: BookSummary;
 }
 
 // Form Types
@@ -72,6 +169,18 @@ export interface ApiResponse<T> {
     success: boolean;
     message: string;
     data: T;
+}
+
+export interface PaginationMeta {
+    page: number;
+    pageSize: number;
+    pages: number;
+    total: number;
+}
+
+export interface PaginatedResponse<T> {
+    meta: PaginationMeta;
+    result: T[];
 }
 
 // Redux State Types
@@ -117,6 +226,7 @@ export interface DeliveryInformationProps {
     defaultAddress?: User;
     checkDefault: boolean;
     onCheckDefaultChange: (checked: boolean) => void;
+    triggerValidation?: () => boolean;
 }
 
 export interface VoucherSelectorProps {
@@ -178,7 +288,8 @@ export interface UseOrderSubmitReturn {
         formData: DeliveryFormData,
         paymentMethod: string,
         selectedVoucher: number | null,
-        total: number
+        total: number,
+        validateFormRef?: React.MutableRefObject<(() => boolean) | null>
     ) => void;
 }
 
@@ -192,3 +303,90 @@ export interface OrderData {
     total: number;
     timestamp: string;
 }
+
+export interface RegisterFormData {
+    fullName: string;
+    email: string;
+    phone: string;
+    password: string;
+    confirmPassword: string;
+}
+export interface LoginFormData {
+    fullName: string;
+    password: string;
+}
+
+export interface EntryForm {
+    id: number;
+    totalQuantity: number;
+    totalPrice: number;
+    createdAt: string;
+    createdBy: string;
+}
+
+export interface EntryFormDetail {
+    id: number;
+    isbn: string;
+    title: string;
+    yearOfPublication: number;
+    quantity: number;
+    unitPrice: number;
+    amount: number;
+}
+
+export interface BookItemDTO {
+    isbn: string;
+    title: string;
+    yearOfPublication: number;
+    importPrice: number;
+    quantity: number;
+    amount: number;
+}
+
+export interface CreateEntryFormDTO {
+    supplier: string;
+    invoiceNumber: string;
+    books: BookItemDTO[];
+}
+export interface Address {
+    address: string;
+    ward: string;
+    province: string;
+}
+
+export interface UserData {
+    id: string;
+    fullName: string;
+    email: string;
+    phone: string;
+    role: string;
+    gender?: string;
+    address?: Address;
+    userStatus: string;
+    avatar?: string;
+}
+
+// Dashboard Types
+export interface DateRange {
+    from: string;
+    to: string;
+}
+
+export interface DashboardStats {
+    totalOrders: number;
+    totalRevenue: number;
+    totalProfit: number;
+    customerGrowthRate: number;
+    cancelledOrderRate: number;
+    newCustomersThisMonth: number;
+    newBooksImported: number;
+    cancelledOrders: number;
+}
+
+export interface DashboardOverview {
+    totalBooks: number;
+    totalCustomers: number;
+    outOfStockBooks: number;
+    lowStockBooks: number;
+}
+

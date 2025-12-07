@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /*
  * @description
@@ -30,8 +31,7 @@ public class ApiResponse<T> {
     private String message;
     private T data;
     private Object errors;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime timestamp = LocalDateTime.now();
+    private OffsetDateTime timestamp = OffsetDateTime.now();
 
     public ApiResponse(int status, boolean success, String message, T data, Object errors) {
         this.status = status;

@@ -3,7 +3,7 @@ package iuh.fit.edu.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Entity
@@ -16,7 +16,7 @@ public class EntryForm {
 
     private int totalQuantity;
     private double totalPrice;
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

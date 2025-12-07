@@ -11,40 +11,34 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({
             </h2>
 
             <div className="space-y-4">
-                <label className="flex items-start cursor-pointer">
+                <label className="flex items-center cursor-pointer">
                     <input
                         type="radio"
                         name="payment"
-                        value="bank-transfer"
-                        checked={paymentMethod === "bank-transfer"}
+                        value="COD"
+                        checked={paymentMethod === "COD"}
                         onChange={(e) => onPaymentMethodChange(e.target.value)}
                         className="mt-1 mr-3"
                     />
                     <div className="flex-1">
                         <div className="font-medium">
-                            Chuyển khoản ngân hàng
+                            Thanh toán khi nhận hàng
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">
-                            Thực hiện thanh toán vào ngay tài khoản ngân hàng
-                            của chúng tôi. Vui lòng sử dụng Mã đơn hàng của bạn
-                            trong phần Nội dung thanh toán. Đơn hàng sẽ được
-                            giao sau khi tiền đã chuyển.
-                        </p>
                     </div>
                 </label>
 
-                <label className="flex items-start cursor-pointer">
+                <label className="flex items-center cursor-pointer">
                     <input
                         type="radio"
                         name="payment"
-                        value="cod"
-                        checked={paymentMethod === "cod"}
+                        value="VNPAY"
+                        checked={paymentMethod === "VNPAY"}
                         onChange={(e) => onPaymentMethodChange(e.target.value)}
                         className="mt-1 mr-3"
                     />
                     <div className="flex-1">
                         <div className="font-medium">
-                            Trả tiền mặt khi nhận hàng
+                            Thanh toán qua VNPay
                         </div>
                     </div>
                 </label>

@@ -1,0 +1,65 @@
+import {
+    FaGraduationCap,
+    FaBriefcase,
+    FaHeart,
+    FaChild,
+    FaGlobe,
+    FaBook
+} from "react-icons/fa";
+
+export const bookCategories = [
+    {
+        icon: FaGraduationCap,
+        title: "Sách Giáo Khoa & Tham Khảo",
+        count: "2,500+ đầu sách",
+        desc: "Đầy đủ từ tiểu học đến đại học",
+        color: "from-blue-400 to-blue-500",
+        image: "📚",
+        highlights: ["SGK mới nhất", "Sách ôn thi", "Sách nâng cao"],
+    },
+    {
+        icon: FaBriefcase,
+        title: "Kinh Tế & Kinh Doanh",
+        count: "1,800+ đầu sách",
+        desc: "Từ cơ bản đến chuyên sâu",
+        color: "from-blue-300 to-blue-400",
+        image: "💼",
+        highlights: ["Marketing", "Quản trị", "Khởi nghiệp"],
+    },
+    {
+        icon: FaHeart,
+        title: "Văn Học & Tiểu Thuyết",
+        count: "3,200+ đầu sách",
+        desc: "Trong nước và quốc tế",
+        color: "from-blue-200 to-blue-300",
+        image: "📖",
+        highlights: ["Bestseller", "Tác phẩm kinh điển", "Văn học đương đại"],
+    },
+    {
+        icon: FaChild,
+        title: "Sách Thiếu Nhi",
+        count: "1,500+ đầu sách",
+        desc: "Nuôi dưỡng tâm hồn trẻ thơ",
+        color: "from-blue-100 to-blue-200",
+        image: "🧒",
+        highlights: ["Truyện tranh", "Sách tranh", "Truyện cổ tích"],
+    },
+    {
+        icon: FaGlobe,
+        title: "Ngoại Ngữ",
+        count: "1,200+ đầu sách",
+        desc: "Chinh phục mọi ngôn ngữ",
+        color: "from-blue-50 to-blue-100",
+        image: "🌍",
+        highlights: ["Tiếng Anh", "Tiếng Nhật", "Tiếng Hàn"],
+    },
+    {
+        icon: FaBook,
+        title: "Kỹ Năng Sống",
+        count: "900+ đầu sách",
+        desc: "Phát triển bản thân toàn diện",
+        color: "from-sky-100 to-sky-200",
+        image: "🎯",
+        highlights: ["Tư duy", "Giao tiếp", "Lãnh đạo"],
+    },
+];

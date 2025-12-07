@@ -1,0 +1,69 @@
+name: Deploy to EC2
+
+on:
+    push:
+        branches:
+            - develop
+        paths:
+            - "backend/**"
+            - ".github/workflows/deploy-ec2.yml"
+    workflow_dispatch: # Cho phép trigger thủ công
+
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: 🔍 Checkout code
+              uses: actions/checkout@v4
+
+            - name: ☕ Setup Java 21
+              uses: actions/setup-java@v4
+              with:
+                  distribution: "temurin"
+                  java-version: "21"
+                  cache: "maven"
+
+            - name: 🔨 Build with Maven
+              run: |
+                  cd backend
+                  chmod +x mvnw
+                  ./mvnw clean package -DskipTests -T 2C --batch-mode
+
+            - name: 📦 Verify JAR
+              run: |
+                  ls -lh backend/target/*.jar
+                  echo "JAR_NAME=$(ls backend/target/*.jar | xargs -n 1 basename)" >> $GITHUB_ENV
+
+            - name: 📤 Copy JAR to EC2
+              uses: appleboy/scp-action@v0.1.7
+              with:
+                  host: ${{ secrets.EC2_HOST }}
+                  username: ${{ secrets.EC2_USER }}
+                  key: ${{ secrets.EC2_SSH_KEY }}
+                  source: "backend/target/*.jar"
+                  target: "/tmp/"
+                  strip_components: 2
+
+            - name: 🚀 Deploy and Restart Service
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.EC2_HOST }}
+                  username: ${{ secrets.EC2_USER }}
+                  key: ${{ secrets.EC2_SSH_KEY }}
+                  script: |
+                      # Di chuyển JAR mới (không backup để nhanh hơn)
+                      sudo mv /tmp/wisdom-books-0.0.1-SNAPSHOT.jar /opt/wisdom-books/backend/
+                      sudo chown wisdom:wisdom /opt/wisdom-books/backend/wisdom-books-0.0.1-SNAPSHOT.jar
+
+                      # Restart service nhanh
+                      sudo systemctl restart wisdom-books
+
+                      echo "✅ Deploy completed!"
+
+            - name: 📝 Deployment Summary
+              if: always()
+              run: |
+                  echo "## ✅ Deployment Completed" >> $GITHUB_STEP_SUMMARY
+                  echo "- Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+                  echo "- API: http://${{ secrets.EC2_HOST }}:8080" >> $GITHUB_STEP_SUMMARY
