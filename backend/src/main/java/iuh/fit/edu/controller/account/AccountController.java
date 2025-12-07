@@ -140,5 +140,14 @@ public class AccountController {
         return "Check console logs";
     }
 
+    @PostMapping("/fix-customer-group")
+    public ResponseEntity<String> fixCustomerGroup(@RequestParam String username) {
+        try {
+            ((AccountServiceImpl) accountService).fixCustomerGroup(username);
+            return ResponseEntity.ok("User " + username + " added to CUSTOMER group successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
 
 }

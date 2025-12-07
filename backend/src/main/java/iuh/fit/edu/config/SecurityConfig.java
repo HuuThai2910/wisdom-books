@@ -82,17 +82,18 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/auth/refresh-token").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/fix-customer-group").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users/avatar/**").authenticated()
 
                         // Admin endpoints - CHÚ Ý: các rule cụ thể phải đặt TRƯỚC các rule chung
-                        .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "1")
+                        .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "1","CUSTOMER","3","WARE_HOUSE_STAFF","STAFF")
                         .requestMatchers("/api/dashboard/**").hasAnyAuthority("ADMIN", "1")
                         
                         // Staff endpoints (POST/PUT/DELETE books và orders)
                         .requestMatchers(HttpMethod.POST, "/api/books/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2")
                         .requestMatchers(HttpMethod.PUT, "/api/books/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2")
                         .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2")
-                        .requestMatchers("/api/orders/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2")
+                        .requestMatchers("/api/orders/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2","CUSTOMER","WARE_HOUSE_STAFF")
                         
                         // Warehouse endpoints
                         .requestMatchers("/api/entry-forms/**").hasAnyAuthority("ADMIN", "WARE_HOUSE_STAFF", "1", "4")

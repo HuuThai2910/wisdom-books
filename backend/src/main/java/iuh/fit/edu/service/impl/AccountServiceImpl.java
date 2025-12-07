@@ -68,7 +68,18 @@ public class AccountServiceImpl implements AccountService {
                 user.setPhone(phoneNumber);
                 user.setCreatedBy("system");
                 user.setRole(role);
+                System.out.println(user);
                 userRepository.save(user);
+                System.out.println("user 1" + user);
+                
+                // Add user to CUSTOMER group in Cognito
+                try {
+                    cognitoService.addUserToGroup(request.getFullName(), "CUSTOMER");
+                    System.out.println("[Register] Added new user to CUSTOMER group in Cognito");
+                } catch (Exception e) {
+                    System.err.println("[Register] Failed to add user to CUSTOMER group: " + e.getMessage());
+                    // Continue anyway - user is created, just missing group
+                }
             }
 
             return userMapper.toRegisterResponse(user,sub);
@@ -300,6 +311,20 @@ public class AccountServiceImpl implements AccountService {
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to refresh token: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Fix method để add user CUSTOMER vào Cognito group
+     * Dùng cho các user đã tồn tại mà chưa có trong group
+     */
+    public void fixCustomerGroup(String username) {
+        try {
+            cognitoService.addUserToGroup(username, "CUSTOMER");
+            System.out.println("[Fix] Successfully added " + username + " to CUSTOMER group");
+        } catch (Exception e) {
+            System.err.println("[Fix] Error adding user to group: " + e.getMessage());
+            throw new RuntimeException("Failed to add user to CUSTOMER group: " + e.getMessage());
         }
     }
 }
