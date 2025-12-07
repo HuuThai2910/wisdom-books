@@ -6,6 +6,9 @@ import iuh.fit.edu.entity.constant.UserStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -44,21 +47,12 @@ public class User {
 
     @Column(nullable = false, updatable = false)
     private OffsetDateTime createdAt=OffsetDateTime.now();
-    
+
     private OffsetDateTime updatedAt;
-    
+
     private String createdBy;
     private String updatedBy;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = OffsetDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
-    }
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
@@ -78,7 +72,7 @@ public class User {
 
     @ManyToMany
     @JoinTable(name = "user_voucher", joinColumns = @JoinColumn(name = "user_id"),
-    inverseJoinColumns = @JoinColumn(name = "voucher_id"))
+            inverseJoinColumns = @JoinColumn(name = "voucher_id"))
     @ToString.Exclude
     private List<Voucher> vouchers;
 }

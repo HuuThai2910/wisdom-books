@@ -28,6 +28,7 @@ const SignInForm = ({ onForgotPassword, onSuccess }: SignInFormProps) => {
 
   useEffect(() => {
     if (user) {
+      
       // Lưu thông tin user vào localStorage
       localStorage.setItem('user', JSON.stringify(user));
       console.log("Đăng nhập thành công:", user);
