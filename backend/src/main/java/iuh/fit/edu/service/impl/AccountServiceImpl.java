@@ -17,6 +17,7 @@ import iuh.fit.edu.repository.RoleRepository;
 import iuh.fit.edu.repository.UserRepository;
 import iuh.fit.edu.service.AccountService;
 import iuh.fit.edu.service.CognitoService;
+import iuh.fit.edu.service.TokenBlacklistService;
 import iuh.fit.edu.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     TokenService tokenService;
+
+    @Autowired
+    TokenBlacklistService tokenBlacklistService;
 
 
     @Override
@@ -75,10 +79,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public LoginResponse loginUser(LoginRequest request) {
-        String token= cognitoService.loginUser(request);
-        if (token!=null){
+        CognitoTokens tokens = cognitoService.loginUser(request);
+        if (tokens != null && tokens.getAccessToken() != null) {
             // Lấy thông tin user để lưu token record
-            GetUserResult userResult = cognitoService.getUserInfo(token);
+            GetUserResult userResult = cognitoService.getUserInfo(tokens.getAccessToken());
             String email = userResult.getUserAttributes().stream()
                     .filter(attr -> "email".equals(attr.getName()))
                     .findFirst()
@@ -88,15 +92,17 @@ public class AccountServiceImpl implements AccountService {
             if (email != null) {
                 User user = userRepository.findByEmail(email);
                 if (user != null) {
-                    // Lưu access token record (60 phút)
-                    tokenService.saveTokenRecord(user, iuh.fit.edu.entity.constant.TokenType.ACCESS_TOKEN, 60);
-                    // Lưu refresh token record (7 ngày)
-                    tokenService.saveTokenRecord(user, iuh.fit.edu.entity.constant.TokenType.REFRESH_TOKEN, 7 * 24 * 60);
+                    // Lưu access token record (5 phút)
+                    tokenService.saveTokenRecord(user, iuh.fit.edu.entity.constant.TokenType.ACCESS_TOKEN, 5);
+                    // Lưu refresh token record (30 ngày)
+                    tokenService.saveTokenRecord(user, iuh.fit.edu.entity.constant.TokenType.REFRESH_TOKEN, 30 * 24 * 60);
                 }
             }
             
             return LoginResponse.builder()
-                    .token(token)
+                    .token(tokens.getAccessToken())
+                    .refreshToken(tokens.getRefreshToken())
+                    .expiresIn(tokens.getExpiresIn())
                     .success(true)
                     .build();
         }
@@ -104,7 +110,25 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void logout(String accessToken) {
+    public void logout(String accessToken, String refreshToken) {
+        // Blacklist access token ngay lập tức
+        try {
+            tokenBlacklistService.blacklistToken(accessToken, "User logout - access token");
+            System.out.println("[Logout] Access token blacklisted successfully");
+        } catch (Exception e) {
+            System.err.println("[Logout] Error blacklisting access token: " + e.getMessage());
+        }
+        
+        // Blacklist refresh token nếu có
+        if (refreshToken != null && !refreshToken.isEmpty()) {
+            try {
+                tokenBlacklistService.blacklistToken(refreshToken, "User logout - refresh token");
+                System.out.println("[Logout] Refresh token blacklisted successfully");
+            } catch (Exception e) {
+                System.err.println("[Logout] Error blacklisting refresh token: " + e.getMessage());
+            }
+        }
+        
         // Lấy thông tin user từ token
         try {
             GetUserResult userResult = cognitoService.getUserInfo(accessToken);
@@ -238,30 +262,37 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public LoginResponse refreshAccessToken(String refreshToken) {
         try {
-            // Lấy thông tin user từ refresh token
-            GetUserResult userResult = cognitoService.getUserInfo(refreshToken);
-            String email = userResult.getUserAttributes().stream()
-                    .filter(attr -> "email".equals(attr.getName()))
-                    .findFirst()
-                    .map(AttributeType::getValue)
-                    .orElseThrow(() -> new RuntimeException("Email not found in token"));
+            // Decode refresh token để lấy username (từ cookie hoặc request body cần gửi kèm)
+            // Vì refresh token không thể decode như access token, cần lấy username từ request
+            // Hoặc lưu mapping refreshToken -> username trong DB
             
-            User user = userRepository.findByEmail(email);
+            // Tạm thời throw exception để yêu cầu username từ client
+            throw new RuntimeException("Username required for refresh token. Please update API call to include username.");
+            
+        } catch (Exception e) {
+            System.err.println("[RefreshToken] Error: " + e.getMessage());
+            throw new RuntimeException("Failed to refresh access token: " + e.getMessage());
+        }
+    }
+    
+    // Overload method với username parameter
+    public LoginResponse refreshAccessToken(String refreshToken, String username) {
+        try {
+            // Call Cognito để refresh token
+            String newAccessToken = cognitoService.refreshToken(refreshToken, username);
+            
+            // Lấy user info từ email/username
+            User user = userRepository.findByEmail(username);
             if (user == null) {
-                throw new RuntimeException("User not found");
+                // Try tìm theo fullName nếu không phải email
+                user = userRepository.findAll().stream()
+                        .filter(u -> u.getFullName().equals(username))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("User not found"));
             }
             
-            // Kiểm tra refresh token còn hợp lệ không
-            if (!tokenService.hasValidToken(user, iuh.fit.edu.entity.constant.TokenType.REFRESH_TOKEN)) {
-                throw new RuntimeException("Refresh token expired or revoked");
-            }
-            
-            // Tạo access token mới (giả sử dùng lại token từ Cognito)
-            // Trong thực tế, bạn có thể call Cognito API để refresh token
-            String newAccessToken = refreshToken; // Placeholder - cần implement Cognito refresh
-            
-            // Lưu access token record mới (60 phút)
-            tokenService.saveTokenRecord(user, iuh.fit.edu.entity.constant.TokenType.ACCESS_TOKEN, 60);
+            // Lưu access token record mới (5 phút)
+            tokenService.saveTokenRecord(user, iuh.fit.edu.entity.constant.TokenType.ACCESS_TOKEN, 5);
             
             return LoginResponse.builder()
                     .token(newAccessToken)

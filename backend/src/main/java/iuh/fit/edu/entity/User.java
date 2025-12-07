@@ -14,7 +14,6 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data
-
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,14 +41,14 @@ public class User {
     @ToString.Exclude
     private Role role;
 
-    @Column(columnDefinition = "DATETIME")
-    private OffsetDateTime createdAt;
+
+    @Column(nullable = false, updatable = false)
+    private OffsetDateTime createdAt=OffsetDateTime.now();
+    
+    private OffsetDateTime updatedAt;
     
     private String createdBy;
     private String updatedBy;
-    
-    @Column(columnDefinition = "DATETIME")
-    private OffsetDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
