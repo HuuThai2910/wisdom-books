@@ -669,6 +669,12 @@ const ViewUpsertBook = () => {
                                             label="Giá nhập"
                                             name="importPrice"
                                             placeholder="0"
+                                            disabled={!!dataUpdate?.id}
+                                            tooltip={
+                                                dataUpdate?.id
+                                                    ? "Không thể thay đổi giá nhập khi cập nhật"
+                                                    : undefined
+                                            }
                                             fieldProps={{
                                                 addonAfter: "₫",
                                                 formatter: (value) =>

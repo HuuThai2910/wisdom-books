@@ -30,7 +30,7 @@ public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificat
             "where b.id = :id")
     int restoreStock(@Param("id") Long id, @Param("quantity") int quantity);
     
-    @Query("SELECT COUNT(b) FROM Book b WHERE b.quantity = 0")
+    @Query("SELECT COUNT(b) FROM Book b WHERE b.quantity = 0 and b.status = 'SALE'")
     long countOutOfStockBooks();
     
     @Query("SELECT COUNT(b) FROM Book b WHERE b.quantity > 0 AND b.quantity <= 10")

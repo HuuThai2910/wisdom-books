@@ -544,7 +544,8 @@ const UserFormPage = () => {
                   </label>
                   <input
                     type="text"
-                    readOnly={mode === "view"}
+                    readOnly={mode === "view" || mode === "edit"}
+                    disabled={mode === "edit"}
                     value={formData.fullName}
                     onChange={(e) => {
                       setFormData({ ...formData, fullName: e.target.value });
@@ -556,7 +557,7 @@ const UserFormPage = () => {
                       outline-none transition-all duration-200 focus:border-[#2196F3] focus:shadow-lg
                       ${errors.fullName ? "border-red-500" : "border-gray-200"}
                       ${
-                        mode === "view" ? "bg-gray-100 cursor-not-allowed" : ""
+                        mode === "view" || mode === "edit" ? "bg-gray-100 cursor-not-allowed" : ""
                       }`}
                   />
                   {errors.fullName && (

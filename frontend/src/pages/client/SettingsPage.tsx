@@ -393,12 +393,8 @@ export default function SettingsPage() {
                                             name="fullName"
                                             value={formData.fullName}
                                             onChange={handleInputChange}
-                                            disabled={!isEditing}
-                                            className={`w-full px-4 py-2.5 rounded-lg border transition-all duration-200 ${
-                                                isEditing 
-                                                    ? 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500' 
-                                                    : 'border-gray-200 bg-gray-50 text-gray-600'
-                                            } outline-none`}
+                                            disabled={true}
+                                            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed outline-none"
                                             placeholder="Nhập họ tên"
                                         />
                                     </div>
@@ -413,12 +409,8 @@ export default function SettingsPage() {
                                             name="email"
                                             value={formData.email}
                                             onChange={handleInputChange}
-                                            disabled={!isEditing}
-                                            className={`w-full px-4 py-2.5 rounded-lg border transition-all duration-200 ${
-                                                isEditing 
-                                                    ? 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500' 
-                                                    : 'border-gray-200 bg-gray-50 text-gray-600'
-                                            } outline-none`}
+                                            disabled={true}
+                                            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed outline-none"
                                             placeholder="Nhập email"
                                         />
                                     </div>

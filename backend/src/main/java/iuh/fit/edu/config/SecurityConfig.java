@@ -98,7 +98,7 @@ public class SecurityConfig {
 
                         // Admin endpoints - CHÚ Ý: các rule cụ thể phải đặt TRƯỚC các rule chung
                         .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "1","CUSTOMER","3","WARE_HOUSE_STAFF","STAFF")
-                        .requestMatchers("/api/dashboard/**").hasAnyAuthority("ADMIN", "1")
+                        .requestMatchers("/api/dashboard/**").hasAnyAuthority("ADMIN", "1", "STAFF", "2", "WARE_HOUSE_STAFF", "4")
                         
                         // Staff endpoints (POST/PUT/DELETE books và orders)
                         .requestMatchers(HttpMethod.POST, "/api/books/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2")
