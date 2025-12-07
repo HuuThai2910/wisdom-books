@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
-    Breadcrumb,
     Col,
     Row,
     message,
@@ -10,13 +9,10 @@ import {
     Image,
     Form,
     Card,
-    Space,
     Typography,
-    Tabs,
     Modal,
 } from "antd";
 import {
-    FooterToolbar,
     ProForm,
     ProFormText,
     ProFormDigit,
@@ -181,30 +177,53 @@ const ViewUpsertBook = () => {
             console.log("Supplier:", values.supplier);
             console.log("Description state:", description);
             console.log("ShortDes from form:", values.shortDes);
+            console.log("FileList:", fileList);
+            console.log("Existing images:", existingImages);
+            console.log("New files:", newFiles);
+            console.log("New file objects:", newFileObjects);
 
             // Xử lý ảnh
             if (!dataUpdate?.id) {
-                // Tạo mới: validate frontend và gửi mảng rỗng
+                // Tạo mới: validate frontend và gửi placeholder
                 // Backend sẽ nhận lỗi validation nếu mảng rỗng
                 bookData.image = fileList.length > 0 ? ["placeholder.jpg"] : [];
             } else {
-                // Update: chỉ gửi ảnh cũ (không gửi placeholder cho ảnh mới)
-                bookData.image = existingImages;
+                // Update:
+                // - Nếu có ảnh cũ: gửi ảnh cũ
+                // - Nếu không có ảnh cũ nhưng có ảnh mới: gửi placeholder
+                // - Ảnh mới sẽ được upload sau và thay thế placeholder
+                if (existingImages.length > 0) {
+                    bookData.image = existingImages;
+                } else if (newFileObjects.length > 0) {
+                    // Gửi placeholder để pass validation, sẽ được thay thế bằng ảnh thật
+                    bookData.image = ["placeholder.jpg"];
+                } else {
+                    // Không có ảnh nào
+                    bookData.image = [];
+                }
             }
 
             if (dataUpdate?.id) {
                 const res = await bookApi.updateBook(dataUpdate.id, bookData);
 
                 if (res && res.success && res.data) {
+                    console.log(
+                        "Book updated successfully, now uploading new images..."
+                    );
+
                     // Upload new images to S3 after update
                     if (newFileObjects.length > 0) {
                         try {
-                            await bookApi.uploadBookImages(
+                            console.log(
+                                `Uploading ${newFileObjects.length} new images to S3...`
+                            );
+                            const uploadResult = await bookApi.uploadBookImages(
                                 dataUpdate.id,
                                 newFileObjects
                             );
+                            console.log("Upload result:", uploadResult);
                             console.log(
-                                `Uploaded ${newFileObjects.length} images to S3`
+                                `Successfully uploaded ${newFileObjects.length} images to S3`
                             );
                         } catch (uploadError) {
                             console.error("Upload error:", uploadError);
@@ -213,7 +232,10 @@ const ViewUpsertBook = () => {
                                     "Cập nhật sách thành công nhưng upload ảnh thất bại",
                                 description: "Vui lòng thử upload lại sau.",
                             });
+                            return; // Dừng lại, không navigate
                         }
+                    } else {
+                        console.log("No new images to upload");
                     }
                     message.success("Cập nhật sách thành công!");
                     navigate("/admin/books");
@@ -611,7 +633,7 @@ const ViewUpsertBook = () => {
                                         <ProFormDigit
                                             label="Năm xuất bản"
                                             name="yearOfPublication"
-                                            placeholder="2024"
+                                            placeholder="2025"
                                         />
                                     </Col>
                                 </Row>
@@ -874,7 +896,7 @@ const ViewUpsertBook = () => {
                 >
                     <div className="p-6">
                         <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0">
+                            <div className="shrink-0">
                                 <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
                                     <ExclamationCircleOutlined className="text-2xl text-blue-600" />
                                 </div>

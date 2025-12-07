@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, ChevronDown, Home, User, LogOut } from "lucide-react";
 import { logout as logoutApi } from "../../api/auth";
@@ -83,7 +83,7 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
                 className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 rounded-full bg-linear-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
                 {currentUser?.fullName?.charAt(0).toUpperCase() || 'A'}
               </div>
             )}

@@ -6,11 +6,9 @@ import iuh.fit.edu.entity.constant.UserStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Entity
@@ -52,6 +50,15 @@ public class User {
     private String createdBy;
     private String updatedBy;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = OffsetDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = OffsetDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+    }
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude

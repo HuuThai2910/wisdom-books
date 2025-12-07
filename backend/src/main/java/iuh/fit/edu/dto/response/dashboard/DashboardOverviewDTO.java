@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TopCategoryDTO {
-    private Long categoryId; // ID thể loại
-    private String category; // Tên thể loại
-    private long sales; // Số lượng đã bán
+public class DashboardOverviewDTO {
+    private long totalBooks;
+    private long totalCustomers;
+    private long outOfStockBooks;
+    private long lowStockBooks;
 }

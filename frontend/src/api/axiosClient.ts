@@ -12,12 +12,6 @@ const axiosClient: AxiosInstance = axios.create({
 
 // Request interceptor - log để debug
 axiosClient.interceptors.request.use((config) => {
-    console.log('[axiosClient] ========== REQUEST START ==========');
-    console.log('[axiosClient] Method:', config.method?.toUpperCase());
-    console.log('[axiosClient] URL:', config.url);
-    console.log('[axiosClient] Full URL:', config.baseURL + config.url);
-    console.log('[axiosClient] withCredentials:', config.withCredentials);
-    console.log('[axiosClient] All cookies:', document.cookie);
     
     // Check specifically for id_token cookie
     const cookies = document.cookie.split(';').map(c => c.trim());
@@ -28,16 +22,30 @@ axiosClient.interceptors.request.use((config) => {
     return config;
 });
 
-// Response interceptor - xử lý lỗi 401 Unauthorized
+// Response interceptor - xử lý lỗi 401/403
 axiosClient.interceptors.response.use(
     (res) => res,
-    (err) => {
+    async (err) => {
         console.log('[axiosClient] Error:', err.response?.status, err.config?.url);
+        console.log('[axiosClient] Error data:', err.response?.data);
         
-        // Nếu lỗi 401 (Unauthorized) thì redirect đến trang unauthorized
-        if (err.response?.status === 401) {
-            const currentPath = window.location.pathname;
+        const currentPath = window.location.pathname;
+        const errorData = err.response?.data;
+        
+        // Kiểm tra nếu là lỗi tài khoản bị vô hiệu hóa (401 hoặc 403)
+        if (errorData?.error === 'ACCOUNT_DISABLED') {
+            console.log('[axiosClient] Account disabled detected, redirecting to /account-disabled...');
             
+            // Ngăn redirect lặp lại
+            if (currentPath !== '/account-disabled') {
+                window.location.href = '/account-disabled';
+            }
+            
+            return Promise.reject(errorData);
+        }
+        
+        // Xử lý lỗi 401 (Unauthorized) khác
+        if (err.response?.status === 401) {
             // CHỈ redirect đến /unauthorized khi đang ở trang admin/staff/warehouse
             // Trang client (bán hàng) không redirect vì người dùng chưa đăng nhập vẫn xem được
             const isAdminRoute = currentPath.startsWith('/admin');
@@ -50,6 +58,7 @@ axiosClient.interceptors.response.use(
                 window.location.href = '/unauthorized';
             }
         }
+        
         return Promise.reject(err.response?.data || err.message);
     }
 );

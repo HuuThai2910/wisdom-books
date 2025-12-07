@@ -36,4 +36,7 @@ public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificat
     @Query("SELECT COUNT(b) FROM Book b WHERE b.quantity > 0 AND b.quantity <= 10")
     long countLowStockBooks();
 
+        @Query("SELECT COUNT(b) FROM Book b WHERE b.createdAt >= :startDate AND b.createdAt <= :endDate")
+        long countNewBooksByDateRange(@Param("startDate") java.time.OffsetDateTime startDate, @Param("endDate") java.time.OffsetDateTime endDate);
+
 }

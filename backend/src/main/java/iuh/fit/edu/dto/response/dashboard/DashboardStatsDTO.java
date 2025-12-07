@@ -8,15 +8,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DashboardStatsDTO {
-    private long totalBooks;
-    private long totalCustomers;
-    private long outOfStockBooks; // Sách hết hàng (quantity = 0)
-    private long lowStockBooks; // Sách sắp hết (quantity <= 10 và > 0)
+    // Filtered stats (depend on date range)
     private long totalOrders;
     private double totalRevenue;
     private double totalProfit;
-    private double customerGrowthRate; // % khách hàng mới trong tháng
+    private double customerGrowthRate; // % khách hàng mới
     private double cancelledOrderRate; // % đơn hủy
-    private long newCustomersThisMonth; // Số khách hàng mới trong tháng
+    private long newCustomersThisMonth; // Số khách hàng mới trong khoảng thời gian
     private long cancelledOrders; // Số đơn hủy
+    private long newBooksImported; // Số sách mới nhập trong khoảng thời gian
 }

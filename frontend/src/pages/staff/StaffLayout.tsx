@@ -130,7 +130,7 @@ export default function StaffLayout({ children }: StaffLayoutProps) {
           isSidebarExpanded ? "lg:ml-64" : "lg:ml-20"
         } transition-all duration-200`}
       >
-        <AdminHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
+        <AdminHeader onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)} />
         <main className="flex-1 p-6">{children}</main>
         <AdminFooter />
       </div>

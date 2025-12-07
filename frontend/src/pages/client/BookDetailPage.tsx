@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { BookOpen, Info, MessageSquare } from "lucide-react";
 import {
@@ -15,8 +15,8 @@ import {
 } from "react-icons/fa";
 import bookApi from "../../api/bookApi";
 import { Book } from "../../types";
-import { useBooks } from "../../contexts/BookContext";
 import BookCard from "../../components/common/BookCard";
+import Breadcrumb from "../../components/common/Breadcrumb";
 import toast from "react-hot-toast";
 import { useAppDispatch } from "../../app/store";
 import { addItem } from "../../features/cart/cartSlice";
@@ -34,7 +34,6 @@ export default function BookDetailPage() {
     const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
     const [isZooming, setIsZooming] = useState(false);
     const [relatedBooks, setRelatedBooks] = useState<Book[]>([]);
-    const { books } = useBooks();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
@@ -293,6 +292,12 @@ export default function BookDetailPage() {
     return (
         <div className="min-h-screen wisbook-gradient-overlay pt-15 px-35">
             <div className="container mx-auto px-6 py-8">
+                <Breadcrumb
+                    items={[
+                        { label: "Sản phẩm", path: "/books" },
+                        { label: book?.title || "Chi tiết sách" },
+                    ]}
+                />
                 <div className="grid lg:grid-cols-12 gap-8 mb-16">
                     {/* Image Gallery */}
                     <motion.div
@@ -666,7 +671,7 @@ export default function BookDetailPage() {
                             </h3>
                             <div className="space-y-3">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
                                         <svg
                                             className="w-4 h-4 text-blue-600"
                                             fill="currentColor"
@@ -687,7 +692,7 @@ export default function BookDetailPage() {
                                 </div>
 
                                 <div className="flex items-start gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
                                         <svg
                                             className="w-4 h-4 text-blue-600"
                                             fill="currentColor"
@@ -720,37 +725,40 @@ export default function BookDetailPage() {
                             </h3>
                             <div className="space-y-3">
                                 <div className="flex items-start gap-3">
-                                    <span className="text-xl flex-shrink-0 mt-0.5">
+                                    <span className="text-xl shrink-0 mt-0.5">
                                         📌
                                     </span>
                                     <p className="text-sm text-gray-700 leading-relaxed">
                                         Tặng kèm Bookmark (đánh dấu trang) cho
-                                        các sách Ẩm thực, Kinh doanh, Thiếu nhi, Du lịch
+                                        các sách Ẩm thực, Kinh doanh, Thiếu nhi,
+                                        Du lịch
                                     </p>
                                 </div>
 
                                 <div className="flex items-start gap-3">
-                                    <span className="text-xl flex-shrink-0 mt-0.5">
+                                    <span className="text-xl shrink-0 mt-0.5">
                                         🎁
                                     </span>
                                     <p className="text-sm text-gray-700 leading-relaxed">
                                         <span className="font-semibold text-blue-600">
                                             FREESHIP
                                         </span>{" "}
-                                        cho tất cả các đơn hàng khi mua tại Wisdom Book
+                                        cho tất cả các đơn hàng khi mua tại
+                                        Wisdom Book
                                     </p>
                                 </div>
 
                                 <div className="flex items-start gap-3">
-                                    <span className="text-xl flex-shrink-0 mt-0.5">
+                                    <span className="text-xl shrink-0 mt-0.5">
                                         🎁
                                     </span>
                                     <p className="text-sm text-gray-700 leading-relaxed">
-                                        Tặng kèm {" "}
+                                        Tặng kèm{" "}
                                         <span className="font-semibold text-blue-600">
                                             VOUCHER lên đến 20K
                                         </span>{" "}
-                                        cho tất cả các khách hàng tại Wisdom Book ngãu nhiên
+                                        cho tất cả các khách hàng tại Wisdom
+                                        Book ngãu nhiên
                                     </p>
                                 </div>
                             </div>

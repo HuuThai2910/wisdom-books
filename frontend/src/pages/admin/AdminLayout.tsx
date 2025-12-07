@@ -2,12 +2,10 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Home,
-  Users,
   UserCheck,
   ShoppingCart,
   BookOpen,
   Warehouse,
-  BarChart3,
   Shield,
   Menu,
   MoreVertical,

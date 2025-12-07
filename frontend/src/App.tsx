@@ -35,6 +35,7 @@ import RoleBasedRoute from "./components/common/RoleBasedRoute";
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import WarehouseDashboard from "./pages/warehouse/WarehouseDashboard";
 import Unauthorized from "./pages/Unauthorized";
+import AccountDisabled from "./pages/AccountDisabled";
 import { useEffect } from "react";
 import { tokenRefreshManager } from "./util/tokenRefreshManager";
 import Cookies from "js-cookie";
@@ -115,6 +116,7 @@ function App() {
                     />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/unauthorized" element={<Unauthorized />} />
+                    <Route path="/account-disabled" element={<AccountDisabled />} />
                     <Route
                         path="/books"
                         element={
@@ -263,9 +265,9 @@ function App() {
                         </RoleBasedRoute>
                     } />
                     <Route path="/admin/dashboard" element={
-                        <RoleBasedRoute allowedRoles={['1', 'ADMIN', 1, 'admin']}>
-                            {/* <Dashboard /> */}
-                            <ManageUserPage />
+                        <RoleBasedRoute allowedRoles={['1', 'ADMIN']}>
+                            <Dashboard />
+                            {/* <ManageUserPage /> */}
                         </RoleBasedRoute>
                     } />
                     <Route path="/admin/profile" element={
@@ -306,7 +308,7 @@ function App() {
 
                     {/* Staff Routes - Only for STAFF role (2) */}
                     <Route path="/staff/dashboard" element={
-                        <RoleBasedRoute allowedRoles={['2', 'STAFF', 2, 'staff']}>
+                        <RoleBasedRoute allowedRoles={['2', 'STAFF']}>
                             <StaffDashboard />
                         </RoleBasedRoute>
                     } />
@@ -323,7 +325,7 @@ function App() {
 
                     {/* Warehouse Routes - Only for WARE_HOUSE_STAFF role (4) */}
                     <Route path="/warehouse/dashboard" element={
-                        <RoleBasedRoute allowedRoles={['4', 'WARE_HOUSE_STAFF', 4, 'ware_house_staff']}>
+                        <RoleBasedRoute allowedRoles={['4', 'WARE_HOUSE_STAFF']}>
                             <WarehouseDashboard />
                         </RoleBasedRoute>
                     } />

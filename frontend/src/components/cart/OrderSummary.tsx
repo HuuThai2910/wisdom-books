@@ -34,7 +34,7 @@ export default function OrderSummary({ onCheckout }: OrderSummaryProps) {
                     </div>
 
                     <button
-                        className="w-full py-3 border-2  rounded-full text-gray-900 font-medium hover:bg-blue-700 hover:text-white transition-colors mb-3"
+                        className="w-full py-3 border border-blue-600 rounded-full text-blue-600 font-medium hover:bg-blue-700 hover:text-white transition-colors mb-3 shadow-sm"
                         onClick={() => navigate("/books")}
                     >
                         Tiếp tục mua sắm
@@ -42,10 +42,10 @@ export default function OrderSummary({ onCheckout }: OrderSummaryProps) {
 
                     <button
                         disabled={totalQuantity === 0}
-                        className={`w-full py-3 font-medium rounded-full transition-colors ${
+                        className={`w-full py-3 font-medium rounded-full transition-colors shadow-sm ${
                             totalQuantity === 0
                                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                : "bg-blue-700 text-white hover:bg-blue-700"
+                                : "bg-blue-700 text-white hover:bg-blue-800"
                         }`}
                         onClick={onCheckout}
                     >
