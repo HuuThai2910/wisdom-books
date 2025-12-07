@@ -1,4 +1,4 @@
-import { FaRedo } from "react-icons/fa";
+// removed FaRedo button; reset handled by header
 
 interface InventoryFiltersProps {
   searchTerm: string;
@@ -114,14 +114,10 @@ export default function InventoryFilters({
         </div>
       </div>
 
+      {/* Removed explicit "Làm lại" button; reset handled by header reset icon */}
       <div className="flex items-end">
-        <button
-          onClick={onReset}
-          className="flex items-center gap-2 bg-linear-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-2.5 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg transform hover:scale-105"
-        >
-          <FaRedo className="text-sm" />
-          Làm lại
-        </button>
+        {/* placeholder to keep layout alignment */}
+        <div />
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import AdminLayout from "../admin/AdminLayout";
 import dashboardApi from "../../api/dashboardApi";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { DateRange, DashboardStats, DashboardOverview } from "../../types";
 import TopBooksChart from "../../components/dashboard/TopBooksChart";
 import MonthlyRevenueChart from "../../components/dashboard/MonthlyRevenueChart";
@@ -259,16 +259,15 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout>
-      <Toaster position="top-right" />
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 flex items-center justify-between">
           <div className="ml-14 flex items-center gap-2">
             <p className="text-gray-600">Chào</p>
             <span className="text-xl font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-              {user}
+              {user},
             </span>
             <p className="text-gray-600">
-              , Đây là bảng điều khiển quản trị hệ thống
+              Đây là bảng điều khiển quản trị hệ thống
             </p>
           </div>
           <div className="text-right">
@@ -280,7 +279,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="group bg-linear-to-br from-white to-blue-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-blue-100/50">
+          <div className="group bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-blue-100/50">
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 bg-linear-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <Package className="w-7 h-7 text-white" />
@@ -295,7 +294,7 @@ export default function AdminDashboard() {
             <p className="text-xs text-blue-600 font-medium">Đang hoạt động</p>
           </div>
 
-          <div className="group bg-linear-to-br from-white to-cyan-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-cyan-100/50">
+          <div className="group bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-cyan-100/50">
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 bg-linear-to-br from-cyan-500 to-cyan-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <Users className="w-7 h-7 text-white" />
@@ -312,7 +311,7 @@ export default function AdminDashboard() {
             <p className="text-xs text-cyan-600 font-medium">Đã đăng ký</p>
           </div>
 
-          <div className="group bg-linear-to-br from-white to-red-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-red-100/50">
+          <div className="group bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-red-100/50">
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 bg-linear-to-br from-red-500 to-red-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <AlertCircle className="w-7 h-7 text-white" />
@@ -327,7 +326,7 @@ export default function AdminDashboard() {
             <p className="text-xs text-red-600 font-medium">Cần nhập thêm</p>
           </div>
 
-          <div className="group bg-linear-to-br from-white to-orange-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-orange-100/50">
+          <div className="group bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-orange-100/50">
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 bg-linear-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <AlertCircle className="w-7 h-7 text-white" />
@@ -344,7 +343,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="group bg-linear-to-br from-white to-emerald-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-emerald-100/50">
+          <div className="group bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-emerald-100/50">
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 bg-linear-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <ShoppingCart className="w-7 h-7 text-white" />
@@ -361,7 +360,7 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          <div className="group bg-linear-to-br from-white to-blue-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-blue-100/50">
+          <div className="group bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-blue-100/50">
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 bg-linear-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <DollarSign className="w-7 h-7 text-white" />
@@ -378,7 +377,7 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          <div className="group bg-linear-to-br from-white to-amber-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-amber-100/50">
+          <div className="group bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-amber-100/50">
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 bg-linear-to-br from-amber-500 to-amber-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <TrendingUp className="w-7 h-7 text-white" />

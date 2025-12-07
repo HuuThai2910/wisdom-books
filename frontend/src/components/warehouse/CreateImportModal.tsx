@@ -177,7 +177,14 @@ export default function CreateImportModal({
           "Số lượng",
         ];
 
-        // Kiểm tra nếu có cột dư
+        // Kiểm tra số lượng cột
+        if (headers.length < expectedHeaders.length) {
+          toast.error(
+            `File thiếu cột! Cần ${expectedHeaders.length} cột (ISBN, Tên sách, Năm xuất bản, Giá nhập, Số lượng) nhưng chỉ có ${headers.length} cột`
+          );
+          return;
+        }
+
         if (headers.length > expectedHeaders.length) {
           toast.error(
             `File có ${headers.length} cột, nhưng chỉ cho phép ${expectedHeaders.length} cột (ISBN, Tên sách, Năm XB, Giá nhập, Số lượng)`
@@ -439,8 +446,37 @@ export default function CreateImportModal({
       toast.error("Vui lòng chọn sách và nhập số lượng");
       return;
     }
-    if (!importQuantity || Number(importQuantity) <= 0) {
-      toast.error("Vui lòng nhập số lượng hợp lệ");
+
+    // Validate quantity input
+    if (!importQuantity || importQuantity.trim() === "") {
+      toast.error("Vui lòng nhập số lượng");
+      setImportQuantity("");
+      return;
+    }
+
+    const quantity = Number(importQuantity);
+
+    if (isNaN(quantity)) {
+      toast.error("Số lượng phải là số hợp lệ");
+      setImportQuantity("");
+      return;
+    }
+
+    if (!Number.isInteger(quantity)) {
+      toast.error("Số lượng phải là số nguyên");
+      setImportQuantity("");
+      return;
+    }
+
+    if (quantity < 0) {
+      toast.error("Số lượng không được là số âm");
+      setImportQuantity("");
+      return;
+    }
+
+    if (quantity === 0) {
+      toast.error("Số lượng phải lớn hơn 0");
+      setImportQuantity("");
       return;
     }
 
@@ -449,8 +485,6 @@ export default function CreateImportModal({
       toast.error("Không tìm thấy sách");
       return;
     }
-
-    const quantity = Number(importQuantity);
 
     // Kiểm tra số lượng 1 loại sách không quá 10000 cuốn
     if (selectedBook.quantity + quantity > 10000) {

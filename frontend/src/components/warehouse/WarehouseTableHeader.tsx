@@ -5,6 +5,7 @@ interface WarehouseTableHeaderProps {
   setActiveTab: (tab: "inventory" | "history") => void;
   onCreateImport: () => void;
   onRefresh: () => void;
+  onReset?: () => void;
   onExport?: () => void;
   showColumnConfig: boolean;
   setShowColumnConfig: (value: boolean) => void;
@@ -22,6 +23,7 @@ export default function WarehouseTableHeader({
   setActiveTab,
   onCreateImport,
   onRefresh,
+  onReset,
   onExport,
   showColumnConfig,
   setShowColumnConfig,
@@ -84,9 +86,14 @@ export default function WarehouseTableHeader({
           Tạo phiếu nhập
         </button>
         <button
-          onClick={onRefresh}
+          onClick={() => {
+            // First perform refresh action
+            onRefresh && onRefresh();
+            // Then reset filters if provided
+            onReset && onReset();
+          }}
           className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-          title="Làm mới"
+          title="Làm mới / Đặt lại bộ lọc"
         >
           <RefreshCw className="text-gray-600" size={18} />
         </button>

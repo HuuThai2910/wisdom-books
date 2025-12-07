@@ -458,6 +458,7 @@ export default function WarehousePage() {
             setActiveTab={setActiveTab}
             onCreateImport={() => setShowCreateImportModal(true)}
             onRefresh={handleRefresh}
+            onReset={handleReset}
             onExport={
               activeTab === "inventory"
                 ? () => setShowExportModal(true)
