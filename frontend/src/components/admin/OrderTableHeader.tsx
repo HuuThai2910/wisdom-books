@@ -2,7 +2,7 @@
 // Hiển thị mũi tên chỉ hướng sắp xếp (tăng/giảm)
 // Tuân thủ SRP: chỉ đảm nhiệm hiển thị header và xử lý click để thay đổi sort
 
-import { ChevronsUpDown, ChevronUp, ChevronDown, ArrowUp, ArrowDown } from "lucide-react";
+import { ChevronsUpDown, ChevronUp, ChevronDown} from "lucide-react";
 
 interface OrderTableHeaderProps {
     // Tên hiển thị của cột

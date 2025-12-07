@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function AdminFooter() {
   return (
     <footer className="bg-white border-t border-gray-200 py-4 px-6 mt-auto">
