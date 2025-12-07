@@ -67,7 +67,7 @@ public class Book {
     private String createdBy;
     private String updatedBy;
     
-    @Min(value = 1, message = "Số lượng phải lớn hơn 0")
+    @Min(value = 0, message = "Số lượng phải lớn hơn hoặc bằng 0")
     private int quantity;
 
     @OneToMany(mappedBy = "book")

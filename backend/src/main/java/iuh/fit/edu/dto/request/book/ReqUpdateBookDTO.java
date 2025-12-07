@@ -49,7 +49,7 @@ public class ReqUpdateBookDTO {
     private BookStatus status;
 
     @NotNull(message = "Số lượng không được để trống")
-    @Min(value = 1, message = "Số lượng phải lớn hơn 0")
+    @Min(value = 0, message = "Số lượng phải lớn hơn hoặc bằng 0")
     private Integer quantity;
 
     // Danh sách đường dẫn hình ảnh

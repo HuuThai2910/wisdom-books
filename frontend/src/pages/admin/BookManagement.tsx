@@ -441,17 +441,41 @@ export default function BookManagement() {
         if (!bookToDelete) return;
 
         try {
-            // Update status to STOP_SALE instead of deleting
-            await bookApi.updateBook(bookToDelete.id, {
-                ...bookToDelete,
-                status: "STOP_SALE",
-            });
+            // Prepare data according to ReqUpdateBookDTO format
+            const updateData = {
+                id: bookToDelete.id,
+                isbn: bookToDelete.isbn,
+                title: bookToDelete.title,
+                author: bookToDelete.author,
+                yearOfPublication: bookToDelete.yearOfPublication,
+                shortDes: bookToDelete.shortDes || "",
+                description: bookToDelete.description || "",
+                sellingPrice: bookToDelete.sellingPrice,
+                importPrice: bookToDelete.importPrice,
+                status: "STOP_SALE" as const, // Change status to STOP_SALE
+                quantity: bookToDelete.quantity, // Keep original quantity
+                image: bookToDelete.bookImage?.map((img) => img.imagePath) || [
+                    "placeholder.jpg",
+                ],
+                categoryIds: bookToDelete.category?.map((cat) => cat.id) || [],
+                supplierId: bookToDelete.supplier?.id || 1,
+                inventoryId: 1, // Default inventory ID
+            };
+
+            await bookApi.updateBook(bookToDelete.id, updateData);
             toast.success("Đã ngừng bán sách này!");
             closeDeleteConfirm();
             fetchBooks();
         } catch (error: any) {
-            toast.error(error.response?.data?.message || "Có lỗi xảy ra!");
             console.error("Error updating book status:", error);
+            console.error("Error response:", error.response?.data);
+
+            const errorMessage =
+                error.response?.data?.message ||
+                error.response?.data?.error ||
+                error.message ||
+                "Có lỗi xảy ra khi cập nhật trạng thái!";
+            toast.error(errorMessage);
         }
     };
 
