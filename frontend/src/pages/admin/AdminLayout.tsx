@@ -32,7 +32,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { name: "Đơn hàng", path: "/admin/orders", icon: ShoppingCart },
     { name: "Quản lý sách", path: "/admin/books", icon: BookOpen },
     { name: "Kho", path: "/admin/warehouse", icon: Warehouse },
-    { name: "Phân quyền", path: "/admin/permissions", icon: Shield },
   ];
 
   const isActive = (path: string) => location.pathname === path;

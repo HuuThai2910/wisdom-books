@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useLocation } from "react-router-dom";
 import AdminLayout from "./AdminLayout";
+import WarehouseLayout from "../warehouse/WarehouseLayout";
 import bookApi from "../../api/bookApi";
 import entryFormApi from "../../api/entryFormApi";
 import { EntryForm, EntryFormDetail } from "../../types";
@@ -18,6 +20,8 @@ import HistoryTable from "../../components/warehouse/HistoryTable";
 import TablePagination from "../../components/warehouse/TablePagination";
 
 export default function WarehousePage() {
+  const location = useLocation();
+  const isWarehouseRoute = location.pathname.startsWith("/warehouse");
   const [books, setBooks] = useState<ApiBook[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalBooks, setTotalBooks] = useState(0);
@@ -413,8 +417,10 @@ export default function WarehousePage() {
       ? bookCurrentPage * bookPageSize
       : currentPage * pageSize;
 
+  const LayoutComponent = isWarehouseRoute ? WarehouseLayout : AdminLayout;
+
   return (
-    <AdminLayout>
+    <LayoutComponent>
       <>
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -566,6 +572,6 @@ export default function WarehousePage() {
           onClearFilters={handleClearAdvancedFilters}
         />
       </>
-    </AdminLayout>
+    </LayoutComponent>
   );
 }

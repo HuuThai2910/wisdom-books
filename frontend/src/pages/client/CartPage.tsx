@@ -18,16 +18,33 @@ export default function CartPage() {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { cartItems } = useAppSelector((state) => state.cart);
-    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         dispatch(fetchCart());
     }, [dispatch]);
 
-    const allSelected =
-        cartItems.length > 0 &&
-        cartItems.every((item: CartItem) => item.selected);
+    /**
+     * Lọc ra các sản phẩm còn hàng (không tính sản phẩm hết hàng)
+     * Chỉ các sản phẩm này mới có checkbox và được select
+     */
+    const availableItems = cartItems.filter(
+        (item: CartItem) => item.book.quantity > 0
+    );
 
+    /**
+     * Kiểm tra tất cả sản phẩm còn hàng đã được chọn chưa
+     * Chỉ tính các sản phẩm còn hàng, bỏ qua sản phẩm hết hàng
+     */
+    const allSelected =
+        availableItems.length > 0 &&
+        availableItems.every((item: CartItem) => item.selected);
+
+    /**
+     * Toggle chọn tất cả sản phẩm còn hàng
+     * Chỉ select/deselect các sản phẩm còn hàng
+     * Sản phẩm hết hàng không bị ảnh hưởng
+     */
     const toggleSelectAll = () => {
         const newValue = !allSelected;
         dispatch(optimisticUpdateSelectAll(newValue));
@@ -131,12 +148,15 @@ export default function CartPage() {
                                     {/* Table Header */}
                                     <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-200 font-medium text-sm">
                                         <div className="col-span-4 flex items-center gap-3">
-                                            <input
-                                                type="checkbox"
-                                                checked={allSelected}
-                                                onChange={toggleSelectAll}
-                                                className="w-5 h-5 rounded border-gray-300 text-black focus:ring-black"
-                                            />
+                                            {/* Chỉ hiện checkbox "Chọn tất cả" nếu có sản phẩm còn hàng */}
+                                            {availableItems.length > 0 && (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={allSelected}
+                                                    onChange={toggleSelectAll}
+                                                    className="w-5 h-5 rounded border-gray-300 text-black focus:ring-black"
+                                                />
+                                            )}
                                             <span>Tên sản phẩm</span>
                                         </div>
                                         <div className="col-span-2 text-center">

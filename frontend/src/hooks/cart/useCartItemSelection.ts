@@ -11,7 +11,19 @@ export function useCartItemSelection(item: CartItem) {
     const dispatch = useAppDispatch();
     const selectDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Kiểm tra xem sản phẩm có được check khi hết hàng không
+    /**
+     * Effect: Tự động bỏ chọn sản phẩm khi hết hàng
+     *
+     * Logic:
+     * - Khi sản phẩm hết hàng (quantity = 0) và đang được chọn
+     * - Tự động deselect (bỏ chọn) sản phẩm đó
+     * - Cập nhật optimistic (UI ngay lập tức) và lên server
+     *
+     * Use case:
+     * - User đã chọn sản phẩm, sau đó sản phẩm bị người khác mua hết
+     * - Hoặc admin cập nhật số lượng = 0
+     * → Tự động bỏ chọn để tránh lỗi khi checkout
+     */
     useEffect(() => {
         if (item.book.quantity === 0 && item.selected) {
             // Cập nhật hiển thị ngay lập tức cho UI

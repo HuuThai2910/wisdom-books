@@ -10,7 +10,6 @@ import { CartItemProps } from "../../types";
 import { useNavigate } from "react-router-dom";
 import { S3_CONFIG } from "../../config/s3";
 
-
 export default function CartItem({ item }: CartItemProps) {
     const dispatch = useAppDispatch();
     const isOutOfStock = item.book.quantity === 0;
@@ -39,16 +38,18 @@ export default function CartItem({ item }: CartItemProps) {
         >
             {/* Checkbox */}
             <div className="col-span-4 flex items-center gap-4">
-                <input
-                    type="checkbox"
-                    checked={item.selected || false}
-                    onChange={(e) => {
-                        e.stopPropagation();
-                        handleToggleSelect();
-                    }}
-                    disabled={isOutOfStock}
-                    className="w-5 h-5 rounded border-gray-300 text-black focus:ring-black shrink-0 disabled:cursor-not-allowed"
-                />
+                {/* Chỉ hiện checkbox nếu sản phẩm còn hàng */}
+                {!isOutOfStock && (
+                    <input
+                        type="checkbox"
+                        checked={item.selected || false}
+                        onChange={(e) => {
+                            e.stopPropagation();
+                            handleToggleSelect();
+                        }}
+                        className="w-5 h-5 rounded border-gray-300 text-black focus:ring-black shrink-0"
+                    />
+                )}
 
                 {/* Image */}
                 <div
