@@ -63,25 +63,32 @@ public class CognitoServiceImpl implements CognitoService {
 
     @Override
     public CognitoTokens loginUser(LoginRequest request) {
-        Map<String,String> authParams = new HashMap<>();
-        authParams.put("USERNAME",request.getFullName());
-        authParams.put("PASSWORD",request.getPassword());
-        authParams.put("SECRET_HASH", calculateSecretHash(request.getFullName(), clientId, clientSecret));
+        try {
+            Map<String,String> authParams = new HashMap<>();
+            authParams.put("USERNAME",request.getFullName());
+            authParams.put("PASSWORD",request.getPassword());
+            authParams.put("SECRET_HASH", calculateSecretHash(request.getFullName(), clientId, clientSecret));
 
-        AdminInitiateAuthRequest authRequest=new AdminInitiateAuthRequest()
-                .withUserPoolId(userPoolId)
-                .withClientId(clientId)
-                .withAuthFlow(AuthFlowType.ADMIN_NO_SRP_AUTH)
-                .withAuthParameters(authParams);
+            AdminInitiateAuthRequest authRequest=new AdminInitiateAuthRequest()
+                    .withUserPoolId(userPoolId)
+                    .withClientId(clientId)
+                    .withAuthFlow(AuthFlowType.ADMIN_NO_SRP_AUTH)
+                    .withAuthParameters(authParams);
 
-        AdminInitiateAuthResult result=cognitoIdentityProvider.adminInitiateAuth(authRequest);
+            AdminInitiateAuthResult result=cognitoIdentityProvider.adminInitiateAuth(authRequest);
 
-        return CognitoTokens.builder()
-                .accessToken(result.getAuthenticationResult().getAccessToken())
-                .idToken(result.getAuthenticationResult().getIdToken())
-                .refreshToken(result.getAuthenticationResult().getRefreshToken())
-                .expiresIn(result.getAuthenticationResult().getExpiresIn())
-                .build();
+            return CognitoTokens.builder()
+                    .accessToken(result.getAuthenticationResult().getAccessToken())
+                    .idToken(result.getAuthenticationResult().getIdToken())
+                    .refreshToken(result.getAuthenticationResult().getRefreshToken())
+                    .expiresIn(result.getAuthenticationResult().getExpiresIn())
+                    .build();
+        } catch (NotAuthorizedException e) {
+            if (e.getErrorMessage() != null && e.getErrorMessage().contains("User is disabled")) {
+                throw new RuntimeException("ACCOUNT_DISABLED: Tài khoản của bạn đã bị vô hiệu hóa bởi quản trị viên");
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -127,6 +134,14 @@ public class CognitoServiceImpl implements CognitoService {
                 .withUsername(fullName)
                 .withUserPoolId(userPoolId);
         cognitoIdentityProvider.adminDisableUser(request);
+    }
+
+    @Override
+    public void enableUser(String fullName) {
+        AdminEnableUserRequest request=new AdminEnableUserRequest()
+                .withUsername(fullName)
+                .withUserPoolId(userPoolId);
+        cognitoIdentityProvider.adminEnableUser(request);
     }
 
     @Override

@@ -213,6 +213,7 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
           <input
             type={showPassword ? "text" : "password"}
             placeholder="Mật khẩu"
+            autoComplete="new-password"
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
@@ -223,7 +224,7 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
                 errors.password 
                   ? 'border-red-500 focus:border-red-500' 
                   : 'border-transparent focus:border-[#2196F3]'
-              }`}
+              } [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-contacts-auto-fill-button]:hidden`}
           />
           {password && (
             <button
@@ -245,6 +246,7 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
           <input
             type={showConfirmPassword ? "text" : "password"}
             placeholder="Nhập lại Mật khẩu"
+            autoComplete="new-password"
             value={confirmPassword}
             onChange={(e) => {
               setConfirmPassword(e.target.value);
@@ -255,7 +257,7 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
                 errors.confirmPassword 
                   ? 'border-red-500 focus:border-red-500' 
                   : 'border-transparent focus:border-[#2196F3]'
-              }`}
+              } [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-contacts-auto-fill-button]:hidden`}
           />
           {confirmPassword && (
             <button

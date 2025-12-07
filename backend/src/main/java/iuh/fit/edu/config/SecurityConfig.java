@@ -3,7 +3,9 @@ package iuh.fit.edu.config;
 import iuh.fit.edu.config.security.CustomAccessDeniedHandler;
 import iuh.fit.edu.config.security.CustomAuthenticationEntryPoint;
 import iuh.fit.edu.config.security.JwtCookieFilter;
+import iuh.fit.edu.config.security.UserStatusFilter;
 import iuh.fit.edu.repository.BlacklistedTokenRepository;
+import iuh.fit.edu.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +34,9 @@ public class SecurityConfig {
     @Autowired
     private BlacklistedTokenRepository blacklistedTokenRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private final String COGNITO_JWKS_URL =
             "https://cognito-idp.ap-southeast-1.amazonaws.com/ap-southeast-1_rnIXnN2rr/.well-known/jwks.json";
 
@@ -58,6 +63,12 @@ public class SecurityConfig {
         http.addFilterBefore(
                 new JwtCookieFilter(jwtDecoder(), jwtAuthenticationConverter(), blacklistedTokenRepository),
                 UsernamePasswordAuthenticationFilter.class
+        );
+
+        // Thêm filter kiểm tra trạng thái user sau khi authentication
+        http.addFilterAfter(
+                new UserStatusFilter(userRepository),
+                JwtCookieFilter.class
         );
 
         http
