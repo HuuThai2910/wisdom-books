@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 import emailjs from "@emailjs/browser";
+import Breadcrumb from "../../components/common/Breadcrumb";
 
 import {
     contactInfo,
@@ -39,9 +40,9 @@ export default function ContactPage() {
         setIsSubmitting(true);
 
         try {
-            const serviceId = "service_xvx17bh"; 
+            const serviceId = "service_xvx17bh";
             const templateId = "template_290k67w";
-            const publicKey = "6HQ6fxuSA9nwlH26t"; 
+            const publicKey = "6HQ6fxuSA9nwlH26t";
             const templateParams = {
                 name: formData.name,
                 email: formData.email,
@@ -82,7 +83,10 @@ export default function ContactPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 pt-20 px-20 relative overflow-hidden">
+        <div className="min-h-screen bg-blue-50 pt-20 px-20 relative overflow-hidden">
+            <div className="container mx-auto px-6 relative z-10 pt-5">
+                <Breadcrumb items={[{ label: "Liên hệ" }]} />
+            </div>
             {/* Background Decoration */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
@@ -115,12 +119,12 @@ export default function ContactPage() {
                             }}
                             className="inline-block mb-4"
                         >
-                            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl flex items-center justify-center shadow-2xl transform hover:rotate-12 transition-transform">
+                            <div className="w-20 h-20 bg-blue-700 rounded-3xl flex items-center justify-center shadow-2xl transform hover:rotate-12 transition-transform">
                                 <FaHeadset className="text-4xl text-white" />
                             </div>
                         </motion.div>
 
-                        <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 bg-clip-text text-transparent">
+                        <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-blue-700 text-white">
                             Liên Hệ Với WisBook
                         </h1>
 
@@ -158,10 +162,10 @@ export default function ContactPage() {
                                     whileHover={{ y: -10, scale: 1.02 }}
                                     className="relative group"
                                 >
-                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-blue-400/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all"></div>
+                                    <div className="absolute inset-0 bg-blue-600/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all"></div>
 
                                     <div className="relative bg-white rounded-3xl shadow-xl p-6 hover:shadow-2xl border-2 border-blue-100 transition-all">
-                                        <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center mb-3 shadow-lg group-hover:scale-110 transition-transform">
+                                        <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg group-hover:scale-110 transition-transform">
                                             <Icon className="text-2xl text-white" />
                                         </div>
 
@@ -200,7 +204,7 @@ export default function ContactPage() {
 
                             <div className="relative bg-white rounded-3xl shadow-2xl p-6 md:p-8 border-2 border-blue-200">
                                 <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
                                         <FaPaperPlane className="text-white text-xl" />
                                     </div>
 
@@ -312,7 +316,7 @@ export default function ContactPage() {
                                         }}
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className={`w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-600 text-white py-3 rounded-xl font-bold text-base shadow-lg hover:shadow-blue-600/50 flex items-center justify-center gap-2 transition-all ${
+                                        className={`w-full bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-xl font-bold text-base shadow-lg hover:shadow-blue-600/50 flex items-center justify-center gap-2 transition-all ${
                                             isSubmitting
                                                 ? "opacity-70 cursor-not-allowed"
                                                 : ""
@@ -347,10 +351,10 @@ export default function ContactPage() {
                                 <img
                                     src={storeImage}
                                     alt="WisBook Store"
-                                    className="w-full h-[240px] object-cover group-hover:scale-105 transition-transform duration-500"
+                                    className="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-500"
                                 />
 
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                                <div className="absolute inset-0 bg-black/80 to-transparent"></div>
 
                                 <div className="absolute bottom-0 p-4 text-white">
                                     <div className="flex items-center gap-2 mb-1">
@@ -389,7 +393,7 @@ export default function ContactPage() {
                                                     scale: 1.1,
                                                     y: -5,
                                                 }}
-                                                className={`aspect-square rounded-2xl flex items-center justify-center text-white bg-gradient-to-br ${item.color}`}
+                                                className={`aspect-square rounded-2xl flex items-center justify-center text-white bg-blue-600`}
                                             >
                                                 <Icon className="text-xl" />
                                             </motion.a>
@@ -400,7 +404,7 @@ export default function ContactPage() {
 
                             {/* Map */}
                             <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden border-2 border-blue-200">
-                                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4">
+                                <div className="bg-blue-600 p-4">
                                     <h3 className="text-white font-bold text-lg flex items-center gap-2">
                                         <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
                                             <FaMapMarkerAlt className="text-lg" />

@@ -1,8 +1,6 @@
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { FaSyncAlt, FaCheckCircle, FaUndo } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import Header from "../../components/Header/Header";
-import Footer from "../../components/Footer/Footer";
 
 // 📌 IMPORT DỮ LIỆU TỪ FILE RIÊNG
 import {
@@ -25,20 +23,20 @@ export default function ReturnPolicyPage() {
         visible: { opacity: 1, x: 0 },
     };
 
-    const floatAnimation = {
-        y: [-10, 10],
-        transition: {
-            duration: 2,
-            repeat: Infinity,
-            repeatType: "reverse" as const,
-            ease: "easeInOut",
+    const floatAnimation: Variants = {
+        float: {
+            y: [-10, 10],
+            transition: {
+                duration: 2,
+                repeat: Infinity,
+                repeatType: "reverse" as const,
+                ease: "easeInOut",
+            },
         },
     };
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Header />
-
             {/* Hero Section với floating books */}
             <motion.div
                 initial={{ opacity: 0 }}
@@ -49,16 +47,20 @@ export default function ReturnPolicyPage() {
                 {/* Floating book decorations */}
                 <motion.div
                     className="absolute top-10 left-10 text-7xl opacity-30"
-                    animate={floatAnimation}
+                    variants={floatAnimation}
+                    animate="float"
                 >
                     📚
                 </motion.div>
                 <motion.div
                     className="absolute top-20 right-20 text-6xl opacity-20"
                     animate={{
-                        ...floatAnimation,
+                        y: [-10, 10],
                         transition: {
-                            ...floatAnimation.transition,
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: "reverse" as const,
+                            ease: "easeInOut",
                             delay: 0.3,
                         },
                     }}
@@ -68,9 +70,12 @@ export default function ReturnPolicyPage() {
                 <motion.div
                     className="absolute bottom-10 left-1/4 text-5xl opacity-25"
                     animate={{
-                        ...floatAnimation,
+                        y: [-10, 10],
                         transition: {
-                            ...floatAnimation.transition,
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: "reverse" as const,
+                            ease: "easeInOut",
                             delay: 0.6,
                         },
                     }}
@@ -80,9 +85,12 @@ export default function ReturnPolicyPage() {
                 <motion.div
                     className="absolute bottom-20 right-1/3 text-8xl opacity-15"
                     animate={{
-                        ...floatAnimation,
+                        y: [-10, 10],
                         transition: {
-                            ...floatAnimation.transition,
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: "reverse" as const,
+                            ease: "easeInOut",
                             delay: 0.9,
                         },
                     }}
@@ -291,7 +299,7 @@ export default function ReturnPolicyPage() {
                                     </div>
 
                                     {/* Gradient overlay on hover */}
-                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <div className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                                 </div>
 
                                 {/* Step connector */}
@@ -320,7 +328,7 @@ export default function ReturnPolicyPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-orange-200 rounded-2xl p-10 mb-16 relative overflow-hidden"
+                    className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-10 mb-16 relative overflow-hidden"
                 >
                     <div className="absolute top-0 right-0 text-9xl opacity-10">
                         ⚠️
@@ -404,8 +412,6 @@ export default function ReturnPolicyPage() {
                     </motion.div>
                 </div>
             </div>
-
-            <Footer />
         </div>
     );
 }
