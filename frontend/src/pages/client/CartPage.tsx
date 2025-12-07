@@ -18,7 +18,7 @@ export default function CartPage() {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { cartItems } = useAppSelector((state) => state.cart);
-    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         dispatch(fetchCart());
