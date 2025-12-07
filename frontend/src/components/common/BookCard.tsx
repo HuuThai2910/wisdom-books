@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { FaShoppingCart, FaStar, FaRandom, FaEye } from "react-icons/fa";
 import { Book } from "../../types";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../app/store";
 import { addItem } from "../../features/cart/cartSlice";
 import toast from "react-hot-toast";
@@ -20,8 +20,17 @@ export default function BookCard({
     variant = "default",
 }: BookCardProps) {
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    
     // Hàm thêm sản phẩm vào cart
     const handleAddToCart = async (bookId: number) => {
+        // Kiểm tra đăng nhập
+        const user = localStorage.getItem('user');
+        if (!user) {
+            toast.error('Đăng nhập để thêm sản phẩm vào giỏ hàng!');
+            return;
+        }
+
         // Kiểm tra số lượng trong kho trước khi thêm
         if (!book.quantity || book.quantity <= 0) {
             toast.error("Sản phẩm hiện đã hết hàng!");

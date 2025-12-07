@@ -4,6 +4,8 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { fetchCurrentUser, loginUser } from '../../features/auth/authSlice';
 import { User } from '@/types';
+import toast from 'react-hot-toast';
+import { tokenRefreshManager } from '../../util/tokenRefreshManager';
 
 interface SignInFormProps {
   onForgotPassword: () => void;
@@ -22,14 +24,27 @@ const SignInForm = ({ onForgotPassword, onSuccess }: SignInFormProps) => {
   const [password, setPassword] = useState('');
   const [user, setUser] = useState<User>();
   const [errors, setErrors] = useState<FormErrors>({});
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
       // Lưu thông tin user vào localStorage
       localStorage.setItem('user', JSON.stringify(user));
       console.log("Đăng nhập thành công:", user);
-      // Chuyển về trang home
-      navigate('/');
+      
+      // Redirect dựa trên role
+      const userRole = user.role?.toString();
+      if (userRole === '1' || userRole === 'ADMIN') {
+        navigate('/admin/dashboard');
+      } else if (userRole === '2' || userRole === 'STAFF') {
+        navigate('/staff/dashboard');
+      } else if (userRole === '4' || userRole === 'WARE_HOUSE_STAFF') {
+        navigate('/warehouse/dashboard');
+      } else {
+        // CUSTOMER (3) hoặc role khác về trang home
+        navigate('/');
+      }
+      
       // Reload trang để cập nhật header
       window.location.reload();
     }
@@ -48,8 +63,8 @@ const SignInForm = ({ onForgotPassword, onSuccess }: SignInFormProps) => {
     // Validate password
     if (!password) {
       newErrors.password = 'Vui lòng nhập mật khẩu';
-    } else if (password.length < 6) {
-      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+    } else if (password.length < 8) {
+      newErrors.password = 'Mật khẩu phải có ít nhất 8 ký tự';
     }
 
     setErrors(newErrors);
@@ -71,6 +86,13 @@ const SignInForm = ({ onForgotPassword, onSuccess }: SignInFormProps) => {
     dispatch(loginUser({ loginForm }))
       .unwrap()
       .then((response) => {
+        // Lưu username để auto-refresh (refreshToken đã ở cookie)
+        localStorage.setItem('username', username.trim());
+        console.log('[SignInForm] Saved username, refresh token is in cookie');
+        
+        // Bắt đầu monitoring token expiry
+        tokenRefreshManager.startMonitoring();
+        
         dispatch(fetchCurrentUser({ accessToken: response.data.token }))
           .unwrap()
           .then((user) => {
@@ -79,20 +101,13 @@ const SignInForm = ({ onForgotPassword, onSuccess }: SignInFormProps) => {
         onSuccess();
       })
       .catch((error: any) => {
-        // Xử lý lỗi từ backend
+        // Xử lý lỗi từ backend - hiển thị toast thay vì alert
         if (error.response?.data?.message) {
           const message = error.response.data.message;
-          
-          // Kiểm tra lỗi đăng nhập
-          if (message.toLowerCase().includes('username') || message.toLowerCase().includes('tên đăng nhập') || message.toLowerCase().includes('không tồn tại')) {
-            setErrors({ username: 'Tên đăng nhập không tồn tại' });
-          } else if (message.toLowerCase().includes('password') || message.toLowerCase().includes('mật khẩu') || message.toLowerCase().includes('sai')) {
-            setErrors({ password: 'Mật khẩu không chính xác' });
-          } else {
-            alert(message);
-          }
+          // Hiển thị thông báo lỗi chung
+          toast.error('Tên đăng nhập hoặc mật khẩu không đúng');
         } else {
-          alert('Đăng nhập thất bại. Vui lòng thử lại!');
+          toast.error('Tên đăng nhập hoặc mật khẩu không đúng');
         }
       });
   };
@@ -141,21 +156,32 @@ const SignInForm = ({ onForgotPassword, onSuccess }: SignInFormProps) => {
       </div>
       
       <div className="w-full">
-        <input
-          type="password"
-          placeholder="Mật khẩu"
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            if (errors.password) setErrors({ ...errors, password: undefined });
-          }}
-          className={`bg-gray-100 border-2 my-2 px-4 py-2.5 text-sm rounded-lg w-full 
-            outline-none transition-all duration-300 focus:bg-white ${
-              errors.password 
-                ? 'border-red-500 focus:border-red-500' 
-                : 'border-transparent focus:border-[#2196F3]'
-            }`}
-        />
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Mật khẩu"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errors.password) setErrors({ ...errors, password: undefined });
+            }}
+            className={`bg-gray-100 border-2 my-2 px-4 py-2.5 ${password ? 'pr-10' : 'pr-4'} text-sm rounded-lg w-full 
+              outline-none transition-all duration-300 focus:bg-white ${
+                errors.password 
+                  ? 'border-red-500 focus:border-red-500' 
+                  : 'border-transparent focus:border-[#2196F3]'
+              }`}
+          />
+          {password && (
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+            >
+              <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+            </button>
+          )}
+        </div>
         {errors.password && (
           <p className="text-red-500 text-xs mt-1 mb-2 px-1">{errors.password}</p>
         )}

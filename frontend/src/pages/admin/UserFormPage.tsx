@@ -214,6 +214,11 @@ const UserFormPage = () => {
       newErrors.phone = "Số điện thoại phải có 10 số và bắt đầu bằng 0";
     }
 
+    // Giới tính bắt buộc cho cả add và edit
+    if (!formData.gender) {
+      newErrors.gender = "Vui lòng chọn giới tính";
+    }
+
     if (mode === "add") {
       if (!formData.password) {
         newErrors.password = "Vui lòng nhập mật khẩu";
@@ -226,24 +231,30 @@ const UserFormPage = () => {
       } else if (formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
       }
-    }
 
-    if (!formData.role.id) {
-      newErrors.role = "Vui lòng chọn vai trò";
-    }
+      if (!formData.role.id) {
+        newErrors.role = "Vui lòng chọn vai trò";
+      }
 
-    if (!formData.address.province.trim()) {
-      newErrors.province = "Vui lòng chọn tỉnh/thành phố";
-    }
+      // Mode add: địa chỉ bắt buộc
+      if (!formData.address.province.trim()) {
+        newErrors.province = "Vui lòng chọn tỉnh/thành phố";
+      }
 
-    if (!formData.address.ward.trim()) {
-      newErrors.ward = "Vui lòng chọn phường/xã";
-    }
+      if (!formData.address.ward.trim()) {
+        newErrors.ward = "Vui lòng chọn phường/xã";
+      }
 
-    if (!formData.address.address.trim()) {
-      newErrors.address = "Vui lòng nhập địa chỉ chi tiết";
-    } else if (formData.address.address.trim().length < 5) {
-      newErrors.address = "Địa chỉ phải có ít nhất 5 ký tự";
+      if (!formData.address.address.trim()) {
+        newErrors.address = "Vui lòng nhập địa chỉ chi tiết";
+      } else if (formData.address.address.trim().length < 5) {
+        newErrors.address = "Địa chỉ phải có ít nhất 5 ký tự";
+      }
+    } else if (mode === "edit") {
+      // Mode edit: địa chỉ có thể null, chỉ validate nếu có nhập
+      if (formData.address.address.trim() && formData.address.address.trim().length < 5) {
+        newErrors.address = "Địa chỉ phải có ít nhất 5 ký tự";
+      }
     }
 
     setErrors(newErrors);
@@ -589,7 +600,7 @@ const UserFormPage = () => {
 
                   <div>
                     <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Giới tính
+                      Giới tính <span className="text-red-500">*</span>
                     </label>
                     {mode === "view" ? (
                       <input
@@ -599,22 +610,30 @@ const UserFormPage = () => {
                         className="w-full px-4 py-3.5 text-black border-2 border-gray-200 rounded-lg text-sm bg-gray-100 cursor-not-allowed"
                       />
                     ) : (
-                      <select
-                        value={formData.gender}
-                        onChange={(e) =>
-                          setFormData({ ...formData, gender: e.target.value })
-                        }
-                        className="w-full px-4 py-3.5 border-2 text-black border-gray-200 rounded-lg text-sm 
-                          outline-none transition-all duration-200 focus:border-[#2196F3] focus:shadow-lg
-                          appearance-none bg-no-repeat bg-[right_16px_center] cursor-pointer pr-12"
-                        style={{
-                          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232196F3' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                        }}
-                      >
-                        <option value="">-- Chọn giới tính --</option>
-                        <option value="MALE">Nam</option>
-                        <option value="FEMALE">Nữ</option>
-                      </select>
+                      <>
+                        <select
+                          value={formData.gender}
+                          onChange={(e) => {
+                            setFormData({ ...formData, gender: e.target.value });
+                            if (errors.gender)
+                              setErrors({ ...errors, gender: undefined });
+                          }}
+                          className={`w-full px-4 py-3.5 border-2 text-black rounded-lg text-sm 
+                            outline-none transition-all duration-200 focus:border-[#2196F3] focus:shadow-lg
+                            appearance-none bg-no-repeat bg-[right_16px_center] cursor-pointer pr-12
+                            ${errors.gender ? "border-red-500" : "border-gray-200"}`}
+                          style={{
+                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232196F3' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                          }}
+                        >
+                          <option value="">-- Chọn giới tính --</option>
+                          <option value="MALE">Nam</option>
+                          <option value="FEMALE">Nữ</option>
+                        </select>
+                        {errors.gender && (
+                          <p className="text-red-500 text-xs mt-1">{errors.gender}</p>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -623,7 +642,7 @@ const UserFormPage = () => {
                 <div className="grid grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Tỉnh/Thành phố <span className="text-red-500">*</span>
+                      Tỉnh/Thành phố {mode === "add" && <span className="text-red-500">*</span>}
                     </label>
                     {mode === "view" ? (
                       <input
@@ -682,7 +701,7 @@ const UserFormPage = () => {
 
                   <div>
                     <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Phường/Xã <span className="text-red-500">*</span>
+                      Phường/Xã {mode === "add" && <span className="text-red-500">*</span>}
                     </label>
                     {mode === "view" ? (
                       <input
@@ -742,7 +761,7 @@ const UserFormPage = () => {
                 {/* Address */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Địa chỉ chi tiết <span className="text-red-500">*</span>
+                    Địa chỉ chi tiết {mode === "add" && <span className="text-red-500">*</span>}
                   </label>
                   <input
                     type="text"

@@ -373,16 +373,20 @@ export interface DateRange {
 }
 
 export interface DashboardStats {
-    totalBooks: number;
-    totalCustomers: number;
-    outOfStockBooks: number;
-    lowStockBooks: number;
     totalOrders: number;
     totalRevenue: number;
     totalProfit: number;
     customerGrowthRate: number;
     cancelledOrderRate: number;
     newCustomersThisMonth: number;
+    newBooksImported: number;
     cancelledOrders: number;
+}
+
+export interface DashboardOverview {
+    totalBooks: number;
+    totalCustomers: number;
+    outOfStockBooks: number;
+    lowStockBooks: number;
 }
 

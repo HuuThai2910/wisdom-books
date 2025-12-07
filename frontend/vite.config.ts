@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     port: 5173, // port dev server, giữ nguyên nếu bạn muốn
     proxy: {
-      // tất cả request /api/* sẽ được forward tới backend EC2
+      // tất cả request /api/* sẽ được forward tới backend local
       "/api": {
         target: "http://13.251.45.36:8080",
         changeOrigin: true,   // thay đổi origin header thành backend

@@ -18,7 +18,7 @@ import iuh.fit.edu.entity.User;
 public interface AccountService {
     RegisterResponse registerUser(RegisterRequest request,boolean check);
     LoginResponse loginUser(LoginRequest request);
-    void logout(String accessToken);
+    void logout(String accessToken, String refreshToken);
     ForgotPasswordResponse forgotPassword(ForgotPasswordRequest request);
     VerifyOtpResponse verifyOtp(VerifyOtpRequest request);
     ResetPasswordResponse resetPassword(ResetPasswordRequest request);

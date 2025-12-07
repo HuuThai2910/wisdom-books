@@ -163,7 +163,7 @@ export default function SecurityPage() {
                                     </motion.div>
 
                                     <div className="bg-blue-600 p-8 text-white relative overflow-hidden">
-                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 opacity-50" />
+                                        <div className="absolute inset-0 bg-linear-to-br from-blue-500 to-blue-700 opacity-50" />
 
                                         <div className="flex items-center gap-4 relative z-10">
                                             <motion.div
@@ -380,7 +380,7 @@ export default function SecurityPage() {
                                     boxShadow:
                                         "0 15px 30px rgba(37, 99, 235, 0.2)",
                                 }}
-                                className="bg-gradient-to-br from-blue-50 to-white p-8 rounded-2xl text-center border-2 border-blue-200 hover:border-blue-600 transition-all cursor-pointer relative group"
+                                className="bg-linear-to-br from-blue-50 to-white p-8 rounded-2xl text-center border-2 border-blue-200 hover:border-blue-600 transition-all cursor-pointer relative group"
                             >
                                 <motion.div
                                     animate={{ rotate: [0, 10, -10, 0] }}
@@ -466,7 +466,7 @@ export default function SecurityPage() {
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-2xl p-10 text-center mb-16 border-2 border-blue-200"
+                    className="bg-linear-to-br from-blue-50 to-white rounded-2xl shadow-2xl p-10 text-center mb-16 border-2 border-blue-200"
                 >
                     <h2 className="text-3xl font-bold mb-4 text-blue-600">
                         Phát hiện vấn đề bảo mật?

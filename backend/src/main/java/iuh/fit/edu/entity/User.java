@@ -6,15 +6,14 @@ import iuh.fit.edu.entity.constant.UserStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Entity
 @Table(name = "users")
 @Data
-
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,12 +41,24 @@ public class User {
     @ToString.Exclude
     private Role role;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+
+    @Column(nullable = false, updatable = false)
+    private OffsetDateTime createdAt=OffsetDateTime.now();
+    
+    private OffsetDateTime updatedAt;
+    
     private String createdBy;
     private String updatedBy;
-    private LocalDateTime updatedAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = OffsetDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = OffsetDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+    }
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude

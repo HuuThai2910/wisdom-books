@@ -1,5 +1,7 @@
 package iuh.fit.edu.service.impl;
 
+import iuh.fit.edu.dto.response.dashboard.CategoryBookDTO;
+import iuh.fit.edu.dto.response.dashboard.DashboardOverviewDTO;
 import iuh.fit.edu.dto.response.dashboard.DashboardStatsDTO;
 import iuh.fit.edu.dto.response.dashboard.MonthlyRevenueDTO;
 import iuh.fit.edu.dto.response.dashboard.TopBookDTO;
@@ -12,7 +14,7 @@ import iuh.fit.edu.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,18 +28,9 @@ public class DashboardServiceImpl implements DashboardService {
     private final InventoryRepository inventoryRepository;
 
     @Override
-    public DashboardStatsDTO getStats(LocalDateTime startDate, LocalDateTime endDate) {
-        // Tổng sách trong kho (tổng quantity từ Inventory)
-        long totalBooks = inventoryRepository.getTotalQuantity();
-        
-        // Tổng khách hàng (user có role CUSTOMER)
+    public DashboardStatsDTO getStats(OffsetDateTime startDate, OffsetDateTime endDate) {
+        // Tổng khách hàng (user có role CUSTOMER) - dùng để tính tỷ lệ tăng trưởng
         long totalCustomers = userRepository.countCustomers();
-        
-        // Sách hết hàng (quantity = 0)
-        long outOfStockBooks = bookRepository.countOutOfStockBooks();
-        
-        // Sách sắp hết (0 < quantity <= 10)
-        long lowStockBooks = bookRepository.countLowStockBooks();
         
         // Tổng đơn hàng trong khoảng thời gian
         long totalOrders = orderRepository.countOrdersByDateRange(startDate, endDate);
@@ -53,6 +46,9 @@ public class DashboardServiceImpl implements DashboardService {
         
         // Số khách hàng mới trong khoảng thời gian
         long newCustomersThisMonth = userRepository.countNewCustomersByDateRange(startDate, endDate);
+
+        // Số sách mới nhập trong khoảng thời gian (dựa trên createdAt của sách)
+        long newBooksImported = bookRepository.countNewBooksByDateRange(startDate, endDate);
         
         // Tỷ lệ tăng trưởng khách hàng = (khách hàng mới / tổng khách hàng) * 100
         double customerGrowthRate = totalCustomers > 0 ? (newCustomersThisMonth * 100.0 / totalCustomers) : 0;
@@ -64,21 +60,20 @@ public class DashboardServiceImpl implements DashboardService {
         double cancelledOrderRate = totalOrders > 0 ? (cancelledOrders * 100.0 / totalOrders) : 0;
         
         DashboardStatsDTO stats = new DashboardStatsDTO();
-        stats.setTotalBooks(totalBooks);
-        stats.setTotalCustomers(totalCustomers);
-        stats.setOutOfStockBooks(outOfStockBooks);
-        stats.setLowStockBooks(lowStockBooks);
+
         stats.setTotalOrders(totalOrders);
         stats.setTotalRevenue(totalRevenue);
         stats.setTotalProfit(totalProfit);
         stats.setCustomerGrowthRate(customerGrowthRate);
         stats.setCancelledOrderRate(cancelledOrderRate);
         stats.setNewCustomersThisMonth(newCustomersThisMonth);
+        stats.setNewBooksImported(newBooksImported);
         stats.setCancelledOrders(cancelledOrders);
         
         return stats;
     }
 
+    // Doanh thu, số đơn hàng theo từng tháng.
     @Override
     public List<MonthlyRevenueDTO> getMonthlyRevenue(int year) {
         List<Object[]> results = orderRepository.getMonthlyRevenueByYear(year);
@@ -89,39 +84,77 @@ public class DashboardServiceImpl implements DashboardService {
             monthlyRevenue.add(new MonthlyRevenueDTO("Tháng " + i, 0, 0));
         }
         
-        // Cập nhật dữ liệu thực tế
         for (Object[] result : results) {
-            int month = (int) result[0];
-            double revenue = (double) result[1];
-            long orders = (long) result[2];
+            int month = result[0] instanceof Number ? ((Number) result[0]).intValue() : Integer.parseInt(result[0].toString());
+            double revenue = result[1] instanceof Number ? ((Number) result[1]).doubleValue() : Double.parseDouble(result[1].toString());
+            long orders = result[2] instanceof Number ? ((Number) result[2]).longValue() : Long.parseLong(result[2].toString());
             monthlyRevenue.set(month - 1, new MonthlyRevenueDTO("Tháng " + month, revenue, orders));
         }
         
         return monthlyRevenue;
     }
 
+    // Lấy dữ liệu top 10 đầu sách bán chạy  
     @Override
-    public List<TopBookDTO> getTopBooks(LocalDateTime startDate, LocalDateTime endDate, int limit) {
+    public List<TopBookDTO> getTopBooks(OffsetDateTime startDate, OffsetDateTime endDate, int limit) {
         List<Object[]> results = orderRepository.getTopBooksByDateRange(startDate, endDate);
-        
         return results.stream()
                 .limit(limit)
-                .map(result -> new TopBookDTO(
-                        (String) result[0],  // name
-                        (Long) result[1]     // sales
-                ))
+                .map(result -> {
+                    String name = result[0] != null ? result[0].toString() : "";
+                    long sales = 0L;
+                    if (result.length > 1 && result[1] != null) {
+                        sales = result[1] instanceof Number ? ((Number) result[1]).longValue() : Long.parseLong(result[1].toString());
+                    }
+                    return new TopBookDTO(name, sales);
+                })
                 .collect(Collectors.toList());
     }
 
+    // Lấy dữ liệu top 10 loại sách bán chạy  
     @Override
-    public List<TopCategoryDTO> getTopCategories(LocalDateTime startDate, LocalDateTime endDate, int limit) {
+    public List<TopCategoryDTO> getTopCategories(OffsetDateTime startDate, OffsetDateTime endDate, int limit) {
         List<Object[]> results = orderRepository.getTopCategoriesByDateRange(startDate, endDate);
-        
         return results.stream()
                 .limit(limit)
-                .map(result -> new TopCategoryDTO(
-                        (String) result[0],  // category
-                        (Long) result[1]     // sales
+                .map(result -> {
+                    Long categoryId = result[0] != null ? ((Number) result[0]).longValue() : null;
+                    String category = result[1] != null ? result[1].toString() : "";
+                    long sales = 0L;
+                    if (result.length > 2 && result[2] != null) {
+                        sales = result[2] instanceof Number ? ((Number) result[2]).longValue() : Long.parseLong(result[2].toString());
+                    }
+                    return new TopCategoryDTO(categoryId, category, sales);
+                })
+                .collect(Collectors.toList());
+    }
+
+    // Lấy dữ liệu tổng quan (Các dữ liệu không bị thay đổi bởi lọc theo thời gian)
+    @Override
+    public DashboardOverviewDTO getOverview() {
+        long totalBooks = inventoryRepository.getTotalQuantity();
+        long totalCustomers = userRepository.countCustomers();
+        long outOfStockBooks = bookRepository.countOutOfStockBooks();
+        long lowStockBooks = bookRepository.countLowStockBooks();
+
+        return new iuh.fit.edu.dto.response.dashboard.DashboardOverviewDTO(
+                totalBooks,
+                totalCustomers,
+                outOfStockBooks,
+                lowStockBooks
+        );
+    }
+
+    @Override
+    public List<CategoryBookDTO> getCategoryBooks(Long categoryId, OffsetDateTime startDate, OffsetDateTime endDate) {
+        List<Object[]> results = orderRepository.findTopBooksByCategory(categoryId, startDate, endDate);
+        
+        return results.stream()
+                .map(row -> new iuh.fit.edu.dto.response.dashboard.CategoryBookDTO(
+                        (Long) row[0],      // bookId
+                        (String) row[1],    // bookTitle
+                        (Long) row[2],      // sales
+                        (Double) row[3]     // revenue
                 ))
                 .collect(Collectors.toList());
     }

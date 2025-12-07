@@ -6,6 +6,7 @@ import iuh.fit.edu.dto.request.account.ForgotPasswordRequest;
 import iuh.fit.edu.dto.request.account.LoginRequest;
 import iuh.fit.edu.dto.request.account.RegisterRequest;
 import iuh.fit.edu.dto.request.account.ResetPasswordRequest;
+import iuh.fit.edu.dto.response.account.CognitoTokens;
 import iuh.fit.edu.service.CognitoService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,7 @@ public class CognitoServiceImpl implements CognitoService {
     }
 
     @Override
-    public String loginUser(LoginRequest request) {
+    public CognitoTokens loginUser(LoginRequest request) {
         Map<String,String> authParams = new HashMap<>();
         authParams.put("USERNAME",request.getFullName());
         authParams.put("PASSWORD",request.getPassword());
@@ -75,10 +76,12 @@ public class CognitoServiceImpl implements CognitoService {
 
         AdminInitiateAuthResult result=cognitoIdentityProvider.adminInitiateAuth(authRequest);
 
-        Map<String,String> tokens=new HashMap<>();
-        tokens.put("idToken",result.getAuthenticationResult().getIdToken());
-        tokens.put("accessToken",result.getAuthenticationResult().getAccessToken());
-        return tokens.get("accessToken");
+        return CognitoTokens.builder()
+                .accessToken(result.getAuthenticationResult().getAccessToken())
+                .idToken(result.getAuthenticationResult().getIdToken())
+                .refreshToken(result.getAuthenticationResult().getRefreshToken())
+                .expiresIn(result.getAuthenticationResult().getExpiresIn())
+                .build();
     }
 
     @Override
@@ -126,6 +129,78 @@ public class CognitoServiceImpl implements CognitoService {
         cognitoIdentityProvider.adminDisableUser(request);
     }
 
+    @Override
+    public void updateUserRole(String username, String newRole) {
+        // Xóa user khỏi tất cả các group hiện tại
+        String[] allRoles = {"ADMIN", "STAFF", "CUSTOMER", "WARE_HOUSE_STAFF"};
+        for (String role : allRoles) {
+            try {
+                removeUserFromGroup(username, role);
+            } catch (Exception e) {
+                // Ignore nếu user không có trong group này
+            }
+        }
+        
+        // Thêm user vào group mới
+        addUserToGroup(username, newRole);
+    }
+
+    @Override
+    public void addUserToGroup(String username, String groupName) {
+        AdminAddUserToGroupRequest request = new AdminAddUserToGroupRequest()
+                .withUserPoolId(userPoolId)
+                .withUsername(username)
+                .withGroupName(groupName);
+        
+        try {
+            cognitoIdentityProvider.adminAddUserToGroup(request);
+            System.out.println("[Cognito] Added user " + username + " to group " + groupName);
+        } catch (Exception e) {
+            System.err.println("[Cognito] Error adding user to group: " + e.getMessage());
+            throw new RuntimeException("Failed to add user to group: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void removeUserFromGroup(String username, String groupName) {
+        AdminRemoveUserFromGroupRequest request = new AdminRemoveUserFromGroupRequest()
+                .withUserPoolId(userPoolId)
+                .withUsername(username)
+                .withGroupName(groupName);
+        
+        try {
+            cognitoIdentityProvider.adminRemoveUserFromGroup(request);
+            System.out.println("[Cognito] Removed user " + username + " from group " + groupName);
+        } catch (Exception e) {
+            // Không cần throw exception nếu user không có trong group
+            System.out.println("[Cognito] User " + username + " not in group " + groupName);
+        }
+    }
+
+    @Override
+    public String refreshToken(String refreshToken, String username) {
+        try {
+            Map<String, String> authParams = new HashMap<>();
+            authParams.put("REFRESH_TOKEN", refreshToken);
+            authParams.put("SECRET_HASH", calculateSecretHash(username, clientId, clientSecret));
+
+            AdminInitiateAuthRequest authRequest = new AdminInitiateAuthRequest()
+                    .withAuthFlow(AuthFlowType.REFRESH_TOKEN_AUTH)
+                    .withClientId(clientId)
+                    .withUserPoolId(userPoolId)
+                    .withAuthParameters(authParams);
+
+            AdminInitiateAuthResult authResult = cognitoIdentityProvider.adminInitiateAuth(authRequest);
+            
+            String newAccessToken = authResult.getAuthenticationResult().getAccessToken();
+            System.out.println("[Cognito] Token refreshed successfully for user: " + username);
+            
+            return newAccessToken;
+        } catch (Exception e) {
+            System.err.println("[Cognito] Error refreshing token: " + e.getMessage());
+            throw new RuntimeException("Failed to refresh token", e);
+        }
+    }
 
     public String calculateSecretHash(String username, String clientId, String clientSecret) {
         try {

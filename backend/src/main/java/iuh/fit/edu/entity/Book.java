@@ -58,13 +58,16 @@ public class Book {
     @NotNull(message = "Trạng thái sách không được để trống")
     private BookStatus status;
 
-
+    @Column(columnDefinition = "DATETIME")
     private OffsetDateTime createdAt;
+    
+    @Column(columnDefinition = "DATETIME")
     private OffsetDateTime updatedAt;
+    
     private String createdBy;
     private String updatedBy;
     
-    @Min(value = 1, message = "Số lượng phải lớn hơn 0")
+    @Min(value = 0, message = "Số lượng phải lớn hơn hoặc bằng 0")
     private int quantity;
 
     @OneToMany(mappedBy = "book")

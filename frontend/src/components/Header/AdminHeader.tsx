@@ -1,14 +1,41 @@
-import React, { useRef, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useRef, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu, ChevronDown, Home, User, LogOut } from "lucide-react";
+import { logout as logoutApi } from "../../api/auth";
+import toast from "react-hot-toast";
+import Cookies from "js-cookie";
+import { tokenRefreshManager } from "../../util/tokenRefreshManager";
+import { S3_CONFIG } from './../../config/s3';
 
 interface AdminHeaderProps {
   onMobileMenuToggle: () => void;
 }
 
+interface UserData {
+  fullName: string;
+  email: string;
+  avatar?: string;
+  role?: string;
+}
+
 export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
+  const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserData | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Đọc thông tin user từ localStorage
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setCurrentUser(user);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -45,11 +72,21 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
           >
             <div className="text-right hidden sm:block">
               <p className="text-sm text-gray-500">Hi,</p>
-              <p className="text-sm font-semibold text-gray-700">Admin</p>
+              <p className="text-sm font-semibold text-gray-700">
+                {currentUser?.fullName || 'Admin'}
+              </p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
-              A
-            </div>
+            {currentUser?.avatar ? (
+              <img
+                src={S3_CONFIG.BASE_URL + currentUser.avatar}
+                alt={currentUser.fullName}
+                className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-linear-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                {currentUser?.fullName?.charAt(0).toUpperCase() || 'A'}
+              </div>
+            )}
             <ChevronDown
               className={`w-4 h-4 text-gray-500 transition-transform ${
                 dropdownOpen ? "rotate-180" : ""
@@ -77,8 +114,51 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
                 </Link>
                 <button
                   className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                  onClick={() => {
-                    setDropdownOpen(false);
+                  onClick={async () => {
+                    try {
+                      // Stop token monitoring
+                      tokenRefreshManager.stopMonitoring();
+                      
+                      // Lấy token từ cookie
+                      const token = Cookies.get('id_token');
+                      
+                      if (token) {
+                        // Call API để blacklist token (refresh_token được gửi tự động qua cookie)
+                        await logoutApi(token);
+                      }
+                      
+                      // Xóa localStorage
+                      localStorage.removeItem('user');
+                      localStorage.removeItem('token');
+                      localStorage.removeItem('username');
+                      
+                      // Xóa cookies
+                      Cookies.remove('id_token', { path: '/' });
+                      Cookies.remove('refresh_token', { path: '/' });
+                      
+                      // Reset state
+                      setCurrentUser(null);
+                      setDropdownOpen(false);
+                      
+                      // Redirect về login
+                      toast.success('Đăng xuất thành công!');
+                      navigate('/login');
+                      
+                      // Reload để clear tất cả state
+                      window.location.reload();
+                    } catch (error) {
+                      console.error('Logout error:', error);
+                      // Vẫn xóa local data dù API fail
+                      tokenRefreshManager.stopMonitoring();
+                      localStorage.removeItem('user');
+                      localStorage.removeItem('token');
+                      localStorage.removeItem('username');
+                      Cookies.remove('id_token', { path: '/' });
+                      Cookies.remove('refresh_token', { path: '/' });
+                      toast.error('Đã có lỗi xảy ra, nhưng bạn đã được đăng xuất');
+                      navigate('/login');
+                      window.location.reload();
+                    }
                   }}
                 >
                   <LogOut className="w-4 h-4" />

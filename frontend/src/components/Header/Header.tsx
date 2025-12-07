@@ -21,6 +21,10 @@ import wisbook1 from "../../assets/img/wisbook1.png";
 import bookApi from "../../api/bookApi";
 import { Book } from "../../types";
 import { S3_CONFIG } from "./../../config/s3";
+import { logout as logoutApi } from "../../api/auth";
+import toast from "react-hot-toast";
+import Cookies from "js-cookie";
+import { tokenRefreshManager } from "../../util/tokenRefreshManager";
 export default function Header() {
     const [opacity, setOpacity] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -869,7 +873,7 @@ export default function Header() {
                             >
                                 {currentUser?.avatar ? (
                                     <img
-                                        src={currentUser.avatar}
+                                        src={S3_CONFIG.BASE_URL + currentUser.avatar}
                                         alt={currentUser.fullName}
                                         className="w-10 h-10 rounded-full object-cover border-2"
                                         style={{
@@ -912,38 +916,33 @@ export default function Header() {
                                     {currentUser ? (
                                         <div className="p-2">
                                             {/* User Info Section */}
-                                            <div className="px-4 py-3 border-b border-gray-200">
-                                                <div className="flex items-center gap-3">
-                                                    {currentUser.avatar ? (
-                                                        <img
-                                                            src={
-                                                                currentUser.avatar
-                                                            }
-                                                            alt={
-                                                                currentUser.fullName
-                                                            }
-                                                            className="w-12 h-12 rounded-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                                                            {currentUser.fullName
-                                                                ?.charAt(0)
-                                                                .toUpperCase() ||
-                                                                "U"}
-                                                        </div>
-                                                    )}
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="font-semibold text-gray-800 truncate">
-                                                            {
-                                                                currentUser.fullName
-                                                            }
-                                                        </p>
-                                                        <p className="text-xs text-gray-500 truncate">
-                                                            {currentUser.email}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            
+
+                                            {/* Menu Quản lý - chỉ hiển thị cho non-customer roles */}
+                                            {currentUser.role && 
+                                             currentUser.role !== '3' && 
+                                             currentUser.role !== 'CUSTOMER' && (
+                                                <Link
+                                                    to={(() => {
+                                                        const role = currentUser.role?.toString().toUpperCase();
+                                                        console.log('[Header] Navigating with role:', currentUser.role, 'normalized:', role);
+                                                        
+                                                        if (role === '1' || role === 'ADMIN') {
+                                                            return '/admin/dashboard';
+                                                        } else if (role === '2' || role === 'STAFF') {
+                                                            return '/staff/dashboard';
+                                                        } else {
+                                                            return '/warehouse/dashboard';
+                                                        }
+                                                    })()}
+                                                    className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition group"
+                                                >
+                                                    <FaCog className="text-lg text-indigo-600 group-hover:scale-110 transition" />
+                                                    <span className="font-medium">
+                                                        Quản lý
+                                                    </span>
+                                                </Link>
+                                            )}
 
                                             <Link
                                                 to="/orders"
@@ -965,17 +964,51 @@ export default function Header() {
                                             </Link>
                                             <div className="border-t border-gray-200 my-2"></div>
                                             <button
-                                                onClick={() => {
-                                                    localStorage.removeItem(
-                                                        "user"
-                                                    );
-                                                    localStorage.removeItem(
-                                                        "token"
-                                                    );
-                                                    setCurrentUser(null);
-                                                    setShowAccountMenu(false);
-                                                    navigate("/");
-                                                    window.location.reload();
+                                                onClick={async () => {
+                                                    try {
+                                                        // Stop token monitoring
+                                                        tokenRefreshManager.stopMonitoring();
+                                                        
+                                                        // Lấy token từ cookie
+                                                        const token = Cookies.get('id_token');
+                                                        
+                                                        if (token) {
+                                                            // Call API để blacklist token (refresh_token được gửi tự động qua cookie)
+                                                            await logoutApi(token);
+                                                        }
+                                                        
+                                                        // Xóa localStorage
+                                                        localStorage.removeItem("user");
+                                                        localStorage.removeItem("token");
+                                                        localStorage.removeItem("username");
+                                                        
+                                                        // Xóa cookies
+                                                        Cookies.remove('id_token', { path: '/' });
+                                                        Cookies.remove('refresh_token', { path: '/' });
+                                                        
+                                                        // Reset state
+                                                        setCurrentUser(null);
+                                                        setShowAccountMenu(false);
+                                                        
+                                                        // Redirect về home
+                                                        toast.success('Đăng xuất thành công!');
+                                                        navigate("/");
+                                                        
+                                                        // Reload để clear tất cả state
+                                                        window.location.reload();
+                                                    } catch (error) {
+                                                        console.error('Logout error:', error);
+                                                        // Vẫn xóa local data dù API fail
+                                                        tokenRefreshManager.stopMonitoring();
+                                                        localStorage.removeItem("user");
+                                                        localStorage.removeItem("token");
+                                                        localStorage.removeItem("username");
+                                                        Cookies.remove('id_token', { path: '/' });
+                                                        Cookies.remove('refresh_token', { path: '/' });
+                                                        toast.error('Đã có lỗi xảy ra, nhưng bạn đã được đăng xuất');
+                                                        navigate("/");
+                                                        window.location.reload();
+                                                    }
                                                 }}
                                                 className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition group"
                                             >
@@ -997,7 +1030,8 @@ export default function Header() {
                                                 </span>
                                             </Link>
                                             <Link
-                                                to="/register"
+                                                to="/login"
+                                                state={{ mode: 'signup' }}
                                                 className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-blue-50 rounded-lg transition group"
                                             >
                                                 <FaUserPlus className="text-lg text-green-600 group-hover:scale-110 transition" />

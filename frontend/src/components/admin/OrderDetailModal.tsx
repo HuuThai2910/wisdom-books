@@ -46,7 +46,7 @@ const OrderDetailModal = ({
                         className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden"
                     >
                         {/* Header */}
-                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5 flex items-center justify-between">
+                        <div className="bg-linear-to-r from-blue-600 to-blue-700 px-6 py-5 flex items-center justify-between">
                             <div>
                                 <h2 className="text-xl font-bold text-white">
                                     Chi tiết đơn hàng
@@ -167,7 +167,7 @@ const OrderDetailModal = ({
                                             key={item.id}
                                             className="flex gap-3 p-4 bg-gray-50 rounded-lg"
                                         >
-                                            <div className="relative flex-shrink-0">
+                                            <div className="relative shrink-0">
                                                 <img
                                                     src={`https://hai-project-images.s3.us-east-1.amazonaws.com/${item.book.image}`}
                                                     alt={item.book.title}
@@ -215,7 +215,7 @@ const OrderDetailModal = ({
                         </div>
 
                         {/* Footer */}
-                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5">
+                        <div className="bg-linear-to-r from-blue-600 to-blue-700 px-6 py-5">
                             <div className="text-white space-y-2">
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-blue-100">

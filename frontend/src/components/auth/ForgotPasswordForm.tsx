@@ -2,6 +2,7 @@ import { AppDispatch } from '@/app/store';
 import { sendOTPEmail, verifyOTPCode, verifiedOTPAndChangePassword } from '../../features/auth/authSlice';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import toast from 'react-hot-toast';
 
 interface ForgotPasswordFormProps {
   onBackToLogin: () => void;
@@ -21,6 +22,8 @@ const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<FormErrors>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -54,8 +57,14 @@ const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) => {
 
     if (!newPassword) {
       newErrors.newPassword = 'Vui lòng nhập mật khẩu mới';
-    } else if (newPassword.length < 6) {
-      newErrors.newPassword = 'Mật khẩu phải có ít nhất 6 ký tự';
+    } else if (newPassword.length < 8) {
+      newErrors.newPassword = 'Mật khẩu phải có ít nhất 8 ký tự';
+    } else if (!/(?=.*[A-Z])/.test(newPassword)) {
+      newErrors.newPassword = 'Mật khẩu phải có ít nhất 1 ký tự in hoa';
+    } else if (!/(?=.*[0-9])/.test(newPassword)) {
+      newErrors.newPassword = 'Mật khẩu phải có ít nhất 1 số';
+    } else if (!/(?=.*[!@#$%^&*(),.?":{}|<>])/.test(newPassword)) {
+      newErrors.newPassword = 'Mật khẩu phải có ít nhất 1 ký tự đặc biệt';
     } else if (newPassword.length > 50) {
       newErrors.newPassword = 'Mật khẩu không được quá 50 ký tự';
     }
@@ -78,7 +87,7 @@ const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) => {
     dispatch(sendOTPEmail({ email: email.trim() }))
       .unwrap()
       .then(() => {
-        alert('Mã OTP đã được gửi đến email của bạn!');
+        toast.success('Mã OTP đã được gửi đến email của bạn!');
         setCurrentStep(2);
         setErrors({});
       })
@@ -88,10 +97,10 @@ const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) => {
           if (message.toLowerCase().includes('email')) {
             setErrors({ email: 'Email không tồn tại trong hệ thống' });
           } else {
-            alert(message);
+            toast.error(message);
           }
         } else {
-          alert('Gửi email OTP thất bại. Vui lòng thử lại!');
+          toast.error('Gửi email OTP thất bại. Vui lòng thử lại!');
         }
       });
   };
@@ -109,8 +118,14 @@ const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) => {
     // Validate password
     if (!newPassword) {
       newErrors.newPassword = 'Vui lòng nhập mật khẩu mới';
-    } else if (newPassword.length < 6) {
-      newErrors.newPassword = 'Mật khẩu phải có ít nhất 6 ký tự';
+    } else if (newPassword.length < 8) {
+      newErrors.newPassword = 'Mật khẩu phải có ít nhất 8 ký tự';
+    } else if (!/(?=.*[A-Z])/.test(newPassword)) {
+      newErrors.newPassword = 'Mật khẩu phải có ít nhất 1 ký tự in hoa';
+    } else if (!/(?=.*[0-9])/.test(newPassword)) {
+      newErrors.newPassword = 'Mật khẩu phải có ít nhất 1 số';
+    } else if (!/(?=.*[!@#$%^&*(),.?":{}|<>])/.test(newPassword)) {
+      newErrors.newPassword = 'Mật khẩu phải có ít nhất 1 ký tự đặc biệt';
     } else if (newPassword.length > 50) {
       newErrors.newPassword = 'Mật khẩu không được quá 50 ký tự';
     }
@@ -144,7 +159,7 @@ const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) => {
         console.log('Success value:', successValue, 'Message:', message);
         
         if (successValue === true) {
-          alert('Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại.');
+          toast.success('Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại.');
           resetForm();
           onBackToLogin();
         } else {
@@ -215,19 +230,19 @@ const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) => {
 
   const handleResendOtp = () => {
     if (!email.trim()) {
-      alert('Không tìm thấy email. Vui lòng thử lại!');
+      toast.error('Không tìm thấy email. Vui lòng thử lại!');
       return;
     }
 
     dispatch(sendOTPEmail({ email: email.trim() }))
       .unwrap()
       .then(() => {
-        alert('Mã OTP đã được gửi lại đến email của bạn!');
+        toast.success('Mã OTP đã được gửi lại đến email của bạn!');
         setOtpValues(['', '', '', '', '', '']);
         setErrors({});
       })
       .catch((error: any) => {
-        alert('Gửi lại OTP thất bại. Vui lòng thử lại!');
+        toast.error('Gửi lại OTP thất bại. Vui lòng thử lại!');
       });
   };
 
@@ -353,42 +368,64 @@ const ForgotPasswordForm = ({ onBackToLogin }: ForgotPasswordFormProps) => {
 
           {/* Password Inputs */}
           <div className="w-full mt-4">
-            <input
-              type="password"
-              placeholder="Mật khẩu mới"
-              value={newPassword}
-              onChange={(e) => {
-                setNewPassword(e.target.value);
-                if (errors.newPassword) setErrors({ ...errors, newPassword: undefined });
-              }}
-              className={`bg-gray-100 border-2 my-2 px-4 py-2.5 text-sm rounded-lg w-full 
-                outline-none transition-all duration-300 focus:bg-white ${
-                  errors.newPassword 
-                    ? 'border-red-500 focus:border-red-500' 
-                    : 'border-transparent focus:border-blue-600'
-                }`}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Mật khẩu mới"
+                value={newPassword}
+                onChange={(e) => {
+                  setNewPassword(e.target.value);
+                  if (errors.newPassword) setErrors({ ...errors, newPassword: undefined });
+                }}
+                className={`bg-gray-100 border-2 my-2 px-4 py-2.5 ${newPassword ? 'pr-10' : 'pr-4'} text-sm rounded-lg w-full 
+                  outline-none transition-all duration-300 focus:bg-white ${
+                    errors.newPassword 
+                      ? 'border-red-500 focus:border-red-500' 
+                      : 'border-transparent focus:border-blue-600'
+                  }`}
+              />
+              {newPassword && (
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                </button>
+              )}
+            </div>
             {errors.newPassword && (
               <p className="text-red-500 text-xs mt-1 mb-2 px-1">{errors.newPassword}</p>
             )}
           </div>
 
           <div className="w-full">
-            <input
-              type="password"
-              placeholder="Xác nhận mật khẩu"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined });
-              }}
-              className={`bg-gray-100 border-2 my-2 px-4 py-2.5 text-sm rounded-lg w-full 
-                outline-none transition-all duration-300 focus:bg-white ${
-                  errors.confirmPassword 
-                    ? 'border-red-500 focus:border-red-500' 
-                    : 'border-transparent focus:border-blue-600'
-                }`}
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Xác nhận mật khẩu"
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined });
+                }}
+                className={`bg-gray-100 border-2 my-2 px-4 py-2.5 ${confirmPassword ? 'pr-10' : 'pr-4'} text-sm rounded-lg w-full 
+                  outline-none transition-all duration-300 focus:bg-white ${
+                    errors.confirmPassword 
+                      ? 'border-red-500 focus:border-red-500' 
+                      : 'border-transparent focus:border-blue-600'
+                  }`}
+              />
+              {confirmPassword && (
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  <i className={`fas ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                </button>
+              )}
+            </div>
             {errors.confirmPassword && (
               <p className="text-red-500 text-xs mt-1 mb-2 px-1">{errors.confirmPassword}</p>
             )}
