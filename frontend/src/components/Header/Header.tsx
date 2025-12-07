@@ -918,31 +918,38 @@ export default function Header() {
                                             {/* User Info Section */}
                                             
 
-                                            {/* Menu Quản lý - chỉ hiển thị cho non-customer roles */}
-                                            {currentUser.role && 
-                                             currentUser.role !== '3' && 
-                                             currentUser.role !== 'CUSTOMER' && (
-                                                <Link
-                                                    to={(() => {
-                                                        const role = currentUser.role?.toString().toUpperCase();
-                                                        console.log('[Header] Navigating with role:', currentUser.role, 'normalized:', role);
-                                                        
-                                                        if (role === '1' || role === 'ADMIN') {
-                                                            return '/admin/dashboard';
-                                                        } else if (role === '2' || role === 'STAFF') {
-                                                            return '/staff/dashboard';
-                                                        } else {
-                                                            return '/warehouse/dashboard';
-                                                        }
-                                                    })()}
-                                                    className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition group"
-                                                >
-                                                    <FaCog className="text-lg text-indigo-600 group-hover:scale-110 transition" />
-                                                    <span className="font-medium">
-                                                        Quản lý
-                                                    </span>
-                                                </Link>
-                                            )}
+                                            {/* Menu Quản lý - chỉ hiển thị cho ADMIN, STAFF, WAREHOUSE_STAFF */}
+                                            {(() => {
+                                                const role = currentUser.role?.toString();
+                                                const isCustomer = role === '3' || role === 'CUSTOMER' || role === 'customer';
+                                                
+                                                if (isCustomer) {
+                                                    return null;
+                                                }
+                                                
+                                                const roleUpper = role?.toUpperCase();
+                                                let dashboardPath = '/admin/dashboard';
+                                                
+                                                if (roleUpper === '1' || roleUpper === 'ADMIN') {
+                                                    dashboardPath = '/admin/dashboard';
+                                                } else if (roleUpper === '2' || roleUpper === 'STAFF') {
+                                                    dashboardPath = '/staff/dashboard';
+                                                } else if (roleUpper === '4' || roleUpper === 'WARE_HOUSE_STAFF' || roleUpper === 'WAREHOUSE_STAFF') {
+                                                    dashboardPath = '/warehouse/dashboard';
+                                                }
+                                                
+                                                return (
+                                                    <Link
+                                                        to={dashboardPath}
+                                                        className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition group"
+                                                    >
+                                                        <FaCog className="text-lg text-indigo-600 group-hover:scale-110 transition" />
+                                                        <span className="font-medium">
+                                                            Quản lý
+                                                        </span>
+                                                    </Link>
+                                                );
+                                            })()}
 
                                             <Link
                                                 to="/orders"

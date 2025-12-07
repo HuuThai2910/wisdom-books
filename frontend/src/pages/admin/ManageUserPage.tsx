@@ -357,6 +357,15 @@ const ManageUserPage = () => {
                         {renderSortIcon("role")}
                       </div>
                     </th>
+                    <th
+                      className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none transition-colors"
+                      onClick={() => handleSort("userStatus")}
+                    >
+                      <div className="flex items-center">
+                        Trạng thái
+                        {renderSortIcon("userStatus")}
+                      </div>
+                    </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Hành động
                     </th>
@@ -384,7 +393,7 @@ const ManageUserPage = () => {
                   ) : (
                     <tr>
                       <td
-                        colSpan={8}
+                        colSpan={9}
                         className="px-4 py-8 text-center text-gray-500"
                       >
                         {searchValue

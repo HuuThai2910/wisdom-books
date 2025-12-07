@@ -15,6 +15,7 @@ public interface CognitoService {
     void resetPassword(ResetPasswordRequest request);
     GetUserResult getUserInfo(String accessToken);
     void disableUser(String fullName);
+    void enableUser(String fullName);
     
     // Refresh token
     String refreshToken(String refreshToken, String username);

@@ -12,9 +12,11 @@ import iuh.fit.edu.dto.request.account.*;
 import iuh.fit.edu.dto.response.account.*;
 import iuh.fit.edu.entity.Role;
 import iuh.fit.edu.entity.User;
+import iuh.fit.edu.entity.Voucher;
 import iuh.fit.edu.mapper.UserMapper;
 import iuh.fit.edu.repository.RoleRepository;
 import iuh.fit.edu.repository.UserRepository;
+import iuh.fit.edu.repository.VoucherRepository;
 import iuh.fit.edu.service.AccountService;
 import iuh.fit.edu.service.CognitoService;
 import iuh.fit.edu.service.TokenBlacklistService;
@@ -39,6 +41,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    VoucherRepository voucherRepository;
 
     @Autowired
     CognitoService cognitoService;
@@ -68,7 +73,36 @@ public class AccountServiceImpl implements AccountService {
                 user.setPhone(phoneNumber);
                 user.setCreatedBy("system");
                 user.setRole(role);
+                System.out.println(user);
                 userRepository.save(user);
+                System.out.println("user 1" + user);
+                
+                // Add user to CUSTOMER group in Cognito
+                try {
+                    cognitoService.addUserToGroup(request.getFullName(), "CUSTOMER");
+                    System.out.println("[Register] Added new user to CUSTOMER group in Cognito");
+                } catch (Exception e) {
+                    System.err.println("[Register] Failed to add user to CUSTOMER group: " + e.getMessage());
+                    // Continue anyway - user is created, just missing group
+                }
+                
+                // Gán voucher id=1 cho CUSTOMER mới đăng ký
+                try {
+                    Voucher welcomeVoucher = voucherRepository.findById(1L).orElse(null);
+                    if (welcomeVoucher != null) {
+                        if (user.getVouchers() == null) {
+                            user.setVouchers(new java.util.ArrayList<>());
+                        }
+                        user.getVouchers().add(welcomeVoucher);
+                        userRepository.save(user);
+                        System.out.println("[Register] Assigned welcome voucher (id=1) to new CUSTOMER");
+                    } else {
+                        System.err.println("[Register] Welcome voucher (id=1) not found");
+                    }
+                } catch (Exception e) {
+                    System.err.println("[Register] Failed to assign welcome voucher: " + e.getMessage());
+                    // Continue anyway - user is created, just missing voucher
+                }
             }
 
             return userMapper.toRegisterResponse(user,sub);
@@ -79,34 +113,41 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public LoginResponse loginUser(LoginRequest request) {
-        CognitoTokens tokens = cognitoService.loginUser(request);
-        if (tokens != null && tokens.getAccessToken() != null) {
-            // Lấy thông tin user để lưu token record
-            GetUserResult userResult = cognitoService.getUserInfo(tokens.getAccessToken());
-            String email = userResult.getUserAttributes().stream()
-                    .filter(attr -> "email".equals(attr.getName()))
-                    .findFirst()
-                    .map(AttributeType::getValue)
-                    .orElse(null);
-            
-            if (email != null) {
-                User user = userRepository.findByEmail(email);
-                if (user != null) {
-                    // Lưu access token record (5 phút)
-                    tokenService.saveTokenRecord(user, iuh.fit.edu.entity.constant.TokenType.ACCESS_TOKEN, 5);
-                    // Lưu refresh token record (30 ngày)
-                    tokenService.saveTokenRecord(user, iuh.fit.edu.entity.constant.TokenType.REFRESH_TOKEN, 30 * 24 * 60);
+        try {
+            CognitoTokens tokens = cognitoService.loginUser(request);
+            if (tokens != null && tokens.getAccessToken() != null) {
+                // Lấy thông tin user để lưu token record
+                GetUserResult userResult = cognitoService.getUserInfo(tokens.getAccessToken());
+                String email = userResult.getUserAttributes().stream()
+                        .filter(attr -> "email".equals(attr.getName()))
+                        .findFirst()
+                        .map(AttributeType::getValue)
+                        .orElse(null);
+                
+                if (email != null) {
+                    User user = userRepository.findByEmail(email);
+                    if (user != null) {
+                        // Lưu access token record (5 phút)
+                        tokenService.saveTokenRecord(user, iuh.fit.edu.entity.constant.TokenType.ACCESS_TOKEN, 5);
+                        // Lưu refresh token record (30 ngày)
+                        tokenService.saveTokenRecord(user, iuh.fit.edu.entity.constant.TokenType.REFRESH_TOKEN, 30 * 24 * 60);
+                    }
                 }
+                
+                return LoginResponse.builder()
+                        .token(tokens.getAccessToken())
+                        .refreshToken(tokens.getRefreshToken())
+                        .expiresIn(tokens.getExpiresIn())
+                        .success(true)
+                        .build();
             }
-            
-            return LoginResponse.builder()
-                    .token(tokens.getAccessToken())
-                    .refreshToken(tokens.getRefreshToken())
-                    .expiresIn(tokens.getExpiresIn())
-                    .success(true)
-                    .build();
+            throw new RuntimeException("Login failed");
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().startsWith("ACCOUNT_DISABLED:")) {
+                throw e; // Ném lại exception để controller xử lý
+            }
+            throw new RuntimeException("Login failed");
         }
-        throw new RuntimeException("Login failed");
     }
 
     @Override
@@ -300,6 +341,20 @@ public class AccountServiceImpl implements AccountService {
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to refresh token: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Fix method để add user CUSTOMER vào Cognito group
+     * Dùng cho các user đã tồn tại mà chưa có trong group
+     */
+    public void fixCustomerGroup(String username) {
+        try {
+            cognitoService.addUserToGroup(username, "CUSTOMER");
+            System.out.println("[Fix] Successfully added " + username + " to CUSTOMER group");
+        } catch (Exception e) {
+            System.err.println("[Fix] Error adding user to group: " + e.getMessage());
+            throw new RuntimeException("Failed to add user to CUSTOMER group: " + e.getMessage());
         }
     }
 }

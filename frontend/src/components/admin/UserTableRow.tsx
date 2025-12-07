@@ -90,6 +90,17 @@ const UserTableRow = ({
           {getRoleText(user.role)}
         </span>
       </td>
+      <td className="px-4 py-4 border-b border-gray-100">
+        <span
+          className={`inline-block px-3 py-1 rounded-xl text-xs font-medium border ${
+            user.userStatus === 'ACTIVE'
+              ? 'bg-green-50 text-green-600 border-green-600'
+              : 'bg-red-50 text-red-600 border-red-600'
+          }`}
+        >
+          {user.userStatus === 'ACTIVE' ? 'Hoạt động' : 'Vô hiệu hóa'}
+        </span>
+      </td>
 
       <td className="px-4 py-4 border-b border-gray-100">
         <div className="flex gap-2">

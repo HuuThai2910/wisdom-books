@@ -89,8 +89,9 @@ public class UserServiceImpl implements UserService {
             User user = userRepository.findById(id).orElse(null);
             assert user != null;
             
-            // Lưu role cũ để so sánh
+            // Lưu role và status cũ để so sánh
             Role oldRole = user.getRole();
+            UserStatus oldStatus = user.getStatus();
             
             // Cập nhật role mới
             Role newRole = roleRepository.findById(Long.valueOf(request.getRole())).orElse(null);
@@ -116,6 +117,22 @@ public class UserServiceImpl implements UserService {
                     System.out.println("[UserService] Updated user " + user.getFullName() + " role to " + cognitoGroupName + " in Cognito");
                 } catch (Exception e) {
                     System.err.println("[UserService] Failed to update Cognito role: " + e.getMessage());
+                    // Không throw exception để không làm gián đoạn việc update database
+                }
+            }
+            
+            // Cập nhật status trên AWS Cognito nếu status thay đổi
+            if (request.getStatus() != null && request.getStatus() != oldStatus) {
+                try {
+                    if (request.getStatus() == UserStatus.INACTIVE) {
+                        cognitoService.disableUser(user.getFullName());
+                        System.out.println("[UserService] Disabled user " + user.getFullName() + " in Cognito");
+                    } else if (request.getStatus() == UserStatus.ACTIVE) {
+                        cognitoService.enableUser(user.getFullName());
+                        System.out.println("[UserService] Enabled user " + user.getFullName() + " in Cognito");
+                    }
+                } catch (Exception e) {
+                    System.err.println("[UserService] Failed to update Cognito status: " + e.getMessage());
                     // Không throw exception để không làm gián đoạn việc update database
                 }
             }
@@ -162,6 +179,7 @@ public class UserServiceImpl implements UserService {
                                 .email(user.getEmail())
                                 .phone(user.getPhone())
                                 .role(user.getRole() != null ? user.getRole().getName().name() : null)
+                                .userStatus(user.getStatus() != null ? user.getStatus().name() : "ACTIVE")
                                 .avatar(user.getAvatar())
                                 .build()).toList())
                 .build();
@@ -258,6 +276,7 @@ public class UserServiceImpl implements UserService {
                                 .email(user.getEmail())
                                 .phone(user.getPhone())
                                 .role(user.getRole() != null ? user.getRole().getName().name() : null)
+                                .userStatus(user.getStatus() != null ? user.getStatus().name() : "ACTIVE")
                                 .avatar(user.getAvatar())
                                 .build()).toList())
                 .build();

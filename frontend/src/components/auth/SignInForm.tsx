@@ -28,6 +28,7 @@ const SignInForm = ({ onForgotPassword, onSuccess }: SignInFormProps) => {
 
   useEffect(() => {
     if (user) {
+
       // Lưu thông tin user vào localStorage
       localStorage.setItem('user', JSON.stringify(user));
       console.log("Đăng nhập thành công:", user);
@@ -101,14 +102,16 @@ const SignInForm = ({ onForgotPassword, onSuccess }: SignInFormProps) => {
         onSuccess();
       })
       .catch((error: any) => {
-        // Xử lý lỗi từ backend - hiển thị toast thay vì alert
-        if (error.response?.data?.message) {
-          const message = error.response.data.message;
-          // Hiển thị thông báo lỗi chung
-          toast.error('Tên đăng nhập hoặc mật khẩu không đúng');
-        } else {
-          toast.error('Tên đăng nhập hoặc mật khẩu không đúng');
+        // Kiểm tra lỗi tài khoản bị vô hiệu hóa
+        if (error.response?.data?.error === 'ACCOUNT_DISABLED') {
+          toast.error(error.response.data.message || 'Tài khoản của bạn đã bị vô hiệu hóa bởi quản trị viên');
+          return; // Dừng lại, không hiển thị thêm toast khác
         }
+        
+        // Các lỗi khác
+        if (error.response?.data?.message) {
+          toast.error('Tên đăng nhập hoặc mật khẩu không đúng');
+        } 
       });
   };
 

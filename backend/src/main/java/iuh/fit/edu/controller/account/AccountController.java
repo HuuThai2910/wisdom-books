@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -32,27 +33,38 @@ public class AccountController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> loginAccount(@Valid @RequestBody LoginRequest request, HttpServletResponse response){
-
-        LoginResponse cognitoResponse = this.accountService.loginUser(request);
-        String token=cognitoResponse.getToken();
-        String refreshToken=cognitoResponse.getRefreshToken();
-        
-        // Set access token cookie (5 phút)
-        String accessTokenCookie = String.format("id_token=%s; Path=/; Max-Age=%d; SameSite=Lax",
-                token, 300);
-        response.addHeader("Set-Cookie", accessTokenCookie);
-        
-        // Set refresh token cookie (30 ngày)
-        String refreshTokenCookie = String.format("refresh_token=%s; Path=/; Max-Age=%d; SameSite=Lax",
-                refreshToken, 30 * 24 * 3600);
-        response.addHeader("Set-Cookie", refreshTokenCookie);
-        
-        UserInfoResponse userInfoResponse=accountService.getCurrentUserInfo(token);
-        email= userInfoResponse.getEmail();
-        
-        System.out.println("[Login] Set cookies (access + refresh) for user: " + userInfoResponse.getEmail());
-        return ResponseEntity.ok(cognitoResponse);
+    public ResponseEntity<?> loginAccount(@Valid @RequestBody LoginRequest request, HttpServletResponse response){
+        try {
+            LoginResponse cognitoResponse = this.accountService.loginUser(request);
+            String token=cognitoResponse.getToken();
+            String refreshToken=cognitoResponse.getRefreshToken();
+            
+            // Set access token cookie (5 phút)
+            String accessTokenCookie = String.format("id_token=%s; Path=/; Max-Age=%d; SameSite=Lax",
+                    token, 300);
+            response.addHeader("Set-Cookie", accessTokenCookie);
+            
+            // Set refresh token cookie (30 ngày)
+            String refreshTokenCookie = String.format("refresh_token=%s; Path=/; Max-Age=%d; SameSite=Lax",
+                    refreshToken, 30 * 24 * 3600);
+            response.addHeader("Set-Cookie", refreshTokenCookie);
+            
+            UserInfoResponse userInfoResponse=accountService.getCurrentUserInfo(token);
+            email= userInfoResponse.getEmail();
+            
+            System.out.println("[Login] Set cookies (access + refresh) for user: " + userInfoResponse.getEmail());
+            return ResponseEntity.ok(cognitoResponse);
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().startsWith("ACCOUNT_DISABLED:")) {
+                String message = e.getMessage().substring("ACCOUNT_DISABLED:".length()).trim();
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "ACCOUNT_DISABLED");
+                errorResponse.put("message", message);
+                errorResponse.put("status", 403);
+                return ResponseEntity.status(403).body(errorResponse);
+            }
+            throw e;
+        }
     }
 
     @PostMapping("/forgot-password")
@@ -140,5 +152,14 @@ public class AccountController {
         return "Check console logs";
     }
 
+    @PostMapping("/fix-customer-group")
+    public ResponseEntity<String> fixCustomerGroup(@RequestParam String username) {
+        try {
+            ((AccountServiceImpl) accountService).fixCustomerGroup(username);
+            return ResponseEntity.ok("User " + username + " added to CUSTOMER group successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
 
 }

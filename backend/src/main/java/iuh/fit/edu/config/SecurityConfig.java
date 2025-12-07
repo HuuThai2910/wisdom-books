@@ -3,7 +3,9 @@ package iuh.fit.edu.config;
 import iuh.fit.edu.config.security.CustomAccessDeniedHandler;
 import iuh.fit.edu.config.security.CustomAuthenticationEntryPoint;
 import iuh.fit.edu.config.security.JwtCookieFilter;
+import iuh.fit.edu.config.security.UserStatusFilter;
 import iuh.fit.edu.repository.BlacklistedTokenRepository;
+import iuh.fit.edu.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +33,9 @@ public class SecurityConfig {
 
     @Autowired
     private BlacklistedTokenRepository blacklistedTokenRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private final String COGNITO_JWKS_URL =
             "https://cognito-idp.ap-southeast-1.amazonaws.com/ap-southeast-1_rnIXnN2rr/.well-known/jwks.json";
@@ -60,6 +65,12 @@ public class SecurityConfig {
                 UsernamePasswordAuthenticationFilter.class
         );
 
+        // Thêm filter kiểm tra trạng thái user sau khi authentication
+        http.addFilterAfter(
+                new UserStatusFilter(userRepository),
+                JwtCookieFilter.class
+        );
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
@@ -82,17 +93,18 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/auth/refresh-token").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/fix-customer-group").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users/avatar/**").authenticated()
 
                         // Admin endpoints - CHÚ Ý: các rule cụ thể phải đặt TRƯỚC các rule chung
-                        .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "1")
+                        .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "1","CUSTOMER","3","WARE_HOUSE_STAFF","STAFF")
                         .requestMatchers("/api/dashboard/**").hasAnyAuthority("ADMIN", "1")
                         
                         // Staff endpoints (POST/PUT/DELETE books và orders)
                         .requestMatchers(HttpMethod.POST, "/api/books/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2")
                         .requestMatchers(HttpMethod.PUT, "/api/books/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2")
                         .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2")
-                        .requestMatchers("/api/orders/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2")
+                        .requestMatchers("/api/orders/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2","CUSTOMER","WARE_HOUSE_STAFF")
                         
                         // Warehouse endpoints
                         .requestMatchers("/api/entry-forms/**").hasAnyAuthority("ADMIN", "WARE_HOUSE_STAFF", "1", "4")
