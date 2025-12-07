@@ -362,7 +362,7 @@ function App() {
             path="/staff/dashboard"
             element={
               <RoleBasedRoute allowedRoles={["2", "STAFF"]}>
-                <StaffDashboard />
+                <Dashboard />
               </RoleBasedRoute>
             }
           />
@@ -388,7 +388,7 @@ function App() {
             path="/warehouse/dashboard"
             element={
               <RoleBasedRoute allowedRoles={["4", "WARE_HOUSE_STAFF"]}>
-                <WarehouseDashboard />
+                <Dashboard />
               </RoleBasedRoute>
             }
           />
