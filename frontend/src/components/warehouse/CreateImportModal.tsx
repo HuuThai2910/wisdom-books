@@ -39,7 +39,6 @@ export default function CreateImportModal({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedBookIsbn, setSelectedBookIsbn] = useState("");
   const [importQuantity, setImportQuantity] = useState("");
-  const [totalInventoryQty, setTotalInventoryQty] = useState(0);
   const [bookPageSize, setBookPageSize] = useState(10);
   const [bookCurrentPage, setBookCurrentPage] = useState(0);
   const [bookTotalPages, setBookTotalPages] = useState(1);
@@ -89,7 +88,6 @@ export default function CreateImportModal({
     if (isOpen) {
       fetchAllBooks();
       generateInvoiceNumber();
-      fetchTotalInventory();
 
       // Get current user from localStorage
       const userStr = localStorage.getItem("user");
@@ -119,17 +117,6 @@ export default function CreateImportModal({
   }, [searchKeyword]);
 
   // Removed local filtering since we now filter on server side via API
-
-  const fetchTotalInventory = async () => {
-    try {
-      const response = await entryFormApi.getTotalInventoryQuantity();
-      if (response.data !== undefined) {
-        setTotalInventoryQty(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching total inventory:", error);
-    }
-  };
 
   const generateInvoiceNumber = async () => {
     try {

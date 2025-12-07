@@ -11,7 +11,7 @@ export default function TopBooksChart({ data }: TopBooksChartProps) {
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl">
+        <div className="p-2.5 bg-linear-to-br from-blue-500 to-blue-600 rounded-xl">
           <BarChart3 className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -28,7 +28,7 @@ export default function TopBooksChart({ data }: TopBooksChartProps) {
             <div key={index} className="group">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <span className="flex-shrink-0 w-7 h-7 flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 rounded-lg text-sm font-bold">
+                  <span className="shrink-0 w-7 h-7 flex items-center justify-center bg-linear-to-br from-blue-50 to-blue-100 text-blue-600 rounded-lg text-sm font-bold">
                     {index + 1}
                   </span>
                   <span className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors">
@@ -42,7 +42,7 @@ export default function TopBooksChart({ data }: TopBooksChartProps) {
               <div className="ml-10">
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500 group-hover:from-blue-600 group-hover:to-blue-700"
+                    className="h-full bg-linear-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500 group-hover:from-blue-600 group-hover:to-blue-700"
                     style={{
                       width: `${((book.sales || 0) / maxSales) * 100}%`,
                     }}

@@ -63,7 +63,7 @@ export default function AdminProfile() {
         {/* Profile Card */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Cover Image */}
-          <div className="h-32 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+          <div className="h-32 bg-linear-to-r from-blue-500 to-purple-600"></div>
 
           {/* Profile Content */}
           <div className="px-8 pb-8">

@@ -33,7 +33,7 @@ export default function TopCategoriesChart({
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300 lg:col-span-2">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2.5 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl">
+        <div className="p-2.5 bg-linear-to-br from-orange-500 to-orange-600 rounded-xl">
           <BookOpen className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -58,12 +58,12 @@ export default function TopCategoriesChart({
                     name: categoryName,
                   })
                 }
-                className="p-4 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-100 hover:border-blue-300 transition-all hover:shadow-md group cursor-pointer"
+                className="p-4 bg-linear-to-br from-gray-50 to-white rounded-xl border border-gray-100 hover:border-blue-300 transition-all hover:shadow-md group cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-10 h-10 bg-gradient-to-br ${
+                      className={`w-10 h-10 bg-linear-to-br ${
                         colors[index % colors.length]
                       } rounded-lg flex items-center justify-center text-white font-bold text-sm`}
                     >
@@ -82,7 +82,7 @@ export default function TopCategoriesChart({
                 <div className="space-y-2">
                   <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div
-                      className={`h-full bg-gradient-to-r ${
+                      className={`h-full bg-linear-to-r ${
                         colors[index % colors.length]
                       } transition-all duration-500`}
                       style={{ width: `${Math.max(percentage, 2)}%` }}

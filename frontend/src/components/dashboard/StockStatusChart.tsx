@@ -25,7 +25,7 @@ export default function StockStatusChart({ overview }: StockStatusChartProps) {
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2.5 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl">
+        <div className="p-2.5 bg-linear-to-br from-purple-500 to-purple-600 rounded-xl">
           <Package className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -55,7 +55,7 @@ export default function StockStatusChart({ overview }: StockStatusChartProps) {
           </div>
           <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full transition-all duration-500 group-hover:from-emerald-600 group-hover:to-emerald-700"
+              className="h-full bg-linear-to-r from-emerald-500 to-emerald-600 rounded-full transition-all duration-500 group-hover:from-emerald-600 group-hover:to-emerald-700"
               style={{ width: `${inStockPercentage}%` }}
             ></div>
           </div>
@@ -81,7 +81,7 @@ export default function StockStatusChart({ overview }: StockStatusChartProps) {
           </div>
           <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-orange-500 to-orange-600 rounded-full transition-all duration-500 group-hover:from-orange-600 group-hover:to-orange-700"
+              className="h-full bg-linear-to-r from-orange-500 to-orange-600 rounded-full transition-all duration-500 group-hover:from-orange-600 group-hover:to-orange-700"
               style={{ width: `${lowStockPercentage}%` }}
             ></div>
           </div>
@@ -107,7 +107,7 @@ export default function StockStatusChart({ overview }: StockStatusChartProps) {
           </div>
           <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full transition-all duration-500 group-hover:from-red-600 group-hover:to-red-700"
+              className="h-full bg-linear-to-r from-red-500 to-red-600 rounded-full transition-all duration-500 group-hover:from-red-600 group-hover:to-red-700"
               style={{ width: `${outOfStockPercentage}%` }}
             ></div>
           </div>

@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import {
@@ -11,7 +9,6 @@ import {
   TrendingUp,
   AlertCircle,
   RotateCcw,
-  Sparkles,
 } from "lucide-react";
 import AdminLayout from "../admin/AdminLayout";
 import dashboardApi from "../../api/dashboardApi";
@@ -267,7 +264,7 @@ export default function AdminDashboard() {
         <div className="mb-8 flex items-center justify-between">
           <div className="ml-14 flex items-center gap-2">
             <p className="text-gray-600">Chào</p>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
               {user}
             </span>
             <p className="text-gray-600">
@@ -283,9 +280,9 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="group bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-blue-100/50">
+          <div className="group bg-linear-to-br from-white to-blue-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-blue-100/50">
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <div className="p-3 bg-linear-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <Package className="w-7 h-7 text-white" />
               </div>
             </div>
@@ -298,9 +295,9 @@ export default function AdminDashboard() {
             <p className="text-xs text-blue-600 font-medium">Đang hoạt động</p>
           </div>
 
-          <div className="group bg-gradient-to-br from-white to-cyan-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-cyan-100/50">
+          <div className="group bg-linear-to-br from-white to-cyan-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-cyan-100/50">
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <div className="p-3 bg-linear-to-br from-cyan-500 to-cyan-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <Users className="w-7 h-7 text-white" />
               </div>
             </div>
@@ -315,9 +312,9 @@ export default function AdminDashboard() {
             <p className="text-xs text-cyan-600 font-medium">Đã đăng ký</p>
           </div>
 
-          <div className="group bg-gradient-to-br from-white to-red-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-red-100/50">
+          <div className="group bg-linear-to-br from-white to-red-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-red-100/50">
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <div className="p-3 bg-linear-to-br from-red-500 to-red-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <AlertCircle className="w-7 h-7 text-white" />
               </div>
             </div>
@@ -330,9 +327,9 @@ export default function AdminDashboard() {
             <p className="text-xs text-red-600 font-medium">Cần nhập thêm</p>
           </div>
 
-          <div className="group bg-gradient-to-br from-white to-orange-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-orange-100/50">
+          <div className="group bg-linear-to-br from-white to-orange-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-orange-100/50">
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <div className="p-3 bg-linear-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <AlertCircle className="w-7 h-7 text-white" />
               </div>
             </div>
@@ -347,9 +344,9 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="group bg-gradient-to-br from-white to-emerald-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-emerald-100/50">
+          <div className="group bg-linear-to-br from-white to-emerald-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-emerald-100/50">
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <div className="p-3 bg-linear-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <ShoppingCart className="w-7 h-7 text-white" />
               </div>
             </div>
@@ -364,9 +361,9 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          <div className="group bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-blue-100/50">
+          <div className="group bg-linear-to-br from-white to-blue-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-blue-100/50">
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <div className="p-3 bg-linear-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <DollarSign className="w-7 h-7 text-white" />
               </div>
             </div>
@@ -381,9 +378,9 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          <div className="group bg-gradient-to-br from-white to-amber-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-amber-100/50">
+          <div className="group bg-linear-to-br from-white to-amber-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-amber-100/50">
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <div className="p-3 bg-linear-to-br from-amber-500 to-amber-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <TrendingUp className="w-7 h-7 text-white" />
               </div>
             </div>
@@ -412,7 +409,7 @@ export default function AdminDashboard() {
                     : (stats?.newCustomersThisMonth ?? 0).toLocaleString()}
                 </p>
               </div>
-              <div className="p-3 bg-gradient-to-br from-teal-100 to-teal-200 rounded-xl">
+              <div className="p-3 bg-linear-to-br from-teal-100 to-teal-200 rounded-xl">
                 <TrendingUp className="w-7 h-7 text-teal-600" />
               </div>
             </div>
@@ -430,7 +427,7 @@ export default function AdminDashboard() {
                     : (stats?.newBooksImported ?? 0).toLocaleString()}
                 </p>
               </div>
-              <div className="p-3 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-xl">
+              <div className="p-3 bg-linear-to-br from-cyan-100 to-cyan-200 rounded-xl">
                 <Package className="w-7 h-7 text-cyan-600" />
               </div>
             </div>
@@ -448,7 +445,7 @@ export default function AdminDashboard() {
                     : `${(stats?.cancelledOrderRate ?? 0).toFixed(1)}%`}
                 </p>
               </div>
-              <div className="p-3 bg-gradient-to-br from-rose-100 to-rose-200 rounded-xl">
+              <div className="p-3 bg-linear-to-br from-rose-100 to-rose-200 rounded-xl">
                 <ShoppingCart className="w-7 h-7 text-rose-600" />
               </div>
             </div>
@@ -557,7 +554,7 @@ export default function AdminDashboard() {
             <button
               onClick={handleApplyFilter}
               disabled={loading}
-              className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl text-sm font-semibold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              className="px-6 py-2.5 bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-xl text-sm font-semibold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             >
               {loading ? "Đang tải..." : "Áp dụng"}
             </button>

@@ -72,7 +72,7 @@ export default function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
                 className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-lg"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 rounded-full bg-linear-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
                 {userName.charAt(0).toUpperCase()}
               </div>
             )}

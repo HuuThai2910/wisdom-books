@@ -29,7 +29,7 @@ export default function MonthlyRevenueChart({
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2.5 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl">
+        <div className="p-2.5 bg-linear-to-br from-emerald-500 to-emerald-600 rounded-xl">
           <TrendingUp className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -55,7 +55,7 @@ export default function MonthlyRevenueChart({
                 <div className="w-full flex flex-col items-center justify-end flex-1 mb-2">
                   <div className="relative w-full">
                     <div
-                      className="w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg transition-all duration-500 group-hover:from-emerald-600 group-hover:to-emerald-500 cursor-pointer"
+                      className="w-full bg-linear-to-t from-emerald-500 to-emerald-400 rounded-t-lg transition-all duration-500 group-hover:from-emerald-600 group-hover:to-emerald-500 cursor-pointer"
                       style={{
                         height: `${((item.revenue || 0) / maxRevenue) * 200}px`,
                         minHeight: "8px",

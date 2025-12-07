@@ -101,12 +101,12 @@ export default function CategoryBooksModal({
               {books.map((book, index) => (
                 <div
                   key={book.bookId}
-                  className="group p-4 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all"
+                  className="group p-4 bg-linear-to-br from-gray-50 to-white rounded-xl border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <span
-                        className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-white rounded-lg text-sm font-bold"
+                        className="shrink-0 w-8 h-8 flex items-center justify-center text-white rounded-lg text-sm font-bold"
                         style={{
                           background:
                             "linear-gradient(135deg, rgba(0, 80, 210, 1) 0%, rgba(0, 90, 220, 1) 100%)",
