@@ -90,9 +90,20 @@ export default function CreateImportModal({
       fetchAllBooks();
       generateInvoiceNumber();
       fetchTotalInventory();
-      setSupplier("Admin");
+
+      // Get current user from localStorage
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          setSupplier(user.fullName || "Admin");
+        } catch (error) {
+          setSupplier("Admin");
+        }
+      } else {
+        setSupplier("Admin");
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, bookCurrentPage, bookPageSize]);
 
   // Fetch books when search keyword changes with debounce
@@ -145,28 +156,16 @@ export default function CreateImportModal({
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Fetch all books first for validation
-    let allBooksForValidation: ApiBook[] = [];
-    try {
-      const response = await bookApi.getAllBooks({
-        page: 0,
-        size: 10000, // Get all books
-        sort: "quantity,asc",
-        filter: undefined,
-      });
-      if (response.data) {
-        allBooksForValidation = response.data.result || [];
-      }
-    } catch (error) {
-      console.error("Error fetching books for validation:", error);
-      toast.error("Không thể tải danh sách sách để kiểm tra");
+    if (!file) {
+      console.log("No file selected");
       return;
     }
 
+    // We'll parse the file first and fetch only the books referenced in the file for validation
+    let allBooksForValidation: ApiBook[] = [];
+
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: "array" });
@@ -212,7 +211,44 @@ export default function CreateImportModal({
         }
 
         // Đọc dữ liệu từ hàng thứ 2 trở đi
+        // Nhưng trước hết thu thập tất cả ISBN trong file để gọi API lấy những sách cần thiết
         const booksToAdd: BookInImport[] = [];
+        // Collect ISBNs to fetch only necessary books
+        const isbnSet = new Set<string>();
+        for (let i = 1; i < jsonData.length; i++) {
+          const row = jsonData[i];
+          if (!row || row.length === 0 || row.every((cell) => !cell)) continue;
+          const isbn = row[0]?.toString().trim();
+          if (isbn) isbnSet.add(isbn);
+        }
+
+        if (isbnSet.size > 0) {
+          try {
+            const isbns = Array.from(isbnSet);
+            const filter = isbns.map((s) => `isbn='${s}'`).join(" or ");
+            const filterQuery = `(${filter})`;
+            console.log(
+              "Fetching books for validation with filter:",
+              filterQuery
+            );
+            const resp = await bookApi.getAllBooks({
+              page: 0,
+              size: Math.max(isbns.length, 1),
+              sort: "quantity,asc",
+              filter: filterQuery,
+            });
+            if (resp.data) {
+              allBooksForValidation = resp.data.result || [];
+              console.log(
+                `Loaded ${allBooksForValidation.length} books for validation (by ISBN)`
+              );
+            }
+          } catch (err) {
+            console.error("Error fetching books for validation by ISBN:", err);
+            toast.error("Không thể tải danh sách sách để kiểm tra");
+            return;
+          }
+        }
         const errors: string[] = [];
 
         for (let i = 1; i < jsonData.length; i++) {

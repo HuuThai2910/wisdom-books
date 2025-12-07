@@ -1,7 +1,6 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
+import toast, { Toaster } from "react-hot-toast";
 import {
   Calendar,
   Users,
@@ -13,18 +12,15 @@ import {
   RotateCcw,
   Sparkles,
 } from "lucide-react";
-import AdminLayout from "../admin/AdminLayout";
-import dashboardApi from "../../api/dashboardApi";
-import toast, { Toaster } from "react-hot-toast";
-import { DateRange, DashboardStats, DashboardOverview } from "../../types";
-import TopBooksChart from "../../components/dashboard/TopBooksChart";
-import MonthlyRevenueChart from "../../components/dashboard/MonthlyRevenueChart";
-import TopCategoriesChart from "../../components/dashboard/TopCategoriesChart";
-import StockStatusChart from "../../components/dashboard/StockStatusChart";
+import AdminLayout from "./components/AdminLayout";
+import dashboardApi from "./api/dashboardApi";
+import { DateRange, DashboardStats, DashboardOverview } from "./types";
+import TopBooksChart from "./components/TopBooksChart";
+import MonthlyRevenueChart from "./components/MonthlyRevenueChart";
+import TopCategoriesChart from "./components/TopCategoriesChart";
+import StockStatusChart from "./components/StockStatusChart";
 
-export default function AdminDashboard() {
-  const [user, setUser] = useState("Admin");
-
+export default function App() {
   const now = new Date();
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -112,9 +108,7 @@ export default function AdminDashboard() {
         endDateTime,
         10
       );
-      console.log("Top books response:", response);
       if (response.data && response.data.data) {
-        console.log("Top books data:", response.data.data);
         setTopBooks(response.data.data);
       }
     } catch (error) {
@@ -131,9 +125,7 @@ export default function AdminDashboard() {
         endDateTime,
         10
       );
-      console.log("Top categories response:", response);
       if (response.data && response.data.data) {
-        console.log("Top categories data:", response.data.data);
         setTopCategories(response.data.data);
       }
     } catch (error) {
@@ -142,17 +134,6 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    // Get user from localStorage
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        setUser(user.fullName || "Admin");
-      } catch (error) {
-        setUser("Admin");
-      }
-    }
-
     fetchOverview();
     fetchStats();
     fetchMonthlyRevenue();
@@ -179,7 +160,6 @@ export default function AdminDashboard() {
     };
     setDateRange(newDateRange);
 
-    // Fetch với dateRange mới ngay lập tức
     try {
       setLoading(true);
       const startDateTime = `${newDateRange.from}T00:00:00+07:00`;
@@ -247,7 +227,6 @@ export default function AdminDashboard() {
       });
     }
 
-    // Fetch lại dữ liệu monthly revenue với năm mới
     try {
       const response = await dashboardApi.getMonthlyRevenue(year);
       if (response.data && response.data.data) {
@@ -258,20 +237,22 @@ export default function AdminDashboard() {
     }
   };
 
-  // Stock status chart uses `stats` directly; no derived const needed
-
   return (
     <AdminLayout>
       <Toaster position="top-right" />
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 flex items-center justify-between">
-          <div className="ml-14 flex items-center gap-2">
-            <p className="text-gray-600">Chào</p>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-              {user}
-            </span>
-            <p className="text-gray-600">
-              , Đây là bảng điều khiển quản trị hệ thống
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-lg">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 bg-clip-text text-transparent">
+                Wisdom Book
+              </h1>
+            </div>
+            <p className="text-gray-600 ml-14">
+              Bảng điều khiển quản trị hệ thống
             </p>
           </div>
           <div className="text-right">
@@ -346,6 +327,131 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-5 h-5 text-gray-500" />
+              <label className="text-sm font-semibold text-gray-700">
+                Lọc theo:
+              </label>
+              <select
+                value={filterType}
+                onChange={(e) =>
+                  handleFilterTypeChange(
+                    e.target.value as "day" | "month" | "year"
+                  )
+                }
+                className="px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-medium bg-white hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              >
+                <option value="day">Ngày</option>
+                <option value="month">Tháng</option>
+                <option value="year">Năm</option>
+              </select>
+            </div>
+
+            {filterType === "day" && (
+              <div className="flex items-center gap-3">
+                <input
+                  type="date"
+                  value={dateRange.from}
+                  onChange={(e) =>
+                    setDateRange({ ...dateRange, from: e.target.value })
+                  }
+                  className="px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-medium hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                />
+                <span className="text-gray-400 font-medium">→</span>
+                <input
+                  type="date"
+                  value={dateRange.to}
+                  onChange={(e) =>
+                    setDateRange({ ...dateRange, to: e.target.value })
+                  }
+                  className="px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-medium hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                />
+              </div>
+            )}
+
+            {filterType === "month" && (
+              <div className="flex items-center gap-3">
+                <label className="text-sm font-semibold text-gray-700">
+                  Tháng:
+                </label>
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => handleMonthChange(Number(e.target.value))}
+                  className="px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-medium bg-white hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                >
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                    <option key={month} value={month}>
+                      Tháng {month}
+                    </option>
+                  ))}
+                </select>
+                <label className="text-sm font-semibold text-gray-700">
+                  Năm:
+                </label>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => handleYearChange(Number(e.target.value))}
+                  className="px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-medium bg-white hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                >
+                  {Array.from(
+                    { length: new Date().getFullYear() - 2000 + 1 },
+                    (_, i) => 2000 + i
+                  )
+                    .reverse()
+                    .map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            )}
+
+            {filterType === "year" && (
+              <div className="flex items-center gap-3">
+                <label className="text-sm font-semibold text-gray-700">
+                  Năm:
+                </label>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => handleYearChange(Number(e.target.value))}
+                  className="px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-medium bg-white hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                >
+                  {Array.from(
+                    { length: new Date().getFullYear() - 2000 + 1 },
+                    (_, i) => 2000 + i
+                  )
+                    .reverse()
+                    .map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            )}
+
+            <button
+              onClick={handleApplyFilter}
+              disabled={loading}
+              className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl text-sm font-semibold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            >
+              {loading ? "Đang tải..." : "Áp dụng"}
+            </button>
+
+            <button
+              onClick={handleReset}
+              disabled={loading}
+              className="p-2.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-110"
+              title="Reset về tháng hiện tại"
+            >
+              <RotateCcw className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="group bg-gradient-to-br from-white to-emerald-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-emerald-100/50">
             <div className="flex items-start justify-between mb-4">
@@ -371,14 +477,12 @@ export default function AdminDashboard() {
               </div>
             </div>
             <p className="text-sm font-medium text-gray-600 mb-1">Doanh thu</p>
-            <p className="text-2xl font-bold text-gray-900 mb-1">
+            <p className="text-3xl font-bold text-gray-900 mb-1">
               {loading
                 ? "..."
-                : `${(stats?.totalRevenue ?? 0).toLocaleString("vi-VN")}₫`}
+                : `${(stats?.totalRevenue / 1000000 ?? 0).toFixed(1)}M`}
             </p>
-            <p className="text-xs text-blue-600 font-medium">
-              Trong khoảng thời gian
-            </p>
+            <p className="text-xs text-blue-600 font-medium">Triệu đồng</p>
           </div>
 
           <div className="group bg-gradient-to-br from-white to-amber-50 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-amber-100/50">
@@ -388,14 +492,12 @@ export default function AdminDashboard() {
               </div>
             </div>
             <p className="text-sm font-medium text-gray-600 mb-1">Lợi nhuận</p>
-            <p className="text-2xl font-bold text-amber-600 mb-1">
+            <p className="text-3xl font-bold text-amber-600 mb-1">
               {loading
                 ? "..."
-                : `${(stats?.totalProfit ?? 0).toLocaleString("vi-VN")}₫`}
+                : `${(stats?.totalProfit / 1000000 ?? 0).toFixed(1)}M`}
             </p>
-            <p className="text-xs text-amber-600 font-medium">
-              Trong khoảng thời gian
-            </p>
+            <p className="text-xs text-amber-600 font-medium">Triệu đồng</p>
           </div>
         </div>
 
@@ -455,133 +557,13 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-gray-500" />
-              <label className="text-sm font-semibold text-gray-700">
-                Lọc theo:
-              </label>
-              <select
-                value={filterType}
-                onChange={(e) =>
-                  handleFilterTypeChange(
-                    e.target.value as "day" | "month" | "year"
-                  )
-                }
-                className="px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-medium bg-white hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-              >
-                <option value="day">Ngày</option>
-                <option value="month">Tháng</option>
-                <option value="year">Năm</option>
-              </select>
-            </div>
-
-            {filterType === "day" && (
-              <div className="flex items-center gap-3">
-                <input
-                  type="date"
-                  value={dateRange.from}
-                  onChange={(e) =>
-                    setDateRange({ ...dateRange, from: e.target.value })
-                  }
-                  className="px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-medium hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-                />
-                <span className="text-gray-400 font-medium">→</span>
-                <input
-                  type="date"
-                  value={dateRange.to}
-                  onChange={(e) =>
-                    setDateRange({ ...dateRange, to: e.target.value })
-                  }
-                  className="px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm font-medium hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-                />
-              </div>
-            )}
-
-            {filterType === "month" && (
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-600">Tháng:</label>
-                <select
-                  value={selectedMonth}
-                  onChange={(e) => handleMonthChange(Number(e.target.value))}
-                  className="px-3 py-2 border rounded-lg text-sm bg-white"
-                >
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                    <option key={month} value={month}>
-                      Tháng {month}
-                    </option>
-                  ))}
-                </select>
-                <label className="text-sm text-gray-600">Năm:</label>
-                <select
-                  value={selectedYear}
-                  onChange={(e) => handleYearChange(Number(e.target.value))}
-                  className="px-3 py-2 border rounded-lg text-sm bg-white"
-                >
-                  {Array.from(
-                    { length: new Date().getFullYear() - 2000 + 1 },
-                    (_, i) => 2000 + i
-                  )
-                    .reverse()
-                    .map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            )}
-
-            {filterType === "year" && (
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-600">Năm:</label>
-                <select
-                  value={selectedYear}
-                  onChange={(e) => handleYearChange(Number(e.target.value))}
-                  className="px-3 py-2 border rounded-lg text-sm bg-white"
-                >
-                  {Array.from(
-                    { length: new Date().getFullYear() - 2000 + 1 },
-                    (_, i) => 2000 + i
-                  )
-                    .reverse()
-                    .map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            )}
-            <button
-              onClick={handleApplyFilter}
-              disabled={loading}
-              className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl text-sm font-semibold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            >
-              {loading ? "Đang tải..." : "Áp dụng"}
-            </button>
-
-            <button
-              onClick={handleReset}
-              disabled={loading}
-              className="p-2.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-110"
-              title="Reset về tháng hiện tại"
-            >
-              <RotateCcw className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Charts Row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <TopBooksChart data={topBooks} />
           <MonthlyRevenueChart data={monthlyRevenue} year={selectedYear} />
         </div>
 
-        {/* Charts Row 2 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <TopCategoriesChart data={topCategories} dateRange={dateRange} />
+          <TopCategoriesChart data={topCategories} />
           <StockStatusChart overview={overview} />
         </div>
       </div>

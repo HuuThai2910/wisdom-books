@@ -43,10 +43,7 @@ export default function MonthlyRevenueChart({
       <div className="h-64 flex items-end justify-between gap-2">
         {data.length > 0 ? (
           data.map((item, index) => {
-            const month = item.month || index + 1;
-            const monthIndex = month - 1;
-            const validMonthIndex =
-              monthIndex >= 0 && monthIndex < 12 ? monthIndex : index;
+            const monthIndex = (item.month || index + 1) - 1;
             return (
               <div
                 key={item.month || index}
@@ -62,8 +59,8 @@ export default function MonthlyRevenueChart({
                       }}
                     >
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs py-1.5 px-3 rounded-lg whitespace-nowrap shadow-lg z-10">
-                        {(item.revenue || 0).toLocaleString("vi-VN")}₫
-                        {item.orders !== undefined && (
+                        {((item.revenue || 0) / 1000000).toFixed(1)}M₫
+                        {item.orders && (
                           <div className="text-emerald-300">
                             {item.orders} đơn
                           </div>
@@ -74,7 +71,7 @@ export default function MonthlyRevenueChart({
                   </div>
                 </div>
                 <span className="text-xs font-medium text-gray-600 mt-1">
-                  {months[validMonthIndex]}
+                  {months[monthIndex] || `T${monthIndex + 1}`}
                 </span>
               </div>
             );

@@ -15,7 +15,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -25,5 +25,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countCustomers();
     
     @Query("SELECT COUNT(u) FROM User u WHERE u.role.name = 'CUSTOMER' AND u.createdAt >= :startDate AND u.createdAt <= :endDate")
-    long countNewCustomersByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+    long countNewCustomersByDateRange(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
 }

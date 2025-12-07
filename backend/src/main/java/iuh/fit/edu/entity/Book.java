@@ -58,9 +58,12 @@ public class Book {
     @NotNull(message = "Trạng thái sách không được để trống")
     private BookStatus status;
 
-
+    @Column(columnDefinition = "DATETIME")
     private OffsetDateTime createdAt;
+    
+    @Column(columnDefinition = "DATETIME")
     private OffsetDateTime updatedAt;
+    
     private String createdBy;
     private String updatedBy;
     
