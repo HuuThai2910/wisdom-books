@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import {
-  Home,
-  Warehouse,
-  Menu,
-  MoreVertical,
-} from "lucide-react";
+import { Home, Warehouse, Menu, MoreVertical } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 import AdminHeader from "../../components/Header/AdminHeader";
 import AdminFooter from "../../components/Footer/AdminFooter";
@@ -128,7 +123,9 @@ export default function WarehouseLayout({ children }: WarehouseLayoutProps) {
           isSidebarExpanded ? "lg:ml-64" : "lg:ml-20"
         } transition-all duration-200`}
       >
-        <AdminHeader onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)} />
+        <AdminHeader
+          onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
+        />
         <main className="flex-1 p-6">{children}</main>
         <AdminFooter />
       </div>
