@@ -165,7 +165,7 @@ export default function PaymentMethodsPage() {
 
                                     <div className="bg-blue-600 p-8 text-white relative overflow-hidden">
                                         {/* Subtle gradient overlay */}
-                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 opacity-50" />
+                                        <div className="absolute inset-0 bg-linear-to-br from-blue-500 to-blue-700 opacity-50" />
 
                                         <div className="flex items-center gap-4 mb-4 relative z-10">
                                             <motion.div

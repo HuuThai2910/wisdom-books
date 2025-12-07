@@ -321,7 +321,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5">
+                    <div className="bg-linear-to-r from-blue-600 to-blue-700 px-6 py-5">
                         <div className="flex items-center justify-between flex-wrap gap-4">
                             <div className="flex items-center gap-4">
                                 <div className="relative group">
