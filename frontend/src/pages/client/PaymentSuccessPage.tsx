@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { CheckCircle, Package, Clock, Lightbulb } from "lucide-react";
+import { CheckCircle, Package, Clock} from "lucide-react";
 import paymentApi from "../../api/paymentApi";
 import { formatCurrency } from "../../util/formatting";
 import toast from "react-hot-toast";

@@ -148,7 +148,7 @@ const OrdersPage = () => {
                                         {tab.icon}
                                         <span>{tab.label}</span>
                                         <span
-                                            className={`ml-1 px-2.5 py-1 rounded-full text-xs font-semibold font-bold animate-bounce-gentle ${
+                                            className={`ml-1 px-2.5 py-1 rounded-full text-xs  font-bold animate-bounce-gentle ${
                                                 isActive
                                                     ? "bg-red-600 text-white"
                                                     : "bg-gray-100 text-red-600"

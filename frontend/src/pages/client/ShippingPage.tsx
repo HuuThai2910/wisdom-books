@@ -10,7 +10,7 @@ import {
 
 export default function ShippingPage() {
     return (
-        <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
+        <div className="min-h-screen bg-linear-to-b from-blue-50 via-white to-blue-50">
             {/* HERO */}
             <div className="relative bg-blue-600 text-white py-20 overflow-hidden">
                 {/* Background decorative books */}
@@ -126,7 +126,7 @@ export default function ShippingPage() {
                 </div>
 
                 {/* SHIPPING STEPS */}
-                <div className="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-10 mb-16 border border-blue-200 relative overflow-hidden">
+                <div className="bg-linear-to-br from-blue-50 to-white rounded-2xl p-10 mb-16 border border-blue-200 relative overflow-hidden">
                     {/* Decorative background */}
                     <div className="absolute top-0 left-0 text-blue-100 text-9xl opacity-20 -ml-10 -mt-10">
                         📦
@@ -173,7 +173,7 @@ export default function ShippingPage() {
                         {shippingPartners.map((partner, i) => (
                             <div
                                 key={i}
-                                className="p-6 border-2 border-blue-200 rounded-xl hover:border-blue-600 hover:shadow-lg transition-all duration-300 cursor-pointer bg-gradient-to-br from-white to-blue-50"
+                                className="p-6 border-2 border-blue-200 rounded-xl hover:border-blue-600 hover:shadow-lg transition-all duration-300 cursor-pointer bg-linear-to-br from-white to-blue-50"
                             >
                                 <div className="text-5xl mb-3">
                                     {partner.emoji}
