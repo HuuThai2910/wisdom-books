@@ -335,8 +335,11 @@ public class AccountServiceImpl implements AccountService {
             // Lưu access token record mới (5 phút)
             tokenService.saveTokenRecord(user, iuh.fit.edu.entity.constant.TokenType.ACCESS_TOKEN, 5);
             
+            // AWS Cognito không luôn trả về refresh token mới khi refresh
+            // Nếu không có refresh token mới, giữ lại refresh token cũ
             return LoginResponse.builder()
                     .token(newAccessToken)
+                    .refreshToken(refreshToken) // Giữ lại refresh token cũ
                     .success(true)
                     .build();
         } catch (Exception e) {

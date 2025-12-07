@@ -75,12 +75,19 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
+                        // Auth endpoints - CHÚ Ý: các rule CỤ THỂ phải đặt TRƯỚC rule CHUNG
+                        .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/refresh-token").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/fix-customer-group").permitAll()
+                        
                         // Public endpoints - không cần xác thực
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tz").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/avatar/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users/avatar/**").authenticated()
 
                         // Shopping endpoints - tất cả user đã đăng nhập đều có thể mua hàng
                         .requestMatchers("/api/cart/**").authenticated()
@@ -88,13 +95,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/orders/cancel").authenticated()
                         .requestMatchers("/api/payment/**").authenticated()
                         .requestMatchers("/api/vouchers/**").authenticated()
-                        
-                        // Auth endpoints - tất cả user đã đăng nhập
-                        .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/refresh-token").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/fix-customer-group").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/users/avatar/**").authenticated()
 
                         // Admin endpoints - CHÚ Ý: các rule cụ thể phải đặt TRƯỚC các rule chung
                         .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "1","CUSTOMER","3","WARE_HOUSE_STAFF","STAFF")

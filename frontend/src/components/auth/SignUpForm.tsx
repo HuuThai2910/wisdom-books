@@ -100,8 +100,8 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
     dispatch(registerUser({ registerForm }))
       .unwrap()
       .then(() => {
-        onSuccess();
-        navigate('/');
+        toast.success('Đăng ký thành công! Vui lòng đăng nhập.');
+        navigate('/login');
       })
       .catch((error: any) => {
         // Xử lý lỗi từ backend
