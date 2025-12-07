@@ -141,7 +141,6 @@ const UserFormPage = () => {
       setWardsForSelectedCity([]);
       return;
     }
-
     const filteredWards = wardMappings
       .filter((w) => {
         const provinceToMatch = formData.address.province.replace(
@@ -174,10 +173,10 @@ const UserFormPage = () => {
         setAvatarPreview(event.target?.result as string);
       };
       reader.readAsDataURL(file);
-
-      setFormData((prev) => ({
+      
+      setFormData(prev => ({
         ...prev,
-        avatarFile: file,
+        avatarFile: file
       }));
     }
   };
@@ -185,11 +184,11 @@ const UserFormPage = () => {
   const removeAvatar = () => {
     setAvatarPreview(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      fileInputRef.current.value = '';
     }
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      avatarFile: undefined,
+      avatarFile: undefined
     }));
   };
 
@@ -197,64 +196,53 @@ const UserFormPage = () => {
     const newErrors: FormErrors = {};
 
     if (!formData.fullName.trim()) {
-      newErrors.fullName = "Vui lòng nhập họ và tên";
+      newErrors.fullName = 'Vui lòng nhập họ và tên';
     } else if (formData.fullName.trim().length < 3) {
-      newErrors.fullName = "Họ và tên phải có ít nhất 3 ký tự";
+      newErrors.fullName = 'Họ và tên phải có ít nhất 3 ký tự';
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Vui lòng nhập email";
+      newErrors.email = 'Vui lòng nhập email';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Email không hợp lệ";
+      newErrors.email = 'Email không hợp lệ';
     }
 
     if (!formData.phone.trim()) {
-      newErrors.phone = "Vui lòng nhập số điện thoại";
+      newErrors.phone = 'Vui lòng nhập số điện thoại';
     } else if (!/^0\d{9}$/.test(formData.phone)) {
-      newErrors.phone = "Số điện thoại phải có 10 số và bắt đầu bằng 0";
+      newErrors.phone = 'Số điện thoại phải có 10 số và bắt đầu bằng 0';
     }
 
-    // Giới tính bắt buộc cho cả add và edit
-    if (!formData.gender) {
-      newErrors.gender = "Vui lòng chọn giới tính";
-    }
-
-    if (mode === "add") {
+    if (mode === 'add') {
       if (!formData.password) {
-        newErrors.password = "Vui lòng nhập mật khẩu";
+        newErrors.password = 'Vui lòng nhập mật khẩu';
       } else if (formData.password.length < 6) {
-        newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+        newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
       }
 
       if (!formData.confirmPassword) {
-        newErrors.confirmPassword = "Vui lòng xác nhận mật khẩu";
+        newErrors.confirmPassword = 'Vui lòng xác nhận mật khẩu';
       } else if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
+        newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
       }
+    }
 
-      if (!formData.role.id) {
-        newErrors.role = "Vui lòng chọn vai trò";
-      }
+    if (!formData.role.id) {
+      newErrors.role = 'Vui lòng chọn vai trò';
+    }
 
-      // Mode add: địa chỉ bắt buộc
-      if (!formData.address.province.trim()) {
-        newErrors.province = "Vui lòng chọn tỉnh/thành phố";
-      }
+    if (!formData.address.province.trim()) {
+      newErrors.province = 'Vui lòng chọn tỉnh/thành phố';
+    }
 
-      if (!formData.address.ward.trim()) {
-        newErrors.ward = "Vui lòng chọn phường/xã";
-      }
+    if (!formData.address.ward.trim()) {
+      newErrors.ward = 'Vui lòng chọn phường/xã';
+    }
 
-      if (!formData.address.address.trim()) {
-        newErrors.address = "Vui lòng nhập địa chỉ chi tiết";
-      } else if (formData.address.address.trim().length < 5) {
-        newErrors.address = "Địa chỉ phải có ít nhất 5 ký tự";
-      }
-    } else if (mode === "edit") {
-      // Mode edit: địa chỉ có thể null, chỉ validate nếu có nhập
-      if (formData.address.address.trim() && formData.address.address.trim().length < 5) {
-        newErrors.address = "Địa chỉ phải có ít nhất 5 ký tự";
-      }
+    if (!formData.address.address.trim()) {
+      newErrors.address = 'Vui lòng nhập địa chỉ chi tiết';
+    } else if (formData.address.address.trim().length < 5) {
+      newErrors.address = 'Địa chỉ phải có ít nhất 5 ký tự';
     }
 
     setErrors(newErrors);

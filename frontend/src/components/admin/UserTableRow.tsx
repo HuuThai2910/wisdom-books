@@ -90,7 +90,6 @@ const UserTableRow = ({
           {getRoleText(user.role)}
         </span>
       </td>
-
       <td className="px-4 py-4 border-b border-gray-100">
         <div className="flex gap-2">
           <button

@@ -186,14 +186,15 @@ const ManageUserPage = () => {
     }
   };
 
+
   const handleSort = (column: string) => {
     if (sortBy === column) {
       // Toggle direction if same column
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       // Set new column with ascending order
       setSortBy(column);
-      setSortDirection("asc");
+      setSortDirection('asc');
     }
   };
 
@@ -256,19 +257,15 @@ const ManageUserPage = () => {
 
       // Save file
       XLSX.writeFile(workbook, filename);
-      console.log("File saved successfully");
-
-      toast.success(
-        `Đã xuất ${selectedUserIds.length} người dùng ra file Excel thành công!`
-      );
+      console.log('File saved successfully');
+      
+      toast.success(`Đã xuất ${selectedUserIds.length} người dùng ra file Excel thành công!`);
       setSelectedUserIds([]);
     } catch (error: any) {
-      console.error("Error exporting to Excel:", error);
-      console.error("Error stack:", error.stack);
-      console.error("Error message:", error.message);
-      toast.error(
-        `Lỗi khi xuất file Excel: ${error.message || "Unknown error"}`
-      );
+      console.error('Error exporting to Excel:', error);
+      console.error('Error stack:', error.stack);
+      console.error('Error message:', error.message);
+      toast.error(`Lỗi khi xuất file Excel: ${error.message || 'Unknown error'}`);
     }
   };
 
