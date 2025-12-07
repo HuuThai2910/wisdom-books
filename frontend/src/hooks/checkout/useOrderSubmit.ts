@@ -158,7 +158,7 @@ export const useOrderSubmit = (): UseOrderSubmitReturn & {
                     }
                 }
             } catch (error: any) {
-                const errorMessage = error?.response?.data?.message || "";
+                const errorMessage = error?.message || "";
                 if (errorMessage.includes("không đủ số lượng")) {
                     setOutOfStockModal({
                         isOpen: true,
