@@ -105,8 +105,9 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
       })
       .catch((error: any) => {
         // Xử lý lỗi từ backend
-        if (error.response?.data?.message) {
-          const message = error.response.data.message;
+        if (error) {
+          console.log('[SignUpForm] Registration error:', error);
+          const message = error;
           
           // Kiểm tra lỗi username trùng
           if (message.toLowerCase().includes('username') || message.toLowerCase().includes('tên đăng nhập') || message.toLowerCase().includes('đã tồn tại')) {

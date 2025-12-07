@@ -721,7 +721,6 @@ const ViewUpsertBook = () => {
                                             valueEnum={{
                                                 SALE: "Đang bán",
                                                 STOP_SALE: "Ngừng bán",
-                                                OUT_STOCK: "Hết hàng",
                                             }}
                                         />
                                     </Col>

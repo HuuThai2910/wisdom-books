@@ -124,7 +124,7 @@ export default function ContactPage() {
                             </div>
                         </motion.div>
 
-                        <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-blue-700 text-white">
+                        <h1 className="text-5xl md:text-6xl font-bold mb-4 text-blue-700 ">
                             Liên Hệ Với WisBook
                         </h1>
 

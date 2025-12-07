@@ -102,14 +102,15 @@ const SignInForm = ({ onForgotPassword, onSuccess }: SignInFormProps) => {
         onSuccess();
       })
       .catch((error: any) => {
+        console.log('[SignInForm] Login error:', error);
         // Kiểm tra lỗi tài khoản bị vô hiệu hóa
-        if (error.response?.data?.error === 'ACCOUNT_DISABLED') {
-          toast.error(error.response.data.message || 'Tài khoản của bạn đã bị vô hiệu hóa bởi quản trị viên');
+        if (error === 'Tài khoản của bạn đã bị vô hiệu hóa bởi quản trị viên') {
+          toast.error(error || 'Tài khoản của bạn đã bị vô hiệu hóa bởi quản trị viên');
           return; // Dừng lại, không hiển thị thêm toast khác
         }
         
         // Các lỗi khác
-        if (error.response?.data?.message) {
+        if (error) {
           toast.error('Tên đăng nhập hoặc mật khẩu không đúng');
         } 
       });
