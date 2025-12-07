@@ -168,10 +168,19 @@ const cartSlice = createSlice({
                 item.selected = selected;
             }
         },
-        // Hàm để cập nhật tất cả select item và hiển thị ngay lập tức cho UI
+        /**
+         * Hàm để cập nhật tất cả select item và hiển thị ngay lập tức cho UI
+         * CHỈ áp dụng cho các sản phẩm còn hàng (book.quantity > 0)
+         * Sản phẩm hết hàng không bị ảnh hưởng
+         */
         optimisticUpdateSelectAll: (state, action: PayloadAction<boolean>) => {
             const selected = action.payload;
-            state.cartItems.forEach((i) => (i.selected = selected));
+            // Chỉ update selected cho sản phẩm còn hàng
+            state.cartItems.forEach((item) => {
+                if (item.book.quantity > 0) {
+                    item.selected = selected;
+                }
+            });
         },
         // Hàm để cập nhật số lượng item và hiển thị ngay lập tức cho UI
         optimisticUpdateQuantity: (
