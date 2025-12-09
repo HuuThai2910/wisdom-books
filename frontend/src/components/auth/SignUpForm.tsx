@@ -193,22 +193,7 @@ const SignUpForm = ({ onSuccess, onSwitchToSignIn }: SignUpFormProps) => {
     <form onSubmit={handleSubmit} className="bg-white flex items-center justify-center flex-col px-10 py-8 min-h-full">
       <h1 className="mb-2.5 text-3xl font-bold" style={{ color: '#2196F3' }}>Tạo tài khoản</h1>
       
-      <div className="flex gap-3 my-5">
-        <a href="#" className="border-2 border-gray-300 rounded-[20%] inline-flex justify-center items-center
-          w-10 h-10 text-gray-600 transition-all duration-300 hover:border-blue-600 hover:text-blue-600 hover:-translate-y-1">
-          <i className="fa-brands fa-google-plus-g"></i>
-        </a>
-        <a href="#" className="border-2 border-gray-300 rounded-[20%] inline-flex justify-center items-center
-          w-10 h-10 text-gray-600 transition-all duration-300 hover:border-blue-600 hover:text-blue-600 hover:-translate-y-1">
-          <i className="fa-brands fa-facebook-f"></i>
-        </a>
-        <a href="#" className="border-2 border-gray-300 rounded-[20%] inline-flex justify-center items-center
-          w-10 h-10 text-gray-600 transition-all duration-300 hover:border-blue-600 hover:text-blue-600 hover:-translate-y-1">
-          <i className="fa-brands fa-github"></i>
-        </a>
-      </div>
-      
-      <span className="text-xs text-gray-600">Hoặc sử dụng email của bạn để đăng ký</span>
+
       
       <div className="w-full">
         <input
