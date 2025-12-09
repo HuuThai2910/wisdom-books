@@ -78,6 +78,19 @@ public class UserServiceImpl implements UserService {
         if (user != null) {
             User savedUser = userRepository.save(user);
             System.out.println("User avatar after save: " + savedUser.getAvatar());
+            
+            // Add user to appropriate Cognito group based on role
+            if (role != null && role.getName() != null) {
+                try {
+                    String cognitoGroupName = role.getName().name(); // ADMIN, STAFF, CUSTOMER, WARE_HOUSE_STAFF
+                    cognitoService.addUserToGroup(user.getFullName(), cognitoGroupName);
+                    System.out.println("[CreateUser] Added user " + user.getFullName() + " to " + cognitoGroupName + " group in Cognito");
+                } catch (Exception e) {
+                    System.err.println("[CreateUser] Failed to add user to Cognito group: " + e.getMessage());
+                    // Continue anyway - user is created in DB, just missing Cognito group
+                }
+            }
+            
             return true;
         }
         return false;

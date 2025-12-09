@@ -1,5 +1,7 @@
 import { UserData } from "@/types";
 import { getS3Url } from "../../config/s3";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/store";
 
 interface UserTableRowProps {
   user: UserData;
@@ -20,6 +22,8 @@ const UserTableRow = ({
   isSelected,
   onSelectChange,
 }: UserTableRowProps) => {
+  const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+  const isCurrentUser = currentUser?.email && currentUser.email === user.email;
   const avatarUrl = getS3Url(user.avatar);
 
   const getRoleText = (role: any): string => {
@@ -42,13 +46,14 @@ const UserTableRow = ({
   };
 
   return (
-    <tr className="hover:bg-gray-50 transition-colors duration-150">
+    <tr className={`transition-colors duration-150 ${isCurrentUser ? 'opacity-50 bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-50'}`}>
       <td className="px-4 py-4 border-b border-gray-100">
         <input
           type="checkbox"
           className="w-[18px] h-[18px] cursor-pointer rounded"
           checked={isSelected}
           onChange={(e) => onSelectChange(Number(user.id), e.target.checked)}
+          disabled={isCurrentUser}
         />
       </td>
       <td className="px-4 py-4 border-b border-gray-100 text-sm text-gray-900">
@@ -106,9 +111,10 @@ const UserTableRow = ({
         <div className="flex gap-2">
           <button
             onClick={() => onView(user)}
-            className="w-8 h-8 inline-flex items-center justify-center 
-              transition-all duration-200 text-blue-600 hover:text-blue-700"
-            title="Xem"
+            className={`w-8 h-8 inline-flex items-center justify-center 
+              transition-all duration-200 ${isCurrentUser ? 'text-gray-400 cursor-not-allowed pointer-events-none' : 'text-blue-600 hover:text-blue-700'}`}
+            title={isCurrentUser ? "Không thể xem tài khoản của chính bạn" : "Xem"}
+            disabled={isCurrentUser}
           >
             <svg
               className="w-5 h-5"
@@ -132,9 +138,10 @@ const UserTableRow = ({
           </button>
           <button
             onClick={() => onEdit(user)}
-            className="w-8 h-8 inline-flex items-center justify-center 
-              transition-all duration-200 text-yellow-600 hover:text-blue-700"
-            title="Sửa"
+            className={`w-8 h-8 inline-flex items-center justify-center 
+              transition-all duration-200 ${isCurrentUser ? 'text-gray-400 cursor-not-allowed pointer-events-none' : 'text-yellow-600 hover:text-blue-700'}`}
+            title={isCurrentUser ? "Không thể sửa tài khoản của chính bạn" : "Sửa"}
+            disabled={isCurrentUser}
           >
             <svg
               className="w-5 h-5"
@@ -152,9 +159,10 @@ const UserTableRow = ({
           </button>
           <button
             onClick={() => onDelete(user)}
-            className="w-8 h-8 inline-flex items-center justify-center 
-              transition-all duration-200 text-red-600 hover:text-blue-700"
-            title="Xóa"
+            className={`w-8 h-8 inline-flex items-center justify-center 
+              transition-all duration-200 ${isCurrentUser ? 'text-gray-400 cursor-not-allowed pointer-events-none' : 'text-red-600 hover:text-blue-700'}`}
+            title={isCurrentUser ? "Không thể xóa tài khoản của chính bạn" : "Xóa"}
+            disabled={isCurrentUser}
           >
             <svg
               className="w-5 h-5"
