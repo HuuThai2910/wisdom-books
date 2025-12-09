@@ -36,7 +36,6 @@ export default function HistoryFilters({
         >
           Lọc tổng hợp
         </button>
-        {/* Removed explicit "Làm lại" button; reset handled by header reset icon */}
         <div className="flex items-end">
           <div />
         </div>

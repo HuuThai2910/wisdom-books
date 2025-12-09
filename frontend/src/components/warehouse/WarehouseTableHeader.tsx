@@ -87,9 +87,7 @@ export default function WarehouseTableHeader({
         </button>
         <button
           onClick={() => {
-            // First perform refresh action
             onRefresh && onRefresh();
-            // Then reset filters if provided
             onReset && onReset();
           }}
           className="p-2 hover:bg-gray-100 rounded-md transition-colors"

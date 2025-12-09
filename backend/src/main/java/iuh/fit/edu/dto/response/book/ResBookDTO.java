@@ -64,6 +64,9 @@ public class ResBookDTO {
         private String comment;
         private int rating;
         private OffsetDateTime reviewDate;
+        private String userName;
+        private String userAvatar;
+        private String userEmail;
     }
     @Getter
     @Setter

@@ -34,5 +34,7 @@ public interface OrderService {
 
     @Transactional
     UpdateOrderStatusResponse updateOrderStatus(UpdateOrderRequest request, String email);
+
+    boolean checkUserPurchasedBook(String email, Long bookId);
 }
 

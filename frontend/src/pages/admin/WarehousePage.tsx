@@ -89,11 +89,11 @@ export default function WarehousePage() {
     "asc" | "desc"
   >("desc");
 
-  // Lấy dữ liệu sách từ API với bộ lọc và phân trang
+  // Lấy dữ liệu sách từ API với bộ lọc, tìm kiếm bằng debound (khi ngưng nhập nội dung tìm kiếm 0.3s thì nó mới tiến hành lọc key) và phân trang
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchBooks();
-    }, 500);
+    }, 300);
     return () => clearTimeout(timer);
   }, [searchTerm, bookCurrentPage, bookPageSize]);
 
@@ -545,6 +545,7 @@ export default function WarehousePage() {
           isOpen={showCreateImportModal}
           onClose={() => setShowCreateImportModal(false)}
           onSubmit={handleSubmitImport}
+          initialSearchTerm={searchTerm}
         />
         {/* Chi tiết phiếu nhập */}
         <EntryFormDetailModal

@@ -2,6 +2,7 @@ package iuh.fit.edu.service.impl;
 
 import iuh.fit.edu.dto.request.book.ReqCreateBookDTO;
 import iuh.fit.edu.dto.request.book.ReqUpdateBookDTO;
+import iuh.fit.edu.dto.request.book.ReviewRequest;
 import iuh.fit.edu.dto.response.ResultPaginationDTO;
 import iuh.fit.edu.dto.response.book.ResBookDTO;
 import iuh.fit.edu.dto.response.book.ResCreateBookDTO;
@@ -48,6 +49,7 @@ public class BookServiceImpl implements BookService {
     private final EntryFormRepository entryFormRepository;
     private final EntryFormDetailRepository entryFormDetailRepository;
     private final UserRepository userRepository;
+    private final iuh.fit.edu.repository.ReviewRepository reviewRepository;
     private final BookMapper bookMapper;
     private final S3Service s3Service;
 
@@ -55,8 +57,10 @@ public class BookServiceImpl implements BookService {
     public BookServiceImpl(BookRepository bookRepository, InventoryRepository inventoryRepository,
                            SupplierRepository supplierRepository, CategoryRepository categoryRepository,
                            EntryFormRepository entryFormRepository, EntryFormDetailRepository entryFormDetailRepository,
-                           UserRepository userRepository, BookMapper bookMapper, S3Service s3Service) {
+                           UserRepository userRepository, iuh.fit.edu.repository.ReviewRepository reviewRepository,
+                           BookMapper bookMapper, S3Service s3Service) {
         this.bookRepository = bookRepository;
+        this.reviewRepository = reviewRepository;
         this.inventoryRepository = inventoryRepository;
         this.supplierRepository = supplierRepository;
         this.categoryRepository = categoryRepository;
@@ -212,7 +216,8 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book findBookById(Long id) {
-        return this.bookRepository.findById(id).orElse(null);
+        // Use EntityGraph to fetch reviews with users for detail view
+        return this.bookRepository.findByIdWithReviewsAndUsers(id).orElse(null);
     }
 
 
@@ -441,5 +446,106 @@ public class BookServiceImpl implements BookService {
         }
         this.bookRepository.save(book);
         return uploadedPaths;
+    }
+
+    @Override
+    @Transactional
+    public Review createReview(Long bookId, String email, ReviewRequest reviewRequest) throws IdInvalidException {
+        // Check if book exists
+        Book book = findBookById(bookId);
+        if (book == null) {
+            throw new IdInvalidException("Sách với id " + bookId + " không tồn tại");
+        }
+
+        // Find user
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new IdInvalidException("User không tồn tại");
+        }
+
+        // Initialize reviews list if null
+        if (book.getReviews() == null) {
+            book.setReviews(new ArrayList<>());
+        }
+
+        // Check if user already has a review for this book
+        Optional<Review> existingReview = book.getReviews().stream()
+                .filter(r -> r.getUser().getEmail().equals(email))
+                .findFirst();
+        
+        if (existingReview.isPresent()) {
+            throw new IdInvalidException("Bạn đã đánh giá sách này rồi. Vui lòng sử dụng chức năng cập nhật.");
+        }
+
+        // Create new review
+        Review review = new Review();
+        review.setBook(book);
+        review.setUser(user);
+        review.setRating(reviewRequest.getRating());
+        review.setComment(reviewRequest.getComment());
+        review.setReviewDate(OffsetDateTime.now());
+
+        // Save review directly using repository
+        Review savedReview = reviewRepository.save(review);
+        return savedReview;
+    }
+
+    @Override
+    @Transactional
+    public Review updateReview(Long bookId, String email, ReviewRequest reviewRequest) throws IdInvalidException {
+        // Check if book exists
+        Book book = findBookById(bookId);
+        if (book == null) {
+            throw new IdInvalidException("Sách với id " + bookId + " không tồn tại");
+        }
+
+        // Initialize reviews list if null
+        if (book.getReviews() == null) {
+            throw new IdInvalidException("Bạn chưa có đánh giá nào cho sách này");
+        }
+
+        // Find user's existing review
+        Review existingReview = book.getReviews().stream()
+                .filter(r -> r.getUser().getEmail().equals(email))
+                .findFirst()
+                .orElseThrow(() -> new IdInvalidException("Bạn chưa có đánh giá nào cho sách này"));
+
+        // Update review
+        existingReview.setRating(reviewRequest.getRating());
+        existingReview.setComment(reviewRequest.getComment());
+        existingReview.setReviewDate(OffsetDateTime.now());
+
+        Review updatedReview = reviewRepository.save(existingReview);
+        return updatedReview;
+    }
+
+    @Override
+    @Transactional
+    public void deleteReview(Long bookId, String email) throws IdInvalidException {
+        // Check if book exists
+        Book book = findBookById(bookId);
+        if (book == null) {
+            throw new IdInvalidException("Sách với id " + bookId + " không tồn tại");
+        }
+
+        // Initialize reviews list if null
+        if (book.getReviews() == null || book.getReviews().isEmpty()) {
+            throw new IdInvalidException("Bạn chưa có đánh giá nào cho sách này");
+        }
+
+        // Find and remove user's review
+        Review reviewToRemove = book.getReviews().stream()
+                .filter(r -> r.getUser().getEmail().equals(email))
+                .findFirst()
+                .orElseThrow(() -> new IdInvalidException("Bạn chưa có đánh giá nào cho sách này"));
+
+        // Remove from collection first (for orphanRemoval)
+        book.getReviews().remove(reviewToRemove);
+        
+        // Then delete from database
+        reviewRepository.delete(reviewToRemove);
+        
+        // Save book to trigger orphan removal
+        bookRepository.save(book);
     }
 }

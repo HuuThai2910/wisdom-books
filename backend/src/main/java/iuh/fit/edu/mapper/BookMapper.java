@@ -75,8 +75,24 @@ public interface BookMapper {
         if (book.getReviews() != null) {
             dto.setReview(book.getReviews()
                     .stream()
-                    .map(r -> new ResBookDTO.Review(
-                            r.getId(), r.getComment(), r.getRating(), r.getReviewDate()))
+                    .map(r -> {
+                        String userName = "Khách hàng";
+                        String userAvatar = null;
+                        String userEmail = null;
+                        if (r.getUser() != null) {
+                            userName = r.getUser().getFullName() != null ? r.getUser().getFullName() : "Khách hàng";
+                            userAvatar = r.getUser().getAvatar();
+                            userEmail = r.getUser().getEmail();
+                        }
+                        return new ResBookDTO.Review(
+                                r.getId(), 
+                                r.getComment(), 
+                                r.getRating(), 
+                                r.getReviewDate(),
+                                userName,
+                                userAvatar,
+                                userEmail);
+                    })
                     .toArray(ResBookDTO.Review[]::new));
         }
 

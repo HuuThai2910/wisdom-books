@@ -21,9 +21,8 @@ const bookApi = {
         if (params?.sort) queryParams.append("sort", params.sort);
         if (params?.filter) queryParams.append("filter", params.filter);
 
-        const url = `/books${
-            queryParams.toString() ? "?" + queryParams.toString() : ""
-        }`;
+        const url = `/books${queryParams.toString() ? "?" + queryParams.toString() : ""
+            }`;
         const response = await axiosClient.get<
             ApiResponse<PaginatedResponse<Book>>
         >(url);
@@ -86,6 +85,38 @@ const bookApi = {
                     "Content-Type": "multipart/form-data",
                 },
             }
+        );
+        return response.data;
+    },
+
+    // Submit review for a book
+    submitReview: async (bookId: number, reviewData: {
+        rating: number;
+        comment: string;
+    }): Promise<ApiResponse<any>> => {
+        const response = await axiosClient.post<ApiResponse<any>>(
+            `/books/${bookId}/reviews`,
+            reviewData
+        );
+        return response.data;
+    },
+
+    // Update existing review
+    updateReview: async (bookId: number, reviewData: {
+        rating: number;
+        comment: string;
+    }): Promise<ApiResponse<any>> => {
+        const response = await axiosClient.put<ApiResponse<any>>(
+            `/books/${bookId}/reviews`,
+            reviewData
+        );
+        return response.data;
+    },
+
+    // Delete user's review
+    deleteReview: async (bookId: number): Promise<ApiResponse<void>> => {
+        const response = await axiosClient.delete<ApiResponse<void>>(
+            `/books/${bookId}/reviews`
         );
         return response.data;
     },

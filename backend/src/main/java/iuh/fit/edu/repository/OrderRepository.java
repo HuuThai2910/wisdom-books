@@ -80,5 +80,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     List<Object[]> findTopBooksByCategory(@Param("categoryId") Long categoryId,
                                           @Param("startDate") OffsetDateTime startDate, 
                                           @Param("endDate") OffsetDateTime endDate);
+    
+    // Check if user has DELIVERED orders containing a specific book
+    List<Order> findByUser_EmailAndStatus(String email, iuh.fit.edu.entity.constant.OrderStatus status);
 }
 
