@@ -24,6 +24,8 @@ public class ReqUpdateBookDTO {
     private Long id;
 
     @NotBlank(message = "ISBN không được để trống")
+    @Pattern(regexp = "^[0-9-]{10,17}$",
+            message = "ISBN không hợp lệ (phải là 10-13 chữ số)")
     private String isbn;
 
     @NotBlank(message = "Tiêu đề không được để trống")
