@@ -88,6 +88,7 @@ public class OrderServiceImpl implements OrderService {
         if(request.getPaymentMethod() == PaymentMethod.COD){
             order.setExpiredAt(null);
             orderRepository.save(order);
+            order.getOrderItems().size();
             this.emailService.sendEmailFromTemplateSync(
                     order.getReceiverEmail(),
                     "Đặt hàng thành công #" + order.getOrderCode(),
