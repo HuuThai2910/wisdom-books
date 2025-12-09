@@ -95,7 +95,7 @@ const LoginPage = () => {
               ${mode === 'signup' ? 'translate-x-0' : '-translate-x-[200%]'}`}>
               <h1 className="text-white text-[32px] font-bold mb-2.5
                 [text-shadow:0_3px_10px_rgba(0,0,0,0.4),0_0_20px_rgba(255,255,255,0.3)]">
-                Chào mừng bạn trở lại!
+                Chào mừng trở lại!
               </h1>
               <p className="text-white/95 text-sm leading-5 my-5
                 [text-shadow:0_2px_5px_rgba(0,0,0,0.3)]">
