@@ -3,12 +3,14 @@ package iuh.fit.edu.controller;
 import com.turkraft.springfilter.boot.Filter;
 import iuh.fit.edu.dto.request.book.ReqCreateBookDTO;
 import iuh.fit.edu.dto.request.book.ReqUpdateBookDTO;
+import iuh.fit.edu.dto.request.book.ReviewRequest;
 import iuh.fit.edu.dto.response.ResultPaginationDTO;
 import iuh.fit.edu.dto.response.account.UserInfoResponse;
 import iuh.fit.edu.dto.response.book.ResBookDTO;
 import iuh.fit.edu.dto.response.book.ResCreateBookDTO;
 import iuh.fit.edu.dto.response.book.ResUpdateBookDTO;
 import iuh.fit.edu.entity.Book;
+import iuh.fit.edu.entity.Review;
 import iuh.fit.edu.exception.IdInvalidException;
 import iuh.fit.edu.service.BookService;
 import iuh.fit.edu.util.GetTokenRequest;
@@ -124,6 +126,63 @@ public class BookController {
     ) throws IdInvalidException {
         List<String> uploadedPaths = this.bookService.uploadBookImages(id, images);
         return ResponseEntity.ok(uploadedPaths);
+    }
+
+    @PostMapping("/{bookId}/reviews")
+    @ApiMessage("Tạo đánh giá cho sách")
+    public ResponseEntity<ResBookDTO.Review> createReview(
+            @PathVariable Long bookId,
+            @RequestBody ReviewRequest reviewRequest,
+            HttpServletRequest request
+    ) throws IdInvalidException {
+        UserInfoResponse user = GetTokenRequest.getInfoUser(request);
+        Review review = this.bookService.createReview(bookId, user.getEmail(), reviewRequest);
+        
+        // Convert to response DTO
+        ResBookDTO.Review reviewResponse = new ResBookDTO.Review();
+        reviewResponse.setId(review.getId());
+        reviewResponse.setRating(review.getRating());
+        reviewResponse.setComment(review.getComment());
+        reviewResponse.setReviewDate(review.getReviewDate());
+        reviewResponse.setUserName(user.getFullName());
+        reviewResponse.setUserAvatar(user.getAvatar());
+        reviewResponse.setUserEmail(user.getEmail());
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body(reviewResponse);
+    }
+
+    @PutMapping("/{bookId}/reviews")
+    @ApiMessage("Cập nhật đánh giá của user")
+    public ResponseEntity<ResBookDTO.Review> updateReview(
+            @PathVariable Long bookId,
+            @RequestBody ReviewRequest reviewRequest,
+            HttpServletRequest request
+    ) throws IdInvalidException {
+        UserInfoResponse user = GetTokenRequest.getInfoUser(request);
+        Review review = this.bookService.updateReview(bookId, user.getEmail(), reviewRequest);
+        
+        // Convert to response DTO
+        ResBookDTO.Review reviewResponse = new ResBookDTO.Review();
+        reviewResponse.setId(review.getId());
+        reviewResponse.setRating(review.getRating());
+        reviewResponse.setComment(review.getComment());
+        reviewResponse.setReviewDate(review.getReviewDate());
+        reviewResponse.setUserName(user.getFullName());
+        reviewResponse.setUserAvatar(user.getAvatar());
+        reviewResponse.setUserEmail(user.getEmail());
+        
+        return ResponseEntity.ok(reviewResponse);
+    }
+
+    @DeleteMapping("/{bookId}/reviews")
+    @ApiMessage("Xóa đánh giá của user")
+    public ResponseEntity<Void> deleteReview(
+            @PathVariable Long bookId,
+            HttpServletRequest request
+    ) throws IdInvalidException {
+        UserInfoResponse user = GetTokenRequest.getInfoUser(request);
+        this.bookService.deleteReview(bookId, user.getEmail());
+        return ResponseEntity.ok(null);
     }
 }
 

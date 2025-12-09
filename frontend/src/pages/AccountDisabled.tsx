@@ -12,6 +12,15 @@ export default function AccountDisabled() {
         Cookies.remove('refresh_token');
         document.cookie = 'id_token=; Max-Age=0; path=/';
         document.cookie = 'refresh_token=; Max-Age=0; path=/';
+        
+        // Xóa tất cả localStorage
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        localStorage.removeItem("username");
+        localStorage.removeItem("checkoutItems");
+        localStorage.removeItem("booksPage_currentPage");
+        localStorage.removeItem("booksPage_filters");
+        localStorage.removeItem("booksPage_filterOpen");
     }, []);
 
 
@@ -63,18 +72,6 @@ export default function AccountDisabled() {
                                     <span>Thay đổi quyền truy cập hoặc vai trò trong hệ thống</span>
                                 </li>
                             </ul>
-                        </div>
-
-                        {/* Action buttons */}
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <button
-                                onClick={handleGoHome}
-                                className="flex items-center justify-center gap-2 px-8 py-4 bg-white border-2 border-red-600 text-red-600 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300 shadow-md hover:shadow-lg group"
-                            >
-                                <FaHome className="group-hover:scale-110 transition-transform duration-300" />
-                                Về trang chủ
-                            </button>
-                    
                         </div>
                     </div>
                 </div>

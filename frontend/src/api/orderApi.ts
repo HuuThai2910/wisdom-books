@@ -36,6 +36,10 @@ const orderApi = {
     // Cập nhật trạng thái đơn hàng (chỉ admin có quyền)
     updateOrderStatus: (data: { id: number; status: Order["status"] }) =>
         axiosClient.put<ApiResponse<UpdatedOrderResponse>>("/orders", data),
+
+    // Kiểm tra user đã mua sách chưa (có đơn DELIVERED)
+    checkUserPurchased: (bookId: number) =>
+        axiosClient.get<ApiResponse<boolean>>(`/orders/check-purchased/${bookId}`),
 };
 
 export default orderApi;

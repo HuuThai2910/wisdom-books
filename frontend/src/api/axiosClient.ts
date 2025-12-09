@@ -38,15 +38,32 @@ axiosClient.interceptors.response.use(
         const currentPath = window.location.pathname;
         const errorData = err.response?.data;
 
-        // Kiểm tra nếu là lỗi tài khoản bị vô hiệu hóa (401 hoặc 403)
-        if (errorData?.error === "ACCOUNT_DISABLED") {
-            console.log("[axiosClient] Account disabled detected");
+        // Kiểm tra nếu là lỗi tài khoản bị vô hiệu hóa (403 với error ACCOUNT_DISABLED)
+        // Hoặc kiểm tra errors field cũng có thể chứa "ACCOUNT_DISABLED"
+        if (errorData?.error === "ACCOUNT_DISABLED" || 
+            errorData?.errors === "ACCOUNT_DISABLED" ||
+            (err.response?.status === 403 && errorData?.message?.includes("vô hiệu hóa"))) {
+            console.log("[axiosClient] Account disabled detected - Message:", errorData?.message);
 
             // CHỈ hiển thị toast và redirect nếu KHÔNG phải request login
             // Request login sẽ tự xử lý trong SignInForm
             const isLoginRequest = err.config?.url?.includes("/auth/login");
 
             if (!isLoginRequest) {
+                // Xóa cookies ngay lập tức
+                document.cookie = "id_token=; Max-Age=0; path=/; SameSite=Lax";
+                document.cookie = "refresh_token=; Max-Age=0; path=/; SameSite=Lax";
+                
+                // Xóa tất cả localStorage
+                localStorage.removeItem("user");
+                localStorage.removeItem("token");
+                localStorage.removeItem("username");
+                localStorage.removeItem("checkoutItems");
+                // Xóa các filter của trang books nếu có
+                localStorage.removeItem("booksPage_currentPage");
+                localStorage.removeItem("booksPage_filters");
+                localStorage.removeItem("booksPage_filterOpen");
+                
                 // User đang online bị disable -> hiển thị toast và redirect
                 toast.error(
                     errorData?.message ||

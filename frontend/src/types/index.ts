@@ -18,9 +18,10 @@ export interface Review {
     comment: string;
     rating: number;
     reviewDate: string;
-}
-
-export interface BookImage {
+    userName?: string;
+    userAvatar?: string;
+    userEmail?: string;
+}export interface BookImage {
     bookId: number;
     imagePath: string;
 }

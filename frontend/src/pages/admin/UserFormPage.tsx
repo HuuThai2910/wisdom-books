@@ -48,6 +48,8 @@ const UserFormPage = () => {
   const [wardsForSelectedCity, setWardsForSelectedCity] = useState<string[]>(
     []
   );
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [initialData, setInitialData] = useState<
     UserDetailResponse | undefined
   >();
@@ -190,75 +192,141 @@ const UserFormPage = () => {
     setFormData((prev) => ({
       ...prev,
       avatarFile: undefined,
+      avatarURL: "", // Xóa avatar cũ khi ở chế độ edit
     }));
   };
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
+    // 1. Validate fullName
     if (!formData.fullName.trim()) {
       newErrors.fullName = "Vui lòng nhập họ và tên";
-    } else if (formData.fullName.trim().length < 3) {
-      newErrors.fullName = "Họ và tên phải có ít nhất 3 ký tự";
+      setErrors(newErrors);
+      return false;
+    } else if (formData.fullName.trim().length < 2) {
+      newErrors.fullName = "Họ và tên phải có ít nhất 2 ký tự";
+      setErrors(newErrors);
+      return false;
+    } else if (formData.fullName.trim().length > 100) {
+      newErrors.fullName = "Họ và tên không được quá 100 ký tự";
+      setErrors(newErrors);
+      return false;
     }
 
+    // 2. Validate email
     if (!formData.email.trim()) {
       newErrors.email = "Vui lòng nhập email";
+      setErrors(newErrors);
+      return false;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Email không hợp lệ";
+      setErrors(newErrors);
+      return false;
     }
 
+    // 3. Validate phone
     if (!formData.phone.trim()) {
       newErrors.phone = "Vui lòng nhập số điện thoại";
+      setErrors(newErrors);
+      return false;
     } else if (!/^0\d{9}$/.test(formData.phone)) {
       newErrors.phone = "Số điện thoại phải có 10 số và bắt đầu bằng 0";
+      setErrors(newErrors);
+      return false;
     }
 
-    // Giới tính bắt buộc cho cả add và edit
-    if (!formData.gender) {
-      newErrors.gender = "Vui lòng chọn giới tính";
-    }
-
+    // 4. Validate password (only for add mode)
     if (mode === "add") {
       if (!formData.password) {
         newErrors.password = "Vui lòng nhập mật khẩu";
-      } else if (formData.password.length < 6) {
-        newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+        setErrors(newErrors);
+        return false;
+      } else if (formData.password.length < 8) {
+        newErrors.password = "Mật khẩu phải có ít nhất 8 ký tự";
+        setErrors(newErrors);
+        return false;
+      } else if (!/(?=.*[A-Z])/.test(formData.password)) {
+        newErrors.password = "Mật khẩu phải có ít nhất 1 chữ in hoa";
+        setErrors(newErrors);
+        return false;
+      } else if (!/(?=.*[a-z])/.test(formData.password)) {
+        newErrors.password = "Mật khẩu phải có ít nhất 1 chữ thường";
+        setErrors(newErrors);
+        return false;
+      } else if (!/(?=.*[0-9])/.test(formData.password)) {
+        newErrors.password = "Mật khẩu phải có ít nhất 1 số";
+        setErrors(newErrors);
+        return false;
+      } else if (!/(?=.*[!@#$%^&*(),.?":{}|<>])/.test(formData.password)) {
+        newErrors.password = "Mật khẩu phải có ít nhất 1 ký tự đặc biệt";
+        setErrors(newErrors);
+        return false;
+      } else if (formData.password.length > 50) {
+        newErrors.password = "Mật khẩu không được quá 50 ký tự";
+        setErrors(newErrors);
+        return false;
       }
 
+      // 5. Validate confirm password
       if (!formData.confirmPassword) {
         newErrors.confirmPassword = "Vui lòng xác nhận mật khẩu";
+        setErrors(newErrors);
+        return false;
       } else if (formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
+        setErrors(newErrors);
+        return false;
       }
+    }
 
-      if (!formData.role.id) {
-        newErrors.role = "Vui lòng chọn vai trò";
-      }
+    // 6. Validate role
+    if (!formData.role.id) {
+      newErrors.role = "Vui lòng chọn vai trò";
+      setErrors(newErrors);
+      return false;
+    }
 
-      // Mode add: địa chỉ bắt buộc
+    // 7. Validate address fields (only for add mode)
+    if (mode === "add") {
       if (!formData.address.province.trim()) {
         newErrors.province = "Vui lòng chọn tỉnh/thành phố";
+        setErrors(newErrors);
+        return false;
       }
 
       if (!formData.address.ward.trim()) {
         newErrors.ward = "Vui lòng chọn phường/xã";
+        setErrors(newErrors);
+        return false;
       }
 
       if (!formData.address.address.trim()) {
         newErrors.address = "Vui lòng nhập địa chỉ chi tiết";
+        setErrors(newErrors);
+        return false;
       } else if (formData.address.address.trim().length < 5) {
         newErrors.address = "Địa chỉ phải có ít nhất 5 ký tự";
+        setErrors(newErrors);
+        return false;
       }
     } else if (mode === "edit") {
-      // Mode edit: địa chỉ có thể null, chỉ validate nếu có nhập
       if (formData.address.address.trim() && formData.address.address.trim().length < 5) {
         newErrors.address = "Địa chỉ phải có ít nhất 5 ký tự";
+        setErrors(newErrors);
+        return false;
       }
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    // 8. Validate gender
+    if (!formData.gender) {
+      newErrors.gender = "Vui lòng chọn giới tính";
+      setErrors(newErrors);
+      return false;
+    }
+
+    setErrors({});
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -273,9 +341,15 @@ const UserFormPage = () => {
 
     try {
       let avatarFilename = initialData?.avatarURL;
+      
+      // Nếu có file mới được chọn, upload file
       if (formData.avatarFile) {
         const uploadResponse = await uploadAvatar(formData.avatarFile);
         avatarFilename = uploadResponse.data.data;
+      } 
+      // Nếu avatarURL trong formData là rỗng (người dùng xóa avatar), set thành rỗng
+      else if (formData.avatarURL === "") {
+        avatarFilename = "";
       }
 
       if (mode === "add") {
@@ -310,10 +384,47 @@ const UserFormPage = () => {
         navigate("/admin/users");
       }
     } catch (error: any) {
-      console.error("Error:", error);
-      const errorMessage =
-        error?.response?.data?.message || error?.message || "Có lỗi xảy ra";
-      toast.error(errorMessage);
+      console.error("[UserFormPage] Error:", error);
+      
+      if (error) {
+        // Lấy error code từ backend response
+        const errorCode = error.errors || '';
+        const errorMessage = error.message || '';
+        
+        console.error("[UserFormPage] Error code:", errorCode);
+        console.error("[UserFormPage] Error message:", errorMessage);
+        
+        // Chuyển sang lowercase để so sánh
+        const code = errorCode.toLowerCase();
+        const msg = errorMessage.toLowerCase();
+        
+        // Kiểm tra cả 2 đều trùng
+        if (code.includes('both_exists') || msg.includes('tên người dùng và email')) {
+          setErrors({ 
+            fullName: 'Tên người dùng này đã được sử dụng.',
+            email: 'Email này đã được đăng ký.'
+          });
+        }
+        // Kiểm tra lỗi fullName/username trùng
+        else if (code.includes('fullname_exists') || msg.includes('tên người dùng này đã được sử dụng') ||
+                 msg.includes('username') || msg.includes('user already exists')) {
+          setErrors({ fullName: 'Tên người dùng này đã được sử dụng. Vui lòng chọn tên khác.' });
+        }
+        // Kiểm tra lỗi email trùng
+        else if (code.includes('email_exists') || msg.includes('email này đã được đăng ký')) {
+          setErrors({ email: 'Email này đã được đăng ký. Vui lòng sử dụng email khác.' });
+        } 
+        // Kiểm tra các lỗi chung về email từ AWS Cognito
+        else if (msg.includes('email')) {
+          setErrors({ email: 'Có lỗi với email. Vui lòng kiểm tra lại.' });
+        }
+        // Lỗi chung
+        else {
+          setErrors({ fullName: errorMessage || 'Có lỗi xảy ra. Vui lòng thử lại!' });
+        }
+      } else {
+        setErrors({ fullName: 'Có lỗi xảy ra. Vui lòng thử lại!' });
+      }
     } finally {
       setLoading(false);
     }
@@ -474,26 +585,44 @@ const UserFormPage = () => {
                       <label className="block text-sm font-semibold text-gray-900 mb-2">
                         Mật khẩu <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="password"
-                        value={formData.password}
-                        onChange={(e) => {
-                          setFormData({
-                            ...formData,
-                            password: e.target.value,
-                          });
-                          if (errors.password)
-                            setErrors({ ...errors, password: undefined });
-                        }}
-                        placeholder="Nhập mật khẩu"
-                        className={`w-full px-4 py-3.5 text-black border-2 rounded-lg text-sm 
-                          outline-none transition-all duration-200 focus:border-[#2196F3] focus:shadow-lg
-                          ${
-                            errors.password
-                              ? "border-red-500"
-                              : "border-gray-200"
-                          }`}
-                      />
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={formData.password}
+                          onChange={(e) => {
+                            setFormData({
+                              ...formData,
+                              password: e.target.value,
+                            });
+                            if (errors.password)
+                              setErrors({ ...errors, password: undefined });
+                          }}
+                          placeholder="Nhập mật khẩu"
+                          className={`w-full px-4 py-3.5 pr-12 text-black border-2 rounded-lg text-sm 
+                            outline-none transition-all duration-200 focus:border-[#2196F3] focus:shadow-lg
+                            ${
+                              errors.password
+                                ? "border-red-500"
+                                : "border-gray-200"
+                            }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {showPassword ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                            </svg>
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
                       {errors.password && (
                         <p className="text-red-500 text-xs mt-1">
                           {errors.password}
@@ -505,29 +634,47 @@ const UserFormPage = () => {
                         Xác nhận mật khẩu{" "}
                         <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="password"
-                        value={formData.confirmPassword}
-                        onChange={(e) => {
-                          setFormData({
-                            ...formData,
-                            confirmPassword: e.target.value,
-                          });
-                          if (errors.confirmPassword)
-                            setErrors({
-                              ...errors,
-                              confirmPassword: undefined,
+                      <div className="relative">
+                        <input
+                          type={showConfirmPassword ? "text" : "password"}
+                          value={formData.confirmPassword}
+                          onChange={(e) => {
+                            setFormData({
+                              ...formData,
+                              confirmPassword: e.target.value,
                             });
-                        }}
-                        placeholder="Nhập lại mật khẩu"
-                        className={`w-full px-4 py-3.5 text-black border-2 rounded-lg text-sm 
-                          outline-none transition-all duration-200 focus:border-[#2196F3] focus:shadow-lg
-                          ${
-                            errors.confirmPassword
-                              ? "border-red-500"
-                              : "border-gray-200"
-                          }`}
-                      />
+                            if (errors.confirmPassword)
+                              setErrors({
+                                ...errors,
+                                confirmPassword: undefined,
+                              });
+                          }}
+                          placeholder="Nhập lại mật khẩu"
+                          className={`w-full px-4 py-3.5 pr-12 text-black border-2 rounded-lg text-sm 
+                            outline-none transition-all duration-200 focus:border-[#2196F3] focus:shadow-lg
+                            ${
+                              errors.confirmPassword
+                                ? "border-red-500"
+                                : "border-gray-200"
+                            }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {showConfirmPassword ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                            </svg>
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
                       {errors.confirmPassword && (
                         <p className="text-red-500 text-xs mt-1">
                           {errors.confirmPassword}

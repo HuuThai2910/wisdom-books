@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 
 interface SignUpFormProps {
   onSuccess: () => void;
+  onSwitchToSignIn?: () => void;
 }
 
 interface FormErrors {
@@ -18,7 +19,7 @@ interface FormErrors {
   confirmPassword?: string;
 }
 
-const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
+const SignUpForm = ({ onSuccess, onSwitchToSignIn }: SignUpFormProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [name, setName] = useState<string>('');
@@ -33,53 +34,90 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    // Validate name
+    // Validate theo thứ tự từ trên xuống, dừng ngay khi gặp lỗi đầu tiên
+    
+    // 1. Validate name (field đầu tiên)
     if (!name.trim()) {
       newErrors.name = 'Vui lòng nhập họ tên';
+      setErrors(newErrors);
+      return false;
     } else if (name.trim().length < 2) {
       newErrors.name = 'Họ tên phải có ít nhất 2 ký tự';
+      setErrors(newErrors);
+      return false;
     } else if (name.trim().length > 100) {
       newErrors.name = 'Họ tên không được quá 100 ký tự';
+      setErrors(newErrors);
+      return false;
     }
 
-    // Validate email
+    // 2. Validate email (field thứ hai)
     if (!email.trim()) {
       newErrors.email = 'Vui lòng nhập email';
+      setErrors(newErrors);
+      return false;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = 'Email không hợp lệ';
+      setErrors(newErrors);
+      return false;
     }
 
-    // Validate phone
+    // 3. Validate phone (field thứ ba)
     if (!phone.trim()) {
       newErrors.phone = 'Vui lòng nhập số điện thoại';
+      setErrors(newErrors);
+      return false;
     } else if (!/^0\d{9}$/.test(phone)) {
       newErrors.phone = 'Số điện thoại phải có 10 số và bắt đầu bằng 0';
+      setErrors(newErrors);
+      return false;
     }
 
-    // Validate password
+    // 4. Validate password (field thứ tư)
     if (!password) {
       newErrors.password = 'Vui lòng nhập mật khẩu';
+      setErrors(newErrors);
+      return false;
     } else if (password.length < 8) {
       newErrors.password = 'Mật khẩu phải có ít nhất 8 ký tự';
+      setErrors(newErrors);
+      return false;
     } else if (!/(?=.*[A-Z])/.test(password)) {
-      newErrors.password = 'Mật khẩu phải có ít nhất 1 ký tự in hoa';
+      newErrors.password = 'Mật khẩu phải có ít nhất 1 chữ in hoa';
+      setErrors(newErrors);
+      return false;
+    } else if (!/(?=.*[a-z])/.test(password)) {
+      newErrors.password = 'Mật khẩu phải có ít nhất 1 chữ thường';
+      setErrors(newErrors);
+      return false;
     } else if (!/(?=.*[0-9])/.test(password)) {
       newErrors.password = 'Mật khẩu phải có ít nhất 1 số';
+      setErrors(newErrors);
+      return false;
     } else if (!/(?=.*[!@#$%^&*(),.?":{}|<>])/.test(password)) {
       newErrors.password = 'Mật khẩu phải có ít nhất 1 ký tự đặc biệt';
+      setErrors(newErrors);
+      return false;
     } else if (password.length > 50) {
       newErrors.password = 'Mật khẩu không được quá 50 ký tự';
+      setErrors(newErrors);
+      return false;
     }
 
-    // Validate confirm password
+    // 5. Validate confirm password (field cuối cùng)
     if (!confirmPassword) {
       newErrors.confirmPassword = 'Vui lòng xác nhận mật khẩu';
+      setErrors(newErrors);
+      return false;
     } else if (password !== confirmPassword) {
       newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
+      setErrors(newErrors);
+      return false;
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    // Tất cả validation đã pass
+    setErrors({});
+    return true;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -101,23 +139,49 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
       .unwrap()
       .then(() => {
         toast.success('Đăng ký thành công! Vui lòng đăng nhập.');
-        navigate('/login');
+        // Nếu có callback để chuyển sang modal đăng nhập, gọi nó
+        if (onSwitchToSignIn) {
+          onSwitchToSignIn();
+        } else {
+          // Fallback: navigate nếu không có callback
+          navigate('/login');
+        }
       })
       .catch((error: any) => {
         // Xử lý lỗi từ backend
         if (error) {
           console.log('[SignUpForm] Registration error:', error);
-          const message = error;
+          const message = error.toLowerCase();
           
-          // Kiểm tra lỗi username trùng
-          if (message.toLowerCase().includes('username') || message.toLowerCase().includes('tên đăng nhập') || message.toLowerCase().includes('đã tồn tại')) {
-            setErrors({ name: 'Tên người dùng này đã được sử dụng' });
-          } else if (message.toLowerCase().includes('email')) {
-            setErrors({ email: 'Email này đã được sử dụng' });
-          } else if (message.toLowerCase().includes('phone') || message.toLowerCase().includes('số điện thoại')) {
-            setErrors({ phone: 'Số điện thoại này đã được sử dụng' });
-          } else {
-            toast.error(message);
+          // Backend giờ validate riêng biệt từng trường và trả về message cụ thể
+          
+          // Kiểm tra cả 2 đều trùng
+          if (message.includes('both_exists') || message.includes('tên người dùng và email')) {
+            setErrors({ 
+              name: 'Tên người dùng này đã được sử dụng.',
+              email: 'Email này đã được đăng ký.'
+            });
+            toast.error('Tên người dùng và email đều đã tồn tại!');
+          }
+          // Kiểm tra lỗi fullName/username trùng
+          else if (message.includes('fullname_exists') || message.includes('tên người dùng này đã được sử dụng') ||
+                   message.includes('username') || message.includes('user already exists')) {
+            setErrors({ name: 'Tên người dùng này đã được sử dụng. Vui lòng chọn tên khác.' });
+            toast.error('Tên người dùng đã tồn tại!');
+          }
+          // Kiểm tra lỗi email trùng
+          else if (message.includes('email_exists') || message.includes('email này đã được đăng ký')) {
+            setErrors({ email: 'Email này đã được đăng ký. Vui lòng sử dụng email khác.' });
+            toast.error('Email đã tồn tại trong hệ thống!');
+          } 
+          // Kiểm tra các lỗi chung về email từ AWS Cognito
+          else if (message.includes('email')) {
+            setErrors({ email: 'Có lỗi với email. Vui lòng kiểm tra lại.' });
+            toast.error('Email không hợp lệ hoặc đã tồn tại!');
+          }
+          // Lỗi chung
+          else {
+            toast.error(error);
           }
         } else {
           toast.error('Đăng ký thất bại. Vui lòng thử lại!');

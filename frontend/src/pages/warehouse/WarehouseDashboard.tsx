@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { Package, AlertTriangle, XCircle, FileText } from "lucide-react";
+import {
+  Package,
+  AlertTriangle,
+  XCircle,
+  FileText,
+  Calendar,
+} from "lucide-react";
 import WarehouseLayout from "./WarehouseLayout";
 import dashboardApi from "../../api/dashboardApi";
 import entryFormApi from "../../api/entryFormApi";
@@ -15,6 +21,7 @@ interface OverviewStats {
 export default function WarehouseDashboard() {
   const [user, setUser] = useState<string>("Thủ kho");
   const [loading, setLoading] = useState(true);
+  const now = new Date();
   const [overview, setOverview] = useState<OverviewStats>({
     totalBooks: 0,
     lowStockBooks: 0,
@@ -73,12 +80,13 @@ export default function WarehouseDashboard() {
   return (
     <WarehouseLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Dashboard Thủ Kho
-            </h1>
-            <p className="text-gray-600 mt-1">Xin chào, {user}!</p>
+        <div className="flex items-center justify-end">
+          <div className="flex items-center gap-3 bg-white rounded-xl px-5 py-3 shadow-sm border border-gray-200">
+            <Calendar className="w-5 h-5 text-gray-500" />
+            <p className="text-sm text-gray-500">Hôm nay</p>
+            <p className="text-lg font-semibold text-gray-900">
+              {format(now, "dd/MM/yyyy")}
+            </p>
           </div>
         </div>
 

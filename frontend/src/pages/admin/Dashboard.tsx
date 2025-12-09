@@ -270,7 +270,8 @@ export default function AdminDashboard() {
               Đây là bảng điều khiển quản trị hệ thống
             </p>
           </div>
-          <div className="text-right">
+          <div className="flex items-center gap-3 bg-white rounded-xl px-5 py-3 shadow-sm border border-gray-200">
+            <Calendar className="w-5 h-5 text-gray-500" />
             <p className="text-sm text-gray-500">Hôm nay</p>
             <p className="text-lg font-semibold text-gray-900">
               {format(now, "dd/MM/yyyy")}

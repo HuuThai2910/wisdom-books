@@ -76,5 +76,12 @@ public class OrderController {
         return ResponseEntity.ok(this.orderService.updateOrderStatus(request, user.getEmail()));
     }
 
+    @GetMapping("/check-purchased/{bookId}")
+    @ApiMessage("Check if user has purchased this book")
+    public ResponseEntity<Boolean> checkUserPurchased(@PathVariable Long bookId, HttpServletRequest request){
+        UserInfoResponse user = GetTokenRequest.getInfoUser(request);
+        boolean hasPurchased = this.orderService.checkUserPurchasedBook(user.getEmail(), bookId);
+        return ResponseEntity.ok(hasPurchased);
+    }
 
 }

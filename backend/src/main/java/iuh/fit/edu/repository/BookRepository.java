@@ -1,10 +1,7 @@
 package iuh.fit.edu.repository;
 
 import iuh.fit.edu.entity.Book;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +12,11 @@ import java.util.Optional;
 public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificationExecutor<Book> {
      boolean existsByIsbn(String isbn);
      Optional<Book> findByIsbn(String isbn);
+     
+     // Fetch book with reviews and review users
+     @EntityGraph(attributePaths = {"reviews", "reviews.user"})
+     @Query("SELECT b FROM Book b WHERE b.id = :id")
+     Optional<Book> findByIdWithReviewsAndUsers(@Param("id") Long id);
 
     // 1. ATOMIC REDUCE (Trừ số lượng an toàn)
     // Logic: Chỉ trừ khi stock >= qty.

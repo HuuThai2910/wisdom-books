@@ -74,7 +74,7 @@ public class Book {
     @JsonIgnore
     private List<OrderItem> orderItems;
 
-    @OneToMany(mappedBy = "book")
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})

@@ -61,10 +61,53 @@ public class AccountServiceImpl implements AccountService {
         String phoneNumber = request.getPhone();  // giữ nguyên cho DB
         String internationalPhone = "+84" + rawPhone.substring(1); // dùng cho AWS
 
+        // Validate theo thứ tự hiển thị trong form: fullName -> email -> phone
+        // Check cả 2 để có thể báo lỗi đầy đủ hơn
+        
+        boolean fullNameExists = userRepository.existsByFullName(request.getFullName());
+        boolean emailExists = userRepository.existsByEmail(request.getEmail());
+        
+        // Nếu cả 2 đều trùng, ưu tiên báo fullName trước (theo thứ tự form)
+        if (fullNameExists && emailExists) {
+            throw new RuntimeException("BOTH_EXISTS: Tên người dùng và email đã được sử dụng");
+        }
+        
+        // 1. Kiểm tra fullName đã tồn tại chưa (field đầu tiên trong form)
+        // Cognito dùng fullName làm username nên phải unique
+        if (fullNameExists) {
+            throw new RuntimeException("FULLNAME_EXISTS: Tên người dùng này đã được sử dụng");
+        }
+        
+        // 2. Kiểm tra email đã tồn tại chưa (field thứ hai trong form)
+        if (emailExists) {
+            throw new RuntimeException("EMAIL_EXISTS: Email này đã được đăng ký");
+        }
+
         if(request.getPassword().equals(request.getConfirmPassword())){
             //save aws cognito
             request.setPhone(internationalPhone);
-            String sub=cognitoService.registerUser(request);
+            String sub;
+            try {
+                sub = cognitoService.registerUser(request);
+            } catch (Exception e) {
+                // Parse Cognito exceptions để báo lỗi rõ ràng hơn
+                String errorMsg = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
+                
+                // Nếu Cognito báo email đã tồn tại
+                if (errorMsg.contains("email") || errorMsg.contains("user already exists") || 
+                    errorMsg.contains("usernameexistsexception") || errorMsg.contains("aliasexistsexception")) {
+                    throw new RuntimeException("EMAIL_EXISTS: Email này đã được đăng ký");
+                }
+                
+                // Nếu Cognito báo username đã tồn tại
+                if (errorMsg.contains("username") || errorMsg.contains("user with username")) {
+                    throw new RuntimeException("FULLNAME_EXISTS: Tên người dùng này đã được sử dụng");
+                }
+                
+                // Rethrow exception gốc nếu không match
+                throw e;
+            }
+            
             //save database
             User user=userMapper.toUserAccount(request);
 

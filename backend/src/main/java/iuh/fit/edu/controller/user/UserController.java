@@ -11,6 +11,7 @@ import iuh.fit.edu.dto.response.user.UsersResponse;
 import iuh.fit.edu.service.AccountService;
 import iuh.fit.edu.service.UserService;
 import iuh.fit.edu.util.GetTokenRequest;
+import iuh.fit.edu.util.anotation.ApiMessage;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ public class UserController {
     @Autowired
     UserService userService;
     @GetMapping("/users")
+    @ApiMessage("Lấy danh sách người dùng thành công")
     public ResponseEntity<UsersResponse> getAllUser(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String sortBy,
@@ -44,11 +46,13 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
+    @ApiMessage("Lấy thông tin người dùng theo ID thành công")
     public ResponseEntity<UserResponseById> updateUser(@PathVariable Long id){
         return ResponseEntity.ok(userService.findUserById(id));
     }
 
     @PostMapping(value = "/users")
+    @ApiMessage("Tạo người dùng mới thành công")
     public ResponseEntity<String> createUser(@RequestBody CreateUserRequest createUserRequest,HttpServletRequest request){
         UserInfoResponse response= GetTokenRequest.getInfoUser(request);
 
@@ -59,6 +63,7 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}")
+    @ApiMessage("Cập nhật thông tin người dùng thành công")
     public ResponseEntity<String> updateUser(@PathVariable Long id,@RequestBody UpdateUserRequest updateUserRequest,HttpServletRequest request){
         UserInfoResponse response= GetTokenRequest.getInfoUser(request);
         userService.updateUser(id,updateUserRequest,response.getEmail());
@@ -66,6 +71,7 @@ public class UserController {
     }
 
     @DeleteMapping("/users/delete/{id}")
+    @ApiMessage("Xóa người dùng thành công")
     public ResponseEntity<String> deleteUser(@PathVariable Long id,HttpServletRequest request){
         UserInfoResponse response= GetTokenRequest.getInfoUser(request);
         userService.deleteUser(id,response.getEmail());
@@ -73,12 +79,14 @@ public class UserController {
     }
 
     @GetMapping("/users/avatar/{filename}")
+    @ApiMessage("Lấy URL avatar thành công")
     public ResponseEntity<ApiResponse<String>> getAvatarUrl(@PathVariable String filename){
         String url = userService.getAvatarUrl(filename);
         return ResponseEntity.ok(ApiResponse.success(200, "Avatar URL retrieved", url));
     }
 
     @PostMapping(value = "/users/avatar/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ApiMessage("Tải lên avatar thành công")
     public ResponseEntity<ApiResponse<String>> uploadAvatar(@RequestParam("avatar") MultipartFile avatar){
         String filename = userService.uploadAvatar(avatar);
         return ResponseEntity.ok(ApiResponse.success(200, "Avatar uploaded successfully", filename));

@@ -31,7 +31,9 @@ export const updateUserforAdmin=createAsyncThunk<
             const response = await updateUser(id, user);
             return response;
         } catch (err: any) {
-            return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
+            // Backend trả về {message, errors} - errors chứa error code (FULLNAME_EXISTS, EMAIL_EXISTS)
+            // Trả về errors nếu có, không thì message
+            return thunkAPI.rejectWithValue(err.errors || err.message || 'Có lỗi xảy ra');
         }
     }
 );
@@ -47,7 +49,9 @@ export const createUserforAdmin=createAsyncThunk<
             const response = await createUser(user);
             return response;
         } catch (err: any) {
-            return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
+            // Backend trả về {message, errors} - errors chứa error code (FULLNAME_EXISTS, EMAIL_EXISTS)
+            // Trả về errors nếu có, không thì message
+            return thunkAPI.rejectWithValue(err);
         }
     }
 );

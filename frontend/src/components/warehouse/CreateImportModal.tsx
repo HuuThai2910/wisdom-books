@@ -23,16 +23,18 @@ interface CreateImportModalProps {
     invoiceNumber: string;
     books: BookInImport[];
   }) => void;
+  initialSearchTerm?: string;
 }
 
 export default function CreateImportModal({
   isOpen,
   onClose,
   onSubmit,
+  initialSearchTerm = "",
 }: CreateImportModalProps) {
   const [allBooks, setAllBooks] = useState<ApiBook[]>([]);
   const [filteredBooks, setFilteredBooks] = useState<ApiBook[]>([]);
-  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState(initialSearchTerm);
   const [supplier, setSupplier] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [booksInImport, setBooksInImport] = useState<BookInImport[]>([]);
@@ -84,6 +86,13 @@ export default function CreateImportModal({
     }
   };
 
+  // Update searchKeyword when modal opens with new initialSearchTerm
+  useEffect(() => {
+    if (isOpen && initialSearchTerm !== undefined) {
+      setSearchKeyword(initialSearchTerm);
+    }
+  }, [isOpen, initialSearchTerm]);
+
   useEffect(() => {
     if (isOpen) {
       fetchAllBooks();
@@ -110,7 +119,7 @@ export default function CreateImportModal({
       const timer = setTimeout(() => {
         setBookCurrentPage(0); // Reset to first page when searching
         fetchAllBooks();
-      }, 500);
+      }, 300);
       return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

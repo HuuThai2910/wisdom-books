@@ -6,6 +6,7 @@ import {
   Clock,
   TrendingUp,
   AlertCircle,
+  Calendar,
 } from "lucide-react";
 import StaffLayout from "./StaffLayout";
 import dashboardApi from "../../api/dashboardApi";
@@ -162,7 +163,8 @@ export default function StaffDashboard() {
               , Chào mừng đến với Dashboard Nhân Viên
             </p>
           </div>
-          <div className="text-right">
+          <div className="flex items-center gap-3 bg-white rounded-xl px-5 py-3 shadow-sm border border-gray-200">
+            <Calendar className="w-5 h-5 text-gray-500" />
             <p className="text-sm text-gray-500">Hôm nay</p>
             <p className="text-lg font-semibold text-gray-900">
               {format(now, "dd/MM/yyyy")}

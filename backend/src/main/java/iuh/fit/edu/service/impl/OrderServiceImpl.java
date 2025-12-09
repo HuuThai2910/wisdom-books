@@ -265,4 +265,20 @@ public class OrderServiceImpl implements OrderService {
         String randomPart = UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase();
         return "ORD-" + time + "-" + randomPart;
     }
+
+    @Override
+    public boolean checkUserPurchasedBook(String email, Long bookId) {
+        // Check if user has any DELIVERED orders containing this book
+        List<Order> deliveredOrders = orderRepository.findByUser_EmailAndStatus(email, OrderStatus.DELIVERED);
+        
+        for (Order order : deliveredOrders) {
+            boolean hasBook = order.getOrderItems().stream()
+                    .anyMatch(item -> item.getBook().getId().equals(bookId));
+            if (hasBook) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 }
