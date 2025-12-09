@@ -123,9 +123,16 @@ public class CognitoServiceImpl implements CognitoService {
 
     @Override
     public GetUserResult getUserInfo(String accessToken) {
-        GetUserRequest userRequest=new GetUserRequest()
-                .withAccessToken(accessToken);
-        return cognitoIdentityProvider.getUser(userRequest);
+        try {
+            GetUserRequest userRequest=new GetUserRequest()
+                    .withAccessToken(accessToken);
+            return cognitoIdentityProvider.getUser(userRequest);
+        } catch (NotAuthorizedException e) {
+            if (e.getErrorMessage() != null && e.getErrorMessage().contains("User is disabled")) {
+                throw new RuntimeException("ACCOUNT_DISABLED: Tài khoản của bạn đã bị vô hiệu hóa bởi quản trị viên");
+            }
+            throw e;
+        }
     }
 
     @Override

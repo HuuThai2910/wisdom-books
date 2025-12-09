@@ -23,6 +23,10 @@ const LoginPage = () => {
     setIsFlying(true);
   };
 
+  const handleSwitchToSignIn = () => {
+    setMode('signin');
+  };
+
   const handleAnimationComplete = () => {
     setIsClosing(true);
   };
@@ -51,7 +55,7 @@ const LoginPage = () => {
         {/* Sign Up Form */}
         <div className={`absolute top-0 h-full left-0 w-1/2 transition-all duration-600 ease-in-out overflow-y-auto
           ${mode === 'signup' ? 'translate-x-full opacity-100 z-5' : 'translate-x-0 opacity-0 z-1'}`}>
-          <SignUpForm onSuccess={handleSuccess} />
+          <SignUpForm onSuccess={handleSuccess} onSwitchToSignIn={handleSwitchToSignIn} />
         </div>
 
         {/* Sign In Form */}

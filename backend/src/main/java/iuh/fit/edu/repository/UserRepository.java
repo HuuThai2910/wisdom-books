@@ -20,6 +20,11 @@ import java.time.OffsetDateTime;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByEmail(String email);
+    User findByPhone(String phone);
+    User findByFullName(String fullName);
+    
+    boolean existsByEmail(String email);
+    boolean existsByFullName(String fullName);
     
     @Query("SELECT COUNT(u) FROM User u WHERE u.role.name = 'CUSTOMER'")
     long countCustomers();

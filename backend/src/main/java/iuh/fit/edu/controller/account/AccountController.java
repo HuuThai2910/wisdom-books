@@ -4,6 +4,7 @@ import iuh.fit.edu.dto.request.account.*;
 import iuh.fit.edu.dto.response.account.*;
 import iuh.fit.edu.service.AccountService;
 import iuh.fit.edu.service.impl.AccountServiceImpl;
+import iuh.fit.edu.util.anotation.ApiMessage;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -26,6 +27,7 @@ public class AccountController {
     public static String email;
 
     @PostMapping("/register")
+    @ApiMessage("Đăng ký tài khoản thành công")
     public ResponseEntity<RegisterResponse> registerAccount(@Valid @RequestBody RegisterRequest request){
         RegisterResponse response = this.accountService.registerUser(request,true);
         System.out.println("Registration response: " + response);
@@ -33,6 +35,7 @@ public class AccountController {
     }
 
     @PostMapping("/login")
+    @ApiMessage("Đăng nhập thành công")
     public ResponseEntity<?> loginAccount(@Valid @RequestBody LoginRequest request, HttpServletResponse response){
         try {
             LoginResponse cognitoResponse = this.accountService.loginUser(request);
@@ -68,24 +71,28 @@ public class AccountController {
     }
 
     @PostMapping("/forgot-password")
+    @ApiMessage("Gửi mã xác thực đến email thành công")
     public ResponseEntity<ForgotPasswordResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request){
         ForgotPasswordResponse response = accountService.forgotPassword(request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/verify-otp")
+    @ApiMessage("Xác thực mã OTP thành công")
     public ResponseEntity<VerifyOtpResponse> verifyOtp(@RequestBody VerifyOtpRequest request){
         VerifyOtpResponse response = accountService.verifyOtp(request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/reset-password")
+    @ApiMessage("Đặt lại mật khẩu thành công")
     public ResponseEntity<ResetPasswordResponse> resetPassword(@RequestBody ResetPasswordRequest request){
         ResetPasswordResponse response=accountService.resetPassword(request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/logout")
+    @ApiMessage("Đăng xuất thành công")
     public ResponseEntity<String> logoutAccount(
             @RequestHeader("Authorization") String token,
             @CookieValue(value = "refresh_token", required = false) String refreshToken){
@@ -96,6 +103,7 @@ public class AccountController {
 
 
     @GetMapping("/me")
+    @ApiMessage("Lấy thông tin người dùng hiện tại thành công")
     public ResponseEntity<UserInfoResponse> getCurrentUser(@RequestHeader("Authorization") String token){
         String accessToken = token.replace("Bearer ", "");
         UserInfoResponse response = accountService.getCurrentUserInfo(accessToken);
@@ -103,6 +111,7 @@ public class AccountController {
     }
 
     @GetMapping("/users")
+    @ApiMessage("Lấy danh sách tất cả người dùng thành công")
     public ResponseEntity<UsersResponse> getAllUser(Authentication authentication){
         Jwt jwt = (Jwt) authentication.getPrincipal();
         String email = jwt.getClaim("email");
@@ -110,6 +119,8 @@ public class AccountController {
     }
 
     @PostMapping("/refresh-token")
+    @ApiMessage("Làm mới token thành công")
+
     public ResponseEntity<LoginResponse> refreshToken(
             @CookieValue(value = "refresh_token", required = false) String refreshTokenCookie,
             @RequestBody(required = false) Map<String, String> request,
@@ -153,6 +164,7 @@ public class AccountController {
     }
 
     @PostMapping("/fix-customer-group")
+    @ApiMessage("Cập nhật nhóm khách hàng thành công")
     public ResponseEntity<String> fixCustomerGroup(@RequestParam String username) {
         try {
             ((AccountServiceImpl) accountService).fixCustomerGroup(username);

@@ -30,6 +30,57 @@ public class GlobalExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse<Object>> handleRuntimeException(RuntimeException ex) {
+        // Kiểm tra nếu là lỗi ACCOUNT_DISABLED
+        if (ex.getMessage() != null && ex.getMessage().startsWith("ACCOUNT_DISABLED:")) {
+            LOGGER.warn("Account disabled: {}", ex.getMessage());
+            String message = ex.getMessage().substring("ACCOUNT_DISABLED:".length()).trim();
+            
+            ApiResponse<Object> api = ApiResponse.error(
+                    HttpStatus.FORBIDDEN.value(),
+                    message,
+                    "ACCOUNT_DISABLED"
+            );
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(api);
+        }
+        
+        // Kiểm tra nếu là lỗi FULLNAME_EXISTS
+        if (ex.getMessage() != null && ex.getMessage().startsWith("FULLNAME_EXISTS:")) {
+            LOGGER.warn("Fullname exists: {}", ex.getMessage());
+            String message = ex.getMessage().substring("FULLNAME_EXISTS:".length()).trim();
+            
+            ApiResponse<Object> api = ApiResponse.error(
+                    HttpStatus.BAD_REQUEST.value(),
+                    message,
+                    "FULLNAME_EXISTS"
+            );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(api);
+        }
+        
+        // Kiểm tra nếu là lỗi EMAIL_EXISTS
+        if (ex.getMessage() != null && ex.getMessage().startsWith("EMAIL_EXISTS:")) {
+            LOGGER.warn("Email exists: {}", ex.getMessage());
+            String message = ex.getMessage().substring("EMAIL_EXISTS:".length()).trim();
+            
+            ApiResponse<Object> api = ApiResponse.error(
+                    HttpStatus.BAD_REQUEST.value(),
+                    message,
+                    "EMAIL_EXISTS"
+            );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(api);
+        }
+        
+        // Xử lý RuntimeException khác
+        LOGGER.error("RuntimeException caught in GlobalExceptionHandler", ex);
+        ApiResponse<Object> api = ApiResponse.error(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                ex.getMessage(),
+                null
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(api);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleException(Exception ex) {
         LOGGER.error("Unhandled exception caught in GlobalExceptionHandler", ex);

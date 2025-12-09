@@ -21,7 +21,8 @@ export const registerUser = createAsyncThunk<
             const response = await register(registerForm);
             return response.data;
         } catch (err: any) {
-            return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
+            // Backend trả về {errors: "FULLNAME_EXISTS", message: "..."} - lấy errors trước
+            return thunkAPI.rejectWithValue(err.errors || err.message || 'Có lỗi xảy ra');
         }
     }
 );
