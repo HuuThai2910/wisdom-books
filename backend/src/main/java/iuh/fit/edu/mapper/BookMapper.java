@@ -75,6 +75,7 @@ public interface BookMapper {
         if (book.getReviews() != null) {
             dto.setReview(book.getReviews()
                     .stream()
+                    .sorted((r1, r2) -> r2.getReviewDate().compareTo(r1.getReviewDate())) // Sort by date DESC (newest first)
                     .map(r -> {
                         String userName = "Khách hàng";
                         String userAvatar = null;

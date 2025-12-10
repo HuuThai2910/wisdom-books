@@ -258,6 +258,7 @@ export default function SettingsPage() {
 
             // Lưu vào localStorage và dispatch event để Header update
             localStorage.setItem('user', JSON.stringify(updatedUser));
+            setAvatarPreview(avatarURL || '');
             window.dispatchEvent(new Event('userUpdated'));
 
             setUser(updatedUser);

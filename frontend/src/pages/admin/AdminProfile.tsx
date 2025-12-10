@@ -251,6 +251,7 @@ export default function AdminProfile() {
             window.dispatchEvent(new Event('userUpdated'));
 
             setUser(updatedUser);
+            setAvatarPreview(avatarURL || '');
             setIsEditing(false);
             setAvatarFile(null);
             
