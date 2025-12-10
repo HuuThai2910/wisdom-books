@@ -80,7 +80,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/auth/refresh-token").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/auth/fix-customer-group").permitAll()
-                        
+
                         // Public endpoints - không cần xác thực
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
@@ -93,19 +93,21 @@ public class SecurityConfig {
                         .requestMatchers("/api/cart/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/orders/user").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/orders/cancel").authenticated()
+                        .requestMatchers("/api/books/**").authenticated()
+
                         .requestMatchers("/api/payment/**").authenticated()
                         .requestMatchers("/api/vouchers/**").authenticated()
 
                         // Admin endpoints - CHÚ Ý: các rule cụ thể phải đặt TRƯỚC các rule chung
-                        .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "1","CUSTOMER","3","WARE_HOUSE_STAFF","STAFF")
+                        .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "1", "CUSTOMER", "3", "WARE_HOUSE_STAFF", "STAFF")
                         .requestMatchers("/api/dashboard/**").hasAnyAuthority("ADMIN", "1", "STAFF", "2", "WARE_HOUSE_STAFF", "4")
-                        
+
                         // Staff endpoints (POST/PUT/DELETE books và orders)
                         .requestMatchers(HttpMethod.POST, "/api/books/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2")
                         .requestMatchers(HttpMethod.PUT, "/api/books/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2")
                         .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2")
-                        .requestMatchers("/api/orders/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2","CUSTOMER","WARE_HOUSE_STAFF")
-                        
+                        .requestMatchers("/api/orders/**").hasAnyAuthority("ADMIN", "STAFF", "1", "2", "CUSTOMER", "WARE_HOUSE_STAFF")
+
                         // Warehouse endpoints
                         .requestMatchers("/api/entry-forms/**").hasAnyAuthority("ADMIN", "WARE_HOUSE_STAFF", "1", "4")
 
