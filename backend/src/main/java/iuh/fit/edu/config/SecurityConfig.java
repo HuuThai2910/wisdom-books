@@ -80,6 +80,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/auth/refresh-token").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/auth/fix-customer-group").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
+                        ).permitAll()
 
                         // Public endpoints - không cần xác thực
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
