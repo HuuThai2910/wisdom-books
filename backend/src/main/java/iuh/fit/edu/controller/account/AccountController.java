@@ -44,7 +44,7 @@ public class AccountController {
             
             // Set access token cookie (5 phút)
             String accessTokenCookie = String.format("id_token=%s; Path=/; Max-Age=%d; SameSite=Lax",
-                    token, 300);
+                    token, 3600);
             response.addHeader("Set-Cookie", accessTokenCookie);
             
             // Set refresh token cookie (30 ngày)
