@@ -255,6 +255,8 @@ public class OrderServiceImpl implements OrderService {
             for (OrderItem item : order.getOrderItems()){
                 this.bookRepository.restoreStock(item.getBook().getId(), item.getQuantity());
             }
+        } else if(Objects.equals(request.getStatus(), "DELIVERED")){
+           order.setPaymentStatus(PaymentStatus.PAID);
         }
         return this.orderMapper.toUpdateOrderStatusResponse(this.orderRepository.save(order));
     }
